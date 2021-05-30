@@ -1,6 +1,13 @@
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 var accuracy = 3.5;
-function InitCube() {
+window.onload = function () {
+    InitSimpleShape();
+    document.getElementById("approve").onclick = function () {
+        accuracy = parseInt(document.getElementById("anglesCount").value) / 2;
+        InitSimpleShape();
+    };
+};
+function InitSimpleShape() {
     var zoom = 6;
     var gl = document.getElementById("cnvs").getContext("webgl");
     //var vertices = [
@@ -158,7 +165,7 @@ function InitCube() {
             gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
             rotateY(mov_matrix, 0.01);
         }
-        window.requestAnimationFrame(InitCube);
+        window.requestAnimationFrame(InitSimpleShape);
         mov_matrix[14] = -zoom;
         mov_matrix[12] = 0;
     };

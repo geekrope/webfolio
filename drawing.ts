@@ -2,7 +2,15 @@
 
 var accuracy = 3.5;
 
-function InitCube() {
+window.onload = () => {
+	InitSimpleShape();
+	document.getElementById("approve").onclick = () => {
+		accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
+		InitSimpleShape();
+	}
+}
+
+function InitSimpleShape() {
 	var zoom = 6;
 
 	let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
@@ -209,7 +217,7 @@ function InitCube() {
 
 			rotateY(mov_matrix, 0.01);
 		}
-		window.requestAnimationFrame(InitCube);
+		window.requestAnimationFrame(InitSimpleShape);
 		mov_matrix[14] = -zoom;
 		mov_matrix[12] = 0;
 	}

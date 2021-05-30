@@ -4,12 +4,13 @@
 .nInput {
     width: 250px;
     font-family: Caviar;
-    height: 90%;
+    height: 60%;
     font-size: 30px;
     border-radius: 0.5em;
     background: white;
     filter: drop-shadow(5px 5px 0px #aaaaaa);
     margin: auto;
+    vertical-align: middle;
     border: none;
     outline: none;
     text-align: center;
@@ -24,11 +25,13 @@
     width: 200px;
     border: none;
     font-family: Caviar;
-    height: 90%;
+    height: 60%;
     font-size: 30px;
     border-radius: 0.5em;
     background: white;
     filter: drop-shadow(5px 5px 0px #aaaaaa);
+    margin: auto;
+    vertical-align: middle;
     margin-left: 10px;
     outline: none;
     text-align: center;
@@ -40,7 +43,8 @@
     }
 
 .grid {
-    grid-template-rows: 100px auto;
+    display: grid;
+    grid-template-rows: 70px auto;
     grid-template-columns: 300px auto;
 }
 

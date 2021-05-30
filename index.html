@@ -7,11 +7,11 @@
     </script>
     <link rel="stylesheet" href="index.css">
 </head>
-<body onload="InitCube()">
+<body>
     <div class="grid">
-        <input class="nInput" type="number" style="grid-row-start:1;grid-column-start:1" />
-        <button class="button" style="grid-row-start:1;grid-column-start:2">Обновить</button>
-        <canvas width="1600" height="900" id="cnvs" style="grid-row-start:2;grid-column-start:1;grid-column-end:3">
+        <input class="nInput" id="anglesCount" type="number" style="grid-row-start:1;grid-column-start:1" value="6"/>
+        <button class="button" id="approve" style="grid-row-start:1;grid-column-start:2">Обновить</button>
+        <canvas width="1600" height="900" id="cnvs" style="grid-row-start:2;grid-column-start:1;grid-column-end:3;margin:auto;vertical-align:middle">
         </canvas>
     </div>
 </body>
