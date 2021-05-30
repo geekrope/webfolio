@@ -6,9 +6,13 @@ window.onload = function () {
         accuracy = parseInt(document.getElementById("anglesCount").value) / 2;
     };
 };
+function Circle(angle, r) {
+    return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
+}
 function InitSimpleShape() {
     var zoom = 6;
     var gl = document.getElementById("cnvs").getContext("webgl");
+    //cube
     //var vertices = [
     //	-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1,
     //	-1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1,
@@ -18,35 +22,41 @@ function InitSimpleShape() {
     //	-1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1,
     //];
     var vertices = [];
-    var width = 1;
+    var r = 1;
     for (var angle = 0; angle < accuracy * 2; angle += 1) {
         var radians = (angle / accuracy) * Math.PI;
-        var x = Math.cos(radians) * width + width;
-        var y = Math.sin(radians) * width + width;
-        var x2 = Math.cos(radians + Math.PI / accuracy) * width + width;
-        var y2 = Math.sin(radians + Math.PI / accuracy) * width + width;
+        var p1 = Circle(radians, r);
+        var p2 = Circle(radians + Math.PI / accuracy, r);
+        var x = p1.x;
+        var y = p1.y;
+        var x2 = p2.x;
+        var y2 = p2.y;
         vertices.push(x, y, -1);
         vertices.push(x2, y2, -1);
         vertices.push(x2, y2, 1);
         vertices.push(x, y, 1);
     }
-    vertices.push(1, 1, 1);
+    vertices.push(0, 0, 1);
     for (var angle = 0; angle < accuracy * 2; angle += 1) {
         var radians = (angle / accuracy) * Math.PI;
-        var x = Math.cos(radians) * width + width;
-        var y = Math.sin(radians) * width + width;
-        var x2 = Math.cos(radians + Math.PI / accuracy) * width + width;
-        var y2 = Math.sin(radians + Math.PI / accuracy) * width + width;
+        var p1 = Circle(radians, r);
+        var p2 = Circle(radians + Math.PI / accuracy, r);
+        var x = p1.x;
+        var y = p1.y;
+        var x2 = p2.x;
+        var y2 = p2.y;
         vertices.push(x2, y2, 1);
         vertices.push(x, y, 1);
     }
     vertices.push(1, 1, -1);
     for (var angle = 0; angle < accuracy * 2; angle += 1) {
         var radians = (angle / accuracy) * Math.PI;
-        var x = Math.cos(radians) * width + width;
-        var y = Math.sin(radians) * width + width;
-        var x2 = Math.cos(radians + Math.PI / accuracy) * width + width;
-        var y2 = Math.sin(radians + Math.PI / accuracy) * width + width;
+        var p1 = Circle(radians, r);
+        var p2 = Circle(radians + Math.PI / accuracy, r);
+        var x = p1.x;
+        var y = p1.y;
+        var x2 = p2.x;
+        var y2 = p2.y;
         vertices.push(x2, y2, -1);
         vertices.push(x, y, -1);
     }
@@ -162,7 +172,35 @@ function InitSimpleShape() {
             gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
             gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-            rotateY(mov_matrix, 0.01);
+            if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
+                currentAngleX += deltaX;
+                rotateY(mov_matrix, deltaX / 180 * Math.PI);
+            }
+            else if (deltaX > 0 && currentAngleX + deltaX <= angleX) {
+                currentAngleX += deltaX;
+                rotateY(mov_matrix, deltaX / 180 * Math.PI);
+            }
+            else if (deltaY < 0 && currentAngleY + deltaY >= angleY) {
+                currentAngleY += deltaY;
+                if (currentAngleY < angleY) {
+                    deltaY = angleY - currentAngleY - deltaY;
+                }
+                rotateX(mov_matrix, deltaY / 180 * Math.PI);
+            }
+            else if (deltaY > 0 && currentAngleY + deltaY <= angleY) {
+                currentAngleY += deltaY;
+                if (currentAngleY > angleY) {
+                    deltaY = angleY - currentAngleY - deltaY;
+                }
+                rotateX(mov_matrix, deltaY / 180 * Math.PI);
+            }
+            else {
+                rotationEnded = true;
+                currentAngleX = angleX;
+                currentAngleY = angleY;
+                deltaX = 0;
+                deltaY = 0;
+            }
         }
         window.requestAnimationFrame(InitSimpleShape);
         mov_matrix[14] = -zoom;
@@ -221,22 +259,52 @@ function scaleY(m, value) {
 function scaleZ(m, value) {
     m[10] *= value;
 }
-var a1 = 0;
-var a2 = 0;
-var lastX = -1;
-var lastY = -1;
-document.onmousemove = function (ev) {
-    if (lastX == -1) {
-        lastX = ev.pageX;
+var currentAngleX = 0;
+var angleX = 0;
+var currentAngleY = 0;
+var angleY = 0;
+var defaultDelta = 3;
+var deltaX = 0;
+var deltaY = 0;
+var rotationEnded = true;
+var mouseDown = new DOMPoint();
+document.onmousedown = function (ev) {
+    if (!rotationEnded) {
+        return;
     }
-    if (lastY == -1) {
-        lastY = ev.pageY;
+    mouseDown.x = ev.pageX;
+    mouseDown.y = ev.pageY;
+};
+document.onmouseup = function (ev) {
+    if (!rotationEnded) {
+        return;
     }
-    a1 += (ev.pageX - lastX) / innerWidth / 20;
-    a2 += (ev.pageY - lastY) / innerHeight / 20;
-    lastX = ev.pageX;
-    lastY = ev.pageY;
-    //rotateX(mov_matrix, a2);
-    //rotateY(mov_matrix, a1);
+    if (mouseDown.x == ev.pageX && mouseDown.y == ev.pageY) {
+        return;
+    }
+    if (Math.abs(ev.pageX - mouseDown.x) > Math.abs(ev.pageY - mouseDown.y)) {
+        if (ev.pageX - mouseDown.x < 0) {
+            angleX -= 90;
+            deltaX = -defaultDelta;
+            rotationEnded = false;
+        }
+        else {
+            angleX += 90;
+            deltaX = defaultDelta;
+            rotationEnded = false;
+        }
+    }
+    else {
+        if (ev.pageY - mouseDown.y < 0) {
+            angleY -= 90;
+            deltaY = -defaultDelta;
+            rotationEnded = false;
+        }
+        else {
+            angleY += 90;
+            deltaY = defaultDelta;
+            rotationEnded = false;
+        }
+    }
 };
 //# sourceMappingURL=drawing.js.map
