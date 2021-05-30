@@ -5,11 +5,14 @@
     <title></title>
     <script src="drawing.js">
     </script>
+    <link rel="stylesheet" href="index.css">
 </head>
 <body onload="InitCube()">
-    <canvas width="1600" height="900" id="cnvs">
-    </canvas>
-    <div style="width:500px;height:500px;transform:matrix3d(1,0,1,0, 0,1,0,0, 0,0,1,0, 0,0,0,0);background:red">
+    <div class="grid">
+        <input class="nInput" type="number" style="grid-row-start:1;grid-column-start:1" />
+        <button class="button" style="grid-row-start:1;grid-column-start:2">Обновить</button>
+        <canvas width="1600" height="900" id="cnvs" style="grid-row-start:2;grid-column-start:1;grid-column-end:3">
+        </canvas>
     </div>
 </body>
 </html>
