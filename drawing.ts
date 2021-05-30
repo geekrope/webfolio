@@ -5,8 +5,7 @@ var accuracy = 3.5;
 window.onload = () => {
 	InitSimpleShape();
 	document.getElementById("approve").onclick = () => {
-		accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
-		InitSimpleShape();
+		accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;		
 	}
 }
 

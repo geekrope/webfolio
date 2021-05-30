@@ -4,7 +4,6 @@ window.onload = function () {
     InitSimpleShape();
     document.getElementById("approve").onclick = function () {
         accuracy = parseInt(document.getElementById("anglesCount").value) / 2;
-        InitSimpleShape();
     };
 };
 function InitSimpleShape() {
