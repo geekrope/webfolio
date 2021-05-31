@@ -10,6 +10,9 @@ window.onload = function () {
 function Circle(angle, r) {
     return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
 }
+var c1 = [0, 1, 0];
+var c2 = [1, 0, 0];
+var c3 = [1, 1, 0];
 function InitSimpleShape() {
     mov_matrix[14] = -zoom;
     var gl = document.getElementById("cnvs").getContext("webgl");
@@ -23,6 +26,7 @@ function InitSimpleShape() {
     //	-1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1,
     //];
     var vertices = [];
+    var colors = [];
     var r = 1;
     for (var angle = 0; angle < accuracy * 2; angle += 1) {
         var radians = (angle / accuracy) * Math.PI;
@@ -32,12 +36,18 @@ function InitSimpleShape() {
         var y = p1.y;
         var x2 = p2.x;
         var y2 = p2.y;
+        for (var i = 0; i < c1.length * 4; i++) {
+            colors.push(c1[i % 3]);
+        }
         vertices.push(x, y, -1);
         vertices.push(x2, y2, -1);
         vertices.push(x2, y2, 1);
         vertices.push(x, y, 1);
     }
     vertices.push(0, 0, 1);
+    for (var i = 0; i < c2.length; i++) {
+        colors.push(c2[i % 3]);
+    }
     for (var angle = 0; angle < accuracy * 2; angle += 1) {
         var radians = (angle / accuracy) * Math.PI;
         var p1 = Circle(radians, r);
@@ -46,10 +56,16 @@ function InitSimpleShape() {
         var y = p1.y;
         var x2 = p2.x;
         var y2 = p2.y;
+        for (var i = 0; i < c2.length * 2; i++) {
+            colors.push(c2[i % 3]);
+        }
         vertices.push(x2, y2, 1);
         vertices.push(x, y, 1);
     }
     vertices.push(0, 0, -1);
+    for (var i = 0; i < c3.length; i++) {
+        colors.push(c3[i % 3]);
+    }
     for (var angle = 0; angle < accuracy * 2; angle += 1) {
         var radians = (angle / accuracy) * Math.PI;
         var p1 = Circle(radians, r);
@@ -58,20 +74,12 @@ function InitSimpleShape() {
         var y = p1.y;
         var x2 = p2.x;
         var y2 = p2.y;
+        for (var i = 0; i < c3.length * 2; i++) {
+            colors.push(c3[i % 3]);
+        }
         vertices.push(x2, y2, -1);
         vertices.push(x, y, -1);
     }
-    var colors = [
-        1.0, 1.0, 1.0, 1.0,
-        1.0, 0.0, 0.0, 1.0,
-        0.0, 1.0, 0.0, 1.0,
-        0.0, 0.0, 1.0, 1.0
-    ];
-    //var indices = [
-    //	0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7,
-    //	8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15,
-    //	16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23
-    //];
     var indices = [];
     for (var index = 0; index < accuracy * 2 * 4; index += 4) {
         indices.push(index);

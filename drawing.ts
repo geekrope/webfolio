@@ -15,7 +15,11 @@ function Circle(angle: number, r: number) {
 	return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
 }
 
-function InitSimpleShape() {	
+var c1 = [0, 1, 0];
+var c2 = [1, 0, 0];
+var c3 = [1, 1, 0];
+
+function InitSimpleShape() {
 	mov_matrix[14] = -zoom;
 
 	let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
@@ -33,6 +37,9 @@ function InitSimpleShape() {
 	var vertices = [
 	];
 
+	var colors = [
+	];
+
 	let r = 1;
 
 	for (let angle = 0; angle < accuracy * 2; angle += 1) {
@@ -47,6 +54,10 @@ function InitSimpleShape() {
 		var x2 = p2.x;
 		var y2 = p2.y;
 
+		for (let i = 0; i < c1.length * 4; i++) {
+			colors.push(c1[i % 3]);
+		}
+
 		vertices.push(x, y, -1);
 		vertices.push(x2, y2, -1);
 		vertices.push(x2, y2, 1);
@@ -55,6 +66,10 @@ function InitSimpleShape() {
 
 	vertices.push(0, 0, 1);
 
+	for (let i = 0; i < c2.length; i++) {
+		colors.push(c2[i % 3]);
+	}
+
 	for (let angle = 0; angle < accuracy * 2; angle += 1) {
 		var radians = (angle / accuracy) * Math.PI;
 
@@ -66,6 +81,10 @@ function InitSimpleShape() {
 
 		var x2 = p2.x;
 		var y2 = p2.y;
+
+		for (let i = 0; i < c2.length * 2; i++) {
+			colors.push(c2[i % 3]);
+		}
 
 		vertices.push(x2, y2, 1);
 		vertices.push(x, y, 1);
@@ -73,6 +92,10 @@ function InitSimpleShape() {
 
 	vertices.push(0, 0, -1);
 
+	for (let i = 0; i < c3.length; i++) {
+		colors.push(c3[i % 3]);
+	}
+
 	for (let angle = 0; angle < accuracy * 2; angle += 1) {
 		var radians = (angle / accuracy) * Math.PI;
 
@@ -85,22 +108,13 @@ function InitSimpleShape() {
 		var x2 = p2.x;
 		var y2 = p2.y;
 
+		for (let i = 0; i < c3.length * 2; i++) {
+			colors.push(c3[i % 3]);
+		}
+
 		vertices.push(x2, y2, -1);
 		vertices.push(x, y, -1);
 	}
-
-	var colors = [
-		1.0, 1.0, 1.0, 1.0,
-		1.0, 0.0, 0.0, 1.0,
-		0.0, 1.0, 0.0, 1.0,
-		0.0, 0.0, 1.0, 1.0
-	];
-
-	//var indices = [
-	//	0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7,
-	//	8, 9, 10, 8, 10, 11, 12, 13, 14, 12, 14, 15,
-	//	16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23
-	//];
 
 	var indices = [
 	];
@@ -147,7 +161,7 @@ function InitSimpleShape() {
 		'uniform mat4 Pmatrix;' +
 		'uniform mat4 Vmatrix;' +
 		'uniform mat4 Mmatrix;' +
-		'attribute vec3 color;' +//the color of the point
+		'attribute vec3 color;' + //the color of the point
 		'varying vec3 vColor;' +
 
 		'void main(void) { ' +//pre-built function
@@ -256,7 +270,7 @@ function InitSimpleShape() {
 			deltaY = 0;
 		}
 
-		window.requestAnimationFrame(InitSimpleShape);		
+		window.requestAnimationFrame(InitSimpleShape);
 		mov_matrix[12] = 0;
 	}
 	animate(0);
@@ -345,7 +359,7 @@ document.ondblclick = () => {
 	}
 	else {
 		zoom += 3;
-		translateZ(mov_matrix, 2);		
+		translateZ(mov_matrix, 2);
 		scaled = false;
 	}
 }
