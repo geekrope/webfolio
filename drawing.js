@@ -1,5 +1,6 @@
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 var accuracy = 3.5;
+var zoom = 6;
 window.onload = function () {
     InitSimpleShape();
     document.getElementById("approve").onclick = function () {
@@ -10,7 +11,7 @@ function Circle(angle, r) {
     return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
 }
 function InitSimpleShape() {
-    var zoom = 6;
+    mov_matrix[14] = -zoom;
     var gl = document.getElementById("cnvs").getContext("webgl");
     //cube
     //var vertices = [
@@ -48,7 +49,7 @@ function InitSimpleShape() {
         vertices.push(x2, y2, 1);
         vertices.push(x, y, 1);
     }
-    vertices.push(1, 1, -1);
+    vertices.push(0, 0, -1);
     for (var angle = 0; angle < accuracy * 2; angle += 1) {
         var radians = (angle / accuracy) * Math.PI;
         var p1 = Circle(radians, r);
@@ -61,12 +62,10 @@ function InitSimpleShape() {
         vertices.push(x, y, -1);
     }
     var colors = [
-        5, 3, 7, 5, 3, 7, 5, 3, 7, 5, 3, 7,
-        1, 1, 3, 1, 1, 3, 1, 1, 3, 1, 1, 3,
-        0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
-        1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
-        1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0,
-        0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0
+        1.0, 1.0, 1.0, 1.0,
+        1.0, 0.0, 0.0, 1.0,
+        0.0, 1.0, 0.0, 1.0,
+        0.0, 0.0, 1.0, 1.0
     ];
     //var indices = [
     //	0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7,
@@ -87,11 +86,11 @@ function InitSimpleShape() {
         indices.push(index + 1);
         indices.push(index + 2);
     }
-    //for (let index = accuracy * 2 * 4 + accuracy * 2 * 2; index < accuracy * 2 * 4 + accuracy * 2 * 2 + accuracy * 2 * 2; index += 2) {
-    //	indices.push(accuracy * 2 * 4 + accuracy * 2 * 2);
-    //	indices.push(index + 1);
-    //	indices.push(index + 2);
-    //}
+    for (var index = accuracy * 2 * 4 + accuracy * 2 * 2 + 1; index < accuracy * 2 * 4 + accuracy * 2 * 2 + accuracy * 2 * 2; index += 2) {
+        indices.push(accuracy * 2 * 4 + accuracy * 2 * 2 + 1);
+        indices.push(index + 1);
+        indices.push(index + 2);
+    }
     // Create and store data into vertex buffer
     var vertex_buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
@@ -165,45 +164,41 @@ function InitSimpleShape() {
         gl.clearDepth(1.0);
         gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        for (var i = 0; i < 1; i++) {
-            translateZ(mov_matrix, -i * 5);
-            gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
-            gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
-            gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-            gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-            if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
-                currentAngleX += deltaX;
-                rotateY(mov_matrix, deltaX / 180 * Math.PI);
+        gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
+        gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
+        gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+        if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
+            currentAngleX += deltaX;
+            rotateY(mov_matrix, deltaX / 180 * Math.PI);
+        }
+        else if (deltaX > 0 && currentAngleX + deltaX <= angleX) {
+            currentAngleX += deltaX;
+            rotateY(mov_matrix, deltaX / 180 * Math.PI);
+        }
+        else if (deltaY < 0 && currentAngleY + deltaY >= angleY) {
+            currentAngleY += deltaY;
+            if (currentAngleY < angleY) {
+                deltaY = angleY - currentAngleY - deltaY;
             }
-            else if (deltaX > 0 && currentAngleX + deltaX <= angleX) {
-                currentAngleX += deltaX;
-                rotateY(mov_matrix, deltaX / 180 * Math.PI);
+            rotateX(mov_matrix, deltaY / 180 * Math.PI);
+        }
+        else if (deltaY > 0 && currentAngleY + deltaY <= angleY) {
+            currentAngleY += deltaY;
+            if (currentAngleY > angleY) {
+                deltaY = angleY - currentAngleY - deltaY;
             }
-            else if (deltaY < 0 && currentAngleY + deltaY >= angleY) {
-                currentAngleY += deltaY;
-                if (currentAngleY < angleY) {
-                    deltaY = angleY - currentAngleY - deltaY;
-                }
-                rotateX(mov_matrix, deltaY / 180 * Math.PI);
-            }
-            else if (deltaY > 0 && currentAngleY + deltaY <= angleY) {
-                currentAngleY += deltaY;
-                if (currentAngleY > angleY) {
-                    deltaY = angleY - currentAngleY - deltaY;
-                }
-                rotateX(mov_matrix, deltaY / 180 * Math.PI);
-            }
-            else {
-                rotationEnded = true;
-                currentAngleX = angleX;
-                currentAngleY = angleY;
-                deltaX = 0;
-                deltaY = 0;
-            }
+            rotateX(mov_matrix, deltaY / 180 * Math.PI);
+        }
+        else {
+            rotationEnded = true;
+            currentAngleX = angleX;
+            currentAngleY = angleY;
+            deltaX = 0;
+            deltaY = 0;
         }
         window.requestAnimationFrame(InitSimpleShape);
-        mov_matrix[14] = -zoom;
         mov_matrix[12] = 0;
     };
     animate(0);
@@ -267,6 +262,18 @@ var defaultDelta = 3;
 var deltaX = 0;
 var deltaY = 0;
 var rotationEnded = true;
+var scaled = false;
+document.ondblclick = function () {
+    if (!scaled) {
+        zoom -= 3;
+        scaled = true;
+    }
+    else {
+        zoom += 3;
+        translateZ(mov_matrix, 2);
+        scaled = false;
+    }
+};
 var mouseDown = new DOMPoint();
 document.onmousedown = function (ev) {
     if (!rotationEnded) {
