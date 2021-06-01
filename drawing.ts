@@ -24,16 +24,6 @@ function InitSimpleShape() {
 
 	let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
 
-	//cube
-	//var vertices = [
-	//	-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1,
-	//	-1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1,
-	//	-1, -1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1,
-	//	1, -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1,
-	//	-1, -1, -1, -1, -1, 1, 1, -1, 1, 1, -1, -1,
-	//	-1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1,
-	//];
-
 	var vertices = [
 	];
 
@@ -353,15 +343,15 @@ var rotationEnded = true;
 var scaled = false;
 
 document.ondblclick = () => {
-	if (!scaled) {
-		zoom -= 3;
-		scaled = true;
-	}
-	else {
-		zoom += 3;
-		translateZ(mov_matrix, 2);
-		scaled = false;
-	}
+	//if (!scaled) {
+	//	zoom -= 3;
+	//	scaled = true;
+	//}
+	//else {
+	//	zoom += 3;
+	//	translateZ(mov_matrix, 2);
+	//	scaled = false;
+	//}
 }
 
 var mouseDown = new DOMPoint();
@@ -372,6 +362,10 @@ document.onmousedown = (ev) => {
 	}
 	mouseDown.x = ev.pageX;
 	mouseDown.y = ev.pageY;
+}
+
+document.onwheel = (ev) => {
+	zoom += ev.deltaY / 1200;
 }
 
 document.onmouseup = (ev) => {

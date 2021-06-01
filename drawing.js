@@ -16,15 +16,6 @@ var c3 = [1, 1, 0];
 function InitSimpleShape() {
     mov_matrix[14] = -zoom;
     var gl = document.getElementById("cnvs").getContext("webgl");
-    //cube
-    //var vertices = [
-    //	-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1,
-    //	-1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1, 1,
-    //	-1, -1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1,
-    //	1, -1, -1, 1, 1, -1, 1, 1, 1, 1, -1, 1,
-    //	-1, -1, -1, -1, -1, 1, 1, -1, 1, 1, -1, -1,
-    //	-1, 1, -1, -1, 1, 1, 1, 1, 1, 1, 1, -1,
-    //];
     var vertices = [];
     var colors = [];
     var r = 1;
@@ -272,15 +263,15 @@ var deltaY = 0;
 var rotationEnded = true;
 var scaled = false;
 document.ondblclick = function () {
-    if (!scaled) {
-        zoom -= 3;
-        scaled = true;
-    }
-    else {
-        zoom += 3;
-        translateZ(mov_matrix, 2);
-        scaled = false;
-    }
+    //if (!scaled) {
+    //	zoom -= 3;
+    //	scaled = true;
+    //}
+    //else {
+    //	zoom += 3;
+    //	translateZ(mov_matrix, 2);
+    //	scaled = false;
+    //}
 };
 var mouseDown = new DOMPoint();
 document.onmousedown = function (ev) {
@@ -289,6 +280,9 @@ document.onmousedown = function (ev) {
     }
     mouseDown.x = ev.pageX;
     mouseDown.y = ev.pageY;
+};
+document.onwheel = function (ev) {
+    zoom += ev.deltaY / 1200;
 };
 document.onmouseup = function (ev) {
     if (!rotationEnded) {
