@@ -1,10 +1,11 @@
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 var accuracy = 3.5;
-var zoom = 6;
+var zoom = 20;
 window.onload = function () {
     InitSimpleShape();
     document.getElementById("approve").onclick = function () {
         accuracy = parseInt(document.getElementById("anglesCount").value) / 2;
+        InitSimpleShape();
     };
 };
 function Circle(angle, r) {
@@ -159,15 +160,18 @@ function InitSimpleShape() {
     var animate = function (time) {
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
-        gl.clearColor(0.5, 0.5, 0.5, 1);
-        gl.clearDepth(1.0);
-        gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
-        gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
-        gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+        //gl.clearColor(0.5, 0.5, 0.5, 1);
+        //gl.clearDepth(1.0);
+        //gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
+        //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        for (var i = 0; i < 5; i++) {
+            translateZ(mov_matrix, i * 4);
+            gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
+            gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
+            gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+            gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+        }
         if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
             currentAngleX += deltaX;
             rotateY(mov_matrix, deltaX / 180 * Math.PI);
@@ -197,8 +201,9 @@ function InitSimpleShape() {
             deltaX = 0;
             deltaY = 0;
         }
-        window.requestAnimationFrame(InitSimpleShape);
+        window.requestAnimationFrame(animate);
         mov_matrix[12] = 0;
+        mov_matrix[14] = -zoom;
     };
     animate(0);
 }
@@ -263,15 +268,6 @@ var deltaY = 0;
 var rotationEnded = true;
 var scaled = false;
 document.ondblclick = function () {
-    //if (!scaled) {
-    //	zoom -= 3;
-    //	scaled = true;
-    //}
-    //else {
-    //	zoom += 3;
-    //	translateZ(mov_matrix, 2);
-    //	scaled = false;
-    //}
 };
 var mouseDown = new DOMPoint();
 document.onmousedown = function (ev) {
@@ -316,4 +312,46 @@ document.onmouseup = function (ev) {
         }
     }
 };
+function loadTexture(gl, url) {
+    var texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    // Так как изображение будет загружено из интернета,
+    // может потребоваться время для полной загрузки.
+    // Поэтому сначала мы помещаем в текстуру единственный пиксель, чтобы
+    // её можно было использовать сразу. После завершения загрузки
+    // изображения мы обновим текстуру.
+    var level = 0;
+    var internalFormat = gl.RGBA;
+    var width = 1;
+    var height = 1;
+    var border = 0;
+    var srcFormat = gl.RGBA;
+    var srcType = gl.UNSIGNED_BYTE;
+    var pixel = new Uint8Array([0, 0, 255, 255]); // непрозрачный синий
+    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, border, srcFormat, srcType, pixel);
+    var image = new Image();
+    image.onload = function () {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, srcFormat, srcType, image);
+        // У WebGL1 иные требования к изображениям, имеющим размер степени 2,
+        // и к не имеющим размер степени 2, поэтому проверяем, что изображение
+        // имеет размер степени 2 в обеих измерениях.
+        if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+            // Размер соответствует степени 2. Создаём MIP'ы.
+            gl.generateMipmap(gl.TEXTURE_2D);
+        }
+        else {
+            // Размер не соответствует степени 2.
+            // Отключаем MIP'ы и устанавливаем натяжение по краям
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        }
+    };
+    image.src = url;
+    return texture;
+}
+function isPowerOf2(value) {
+    return (value & (value - 1)) == 0;
+}
 //# sourceMappingURL=drawing.js.map
