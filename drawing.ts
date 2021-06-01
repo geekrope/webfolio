@@ -1,14 +1,13 @@
 ﻿var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
-var accuracy = 3.5;
+var accuracy = 3;
 
-var zoom = 20;
+var zoom = 6;
 
 window.onload = () => {
 	InitSimpleShape();
 	document.getElementById("approve").onclick = () => {
 		accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
-		InitSimpleShape();
 	}
 }
 
@@ -219,20 +218,17 @@ function InitSimpleShape() {
 	var animate = function (time) {
 		gl.enable(gl.DEPTH_TEST);
 		gl.depthFunc(gl.LEQUAL);
-		//gl.clearColor(0.5, 0.5, 0.5, 1);
-		//gl.clearDepth(1.0);
+		gl.clearColor(0.5, 0.5, 0.5, 1);
+		gl.clearDepth(1.0);
 
-		//gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
-		//gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+		gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-		for (let i = 0; i < 5; i++) {
-			translateZ(mov_matrix, i * 4);
-			gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
-			gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
-			gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
-			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-			gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-		}
+		gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
+		gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
+		gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
 		if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
 			currentAngleX += deltaX;
@@ -264,9 +260,7 @@ function InitSimpleShape() {
 			deltaY = 0;
 		}
 
-
-
-		window.requestAnimationFrame(animate);
+		window.requestAnimationFrame(InitSimpleShape);
 		mov_matrix[12] = 0;
 		mov_matrix[14] = -zoom;
 	}
