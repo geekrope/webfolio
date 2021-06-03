@@ -5,7 +5,7 @@ var accuracy = 3;
 var zoom = 6;
 
 window.onload = () => {
-	InitSimpleShape();
+	DrawScene();
 	document.getElementById("approve").onclick = () => {
 		accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
 	}
@@ -19,6 +19,142 @@ var c1 = [0, 1, 0];
 var c2 = [1, 0, 0];
 var c3 = [1, 1, 0];
 
+function DrawScene() {
+	let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
+
+	gl.clearColor(0.5, 0.5, 0.5, 1);
+	gl.clearDepth(1.0);
+
+	gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	CreatePlane();
+	InitSimpleShape();
+
+	requestAnimationFrame(DrawScene);
+}
+
+function CreatePlane() {
+	let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
+
+	var vertices = [
+	];
+
+	var colors = [
+		0, 0, 0,
+		0, 0, 0,
+		0, 0, 0,
+		0, 0, 0
+	];
+
+	var indices = [
+		0, 1, 2, 0, 2, 3
+	];
+
+	var vertex_buffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+	// Create and store data into color buffer
+	var color_buffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
+	// Create and store data into index buffer
+	var index_buffer = gl.createBuffer();
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+
+	/*=================== Shaders =========================*/
+
+	var vertCode = 'attribute vec3 position;' +
+		'uniform mat4 Pmatrix;' +
+		'uniform mat4 Vmatrix;' +
+		'uniform mat4 Mmatrix;' +
+		'attribute vec3 color;' + //the color of the point
+		'varying vec3 vColor;' +
+
+		'void main(void) { ' +//pre-built function
+		'gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);' +
+		'vColor = color;' +
+		'}';
+
+	var fragCode = 'precision mediump float;' +
+		'varying vec3 vColor;' +
+		'void main(void) {' +
+		'gl_FragColor = vec4(vColor, 1.);' +
+		'}';
+
+	var vertShader = gl.createShader(gl.VERTEX_SHADER);
+	gl.shaderSource(vertShader, vertCode);
+	gl.compileShader(vertShader);
+
+	var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+	gl.shaderSource(fragShader, fragCode);
+	gl.compileShader(fragShader);
+
+	var shaderProgram = gl.createProgram();
+	gl.attachShader(shaderProgram, vertShader);
+	gl.attachShader(shaderProgram, fragShader);
+	gl.linkProgram(shaderProgram);
+
+	/* ====== Associating attributes to vertex shader =====*/
+	var Pmatrix = gl.getUniformLocation(shaderProgram, "Pmatrix");
+	var Vmatrix = gl.getUniformLocation(shaderProgram, "Vmatrix");
+	var Mmatrix = gl.getUniformLocation(shaderProgram, "Mmatrix");
+
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+	var position = gl.getAttribLocation(shaderProgram, "position");
+	gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 0, 0);
+
+	// Position
+	gl.enableVertexAttribArray(position);
+	gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+	var color = gl.getAttribLocation(shaderProgram, "color");
+	gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 0, 0);
+
+	// Color
+	gl.enableVertexAttribArray(color);
+	gl.useProgram(shaderProgram);
+
+	/*==================== MATRIX =====================*/
+
+	function get_projection(angle, a, zMin, zMax) {
+		var ang = Math.tan((angle * .5) * Math.PI / 180);//angle*.5
+		return [
+			0.5 / ang, 0, 0, 0,
+			0, 0.5 * a / ang, 0, 0,
+			0, 0, -(zMax + zMin) / (zMax - zMin), -1,
+			0, 0, (-2 * zMax * zMin) / (zMax - zMin), 0
+		];
+	}
+
+	var proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, 100);
+
+	var view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+
+	/*================= Drawing ===========================*/
+
+	var animate = function () {
+		gl.enable(gl.DEPTH_TEST);
+		gl.depthFunc(gl.LEQUAL);
+
+		rotateX(mov_matrix, Math.PI / 60);
+
+		gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
+		gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
+		gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+		rotateX(mov_matrix, -Math.PI / 60);
+
+		mov_matrix[12] = 0;
+		mov_matrix[14] = -zoom;
+	}
+	animate();
+}
+
 function InitSimpleShape() {
 	mov_matrix[14] = -zoom;
 
@@ -31,6 +167,16 @@ function InitSimpleShape() {
 	];
 
 	let r = 1;
+
+	const normalBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+
+	const vertexNormals = [
+
+	];
+
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals),
+		gl.STATIC_DRAW);
 
 	for (let angle = 0; angle < accuracy * 2; angle += 1) {
 		var radians = (angle / accuracy) * Math.PI;
@@ -47,6 +193,13 @@ function InitSimpleShape() {
 		for (let i = 0; i < c1.length * 4; i++) {
 			colors.push(c1[i % 3]);
 		}
+
+		var nP = Circle((radians + radians + Math.PI / accuracy) / 2, r);
+
+		vertexNormals.push(nP.x, nP.y, 0);
+		vertexNormals.push(nP.x, nP.y, 0);
+		vertexNormals.push(nP.x, nP.y, 0);
+		vertexNormals.push(nP.x, nP.y, 0);
 
 		vertices.push(x, y, -1);
 		vertices.push(x2, y2, -1);
@@ -147,17 +300,17 @@ function InitSimpleShape() {
 
 	/*=================== Shaders =========================*/
 
-	var vertCode = 'attribute vec3 position;' +
-		'uniform mat4 Pmatrix;' +
-		'uniform mat4 Vmatrix;' +
-		'uniform mat4 Mmatrix;' +
-		'attribute vec3 color;' + //the color of the point
-		'varying vec3 vColor;' +
+	var vertCode = `attribute vec3 position;
+		uniform mat4 Pmatrix;
+		uniform mat4 Vmatrix;
+		uniform mat4 Mmatrix;
+		attribute vec3 color;
+		varying vec3 vColor;		
 
-		'void main(void) { ' +//pre-built function
-		'gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);' +
-		'vColor = color;' +
-		'}';
+		void main(void) {
+		gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);
+		vColor = color;
+		}`;
 
 	var fragCode = 'precision mediump float;' +
 		'varying vec3 vColor;' +
@@ -215,14 +368,9 @@ function InitSimpleShape() {
 
 	/*================= Drawing ===========================*/
 
-	var animate = function (time) {
+	var animate = function () {
 		gl.enable(gl.DEPTH_TEST);
 		gl.depthFunc(gl.LEQUAL);
-		gl.clearColor(0.5, 0.5, 0.5, 1);
-		gl.clearDepth(1.0);
-
-		gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
-		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 		gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
 		gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
@@ -260,11 +408,11 @@ function InitSimpleShape() {
 			deltaY = 0;
 		}
 
-		window.requestAnimationFrame(InitSimpleShape);
 		mov_matrix[12] = 0;
 		mov_matrix[14] = -zoom;
 	}
-	animate(0);
+
+	animate();
 }
 
 function rotateZ(m, angle) {
