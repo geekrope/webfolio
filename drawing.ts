@@ -15,7 +15,7 @@ function Circle(angle: number, r: number) {
 	return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
 }
 
-var c1 = [0, 1, 0];
+var c1 = [0, 0, 0];
 var c2 = [1, 0, 0];
 var c3 = [1, 1, 0];
 
@@ -28,28 +28,14 @@ function DrawScene() {
 	gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	CreatePlane();
+	//CreatePlane();
 	InitSimpleShape();
 
 	requestAnimationFrame(DrawScene);
 }
 
-function CreatePlane() {
+function InitGL(vertices: number[], colors: number[], indices: number[]) {
 	let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
-
-	var vertices = [
-	];
-
-	var colors = [
-		0, 0, 0,
-		0, 0, 0,
-		0, 0, 0,
-		0, 0, 0
-	];
-
-	var indices = [
-		0, 1, 2, 0, 2, 3
-	];
 
 	var vertex_buffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
@@ -133,26 +119,53 @@ function CreatePlane() {
 
 	var view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
-	/*================= Drawing ===========================*/
+	gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
+	gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
+	gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+}
 
-	var animate = function () {
-		gl.enable(gl.DEPTH_TEST);
-		gl.depthFunc(gl.LEQUAL);
+function CreatePlaneSegment(zOffset: number, rotationAngle: number) {
+	let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
 
-		rotateX(mov_matrix, Math.PI / 60);
+	var vertices = [
+		-1, 0.2, 1,
+		1, 0.2, 1,
+		1, 0, -1,
+		-1, 0, -1
+	];
 
-		gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
-		gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
-		gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+	var colors = [
+		0, 0, 0,
+		0, 0, 0,
+		0, 0, 0,
+		0, 0, 0
+	];
 
-		rotateX(mov_matrix, -Math.PI / 60);
+	var indices = [
+		0, 1, 2, 0, 2, 3
+	];
 
-		mov_matrix[12] = 0;
-		mov_matrix[14] = -zoom;
+	InitGL(vertices, colors, indices);
+
+	gl.enable(gl.DEPTH_TEST);
+	gl.depthFunc(gl.LEQUAL);
+
+	translateZ(mov_matrix, zOffset);
+
+	//rotateX(mov_matrix, rotationAngle);
+
+	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+	//rotateX(mov_matrix, -rotationAngle);
+
+	mov_matrix[14] = -zoom;
+}
+
+function CreatePlane() {
+	for (let index = 0; index < 2; index++) {
+		CreatePlaneSegment(-index * 2, Math.PI / 2);
 	}
-	animate();
 }
 
 function InitSimpleShape() {
@@ -168,15 +181,9 @@ function InitSimpleShape() {
 
 	let r = 1;
 
-	const normalBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-
 	const vertexNormals = [
 
 	];
-
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexNormals),
-		gl.STATIC_DRAW);
 
 	for (let angle = 0; angle < accuracy * 2; angle += 1) {
 		var radians = (angle / accuracy) * Math.PI;
@@ -283,136 +290,44 @@ function InitSimpleShape() {
 		indices.push(index + 2);
 	}
 
-	// Create and store data into vertex buffer
-	var vertex_buffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	InitGL(vertices, colors, indices);
 
-	// Create and store data into color buffer
-	var color_buffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+	gl.enable(gl.DEPTH_TEST);
+	gl.depthFunc(gl.LEQUAL);
 
-	// Create and store data into index buffer
-	var index_buffer = gl.createBuffer();
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
-	/*=================== Shaders =========================*/
-
-	var vertCode = `attribute vec3 position;
-		uniform mat4 Pmatrix;
-		uniform mat4 Vmatrix;
-		uniform mat4 Mmatrix;
-		attribute vec3 color;
-		varying vec3 vColor;		
-
-		void main(void) {
-		gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);
-		vColor = color;
-		}`;
-
-	var fragCode = 'precision mediump float;' +
-		'varying vec3 vColor;' +
-		'void main(void) {' +
-		'gl_FragColor = vec4(vColor, 1.);' +
-		'}';
-
-	var vertShader = gl.createShader(gl.VERTEX_SHADER);
-	gl.shaderSource(vertShader, vertCode);
-	gl.compileShader(vertShader);
-
-	var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-	gl.shaderSource(fragShader, fragCode);
-	gl.compileShader(fragShader);
-
-	var shaderProgram = gl.createProgram();
-	gl.attachShader(shaderProgram, vertShader);
-	gl.attachShader(shaderProgram, fragShader);
-	gl.linkProgram(shaderProgram);
-
-	/* ====== Associating attributes to vertex shader =====*/
-	var Pmatrix = gl.getUniformLocation(shaderProgram, "Pmatrix");
-	var Vmatrix = gl.getUniformLocation(shaderProgram, "Vmatrix");
-	var Mmatrix = gl.getUniformLocation(shaderProgram, "Mmatrix");
-
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-	var position = gl.getAttribLocation(shaderProgram, "position");
-	gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 0, 0);
-
-	// Position
-	gl.enableVertexAttribArray(position);
-	gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
-	var color = gl.getAttribLocation(shaderProgram, "color");
-	gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 0, 0);
-
-	// Color
-	gl.enableVertexAttribArray(color);
-	gl.useProgram(shaderProgram);
-
-	/*==================== MATRIX =====================*/
-
-	function get_projection(angle, a, zMin, zMax) {
-		var ang = Math.tan((angle * .5) * Math.PI / 180);//angle*.5
-		return [
-			0.5 / ang, 0, 0, 0,
-			0, 0.5 * a / ang, 0, 0,
-			0, 0, -(zMax + zMin) / (zMax - zMin), -1,
-			0, 0, (-2 * zMax * zMin) / (zMax - zMin), 0
-		];
+	if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
+		currentAngleX += deltaX;
+		rotateY(mov_matrix, deltaX / 180 * Math.PI);
+	}
+	else if (deltaX > 0 && currentAngleX + deltaX <= angleX) {
+		currentAngleX += deltaX;
+		rotateY(mov_matrix, deltaX / 180 * Math.PI);
+	}
+	else if (deltaY < 0 && currentAngleY + deltaY >= angleY) {
+		currentAngleY += deltaY;
+		if (currentAngleY < angleY) {
+			deltaY = angleY - currentAngleY - deltaY;
+		}
+		rotateX(mov_matrix, deltaY / 180 * Math.PI);
+	}
+	else if (deltaY > 0 && currentAngleY + deltaY <= angleY) {
+		currentAngleY += deltaY;
+		if (currentAngleY > angleY) {
+			deltaY = angleY - currentAngleY - deltaY;
+		}
+		rotateX(mov_matrix, deltaY / 180 * Math.PI);
+	}
+	else {
+		rotationEnded = true;
+		currentAngleX = angleX;
+		currentAngleY = angleY;
+		deltaX = 0;
+		deltaY = 0;
 	}
 
-	var proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, 100);
-
-	var view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-
-	/*================= Drawing ===========================*/
-
-	var animate = function () {
-		gl.enable(gl.DEPTH_TEST);
-		gl.depthFunc(gl.LEQUAL);
-
-		gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
-		gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
-		gl.uniformMatrix4fv(Mmatrix, false, mov_matrix);
-		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-		gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-
-		if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
-			currentAngleX += deltaX;
-			rotateY(mov_matrix, deltaX / 180 * Math.PI);
-		}
-		else if (deltaX > 0 && currentAngleX + deltaX <= angleX) {
-			currentAngleX += deltaX;
-			rotateY(mov_matrix, deltaX / 180 * Math.PI);
-		}
-		else if (deltaY < 0 && currentAngleY + deltaY >= angleY) {
-			currentAngleY += deltaY;
-			if (currentAngleY < angleY) {
-				deltaY = angleY - currentAngleY - deltaY;
-			}
-			rotateX(mov_matrix, deltaY / 180 * Math.PI);
-		}
-		else if (deltaY > 0 && currentAngleY + deltaY <= angleY) {
-			currentAngleY += deltaY;
-			if (currentAngleY > angleY) {
-				deltaY = angleY - currentAngleY - deltaY;
-			}
-			rotateX(mov_matrix, deltaY / 180 * Math.PI);
-		}
-		else {
-			rotationEnded = true;
-			currentAngleX = angleX;
-			currentAngleY = angleY;
-			deltaX = 0;
-			deltaY = 0;
-		}
-
-		mov_matrix[12] = 0;
-		mov_matrix[14] = -zoom;
-	}
-
-	animate();
+	mov_matrix[14] = -zoom;
 }
 
 function rotateZ(m, angle) {
@@ -542,15 +457,37 @@ document.onmouseup = (ev) => {
 	}
 }
 
+function transposeMat4(matrix: number[]): number[] {
+	var newMatrix = [
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0
+	];
+	for (let index = 0; index < matrix.length; index++) {
+		var col = index % 4;
+		var row = Math.floor(index / 4);
+		var newIndex = col * 4 + row;
+		newMatrix[newIndex] = matrix[index];
+	}
+	return newMatrix;
+}
+
+function inverseMat4(matrix: number[]): number[] {
+	var newMatrix = [
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0,
+		0, 0, 0, 0
+	];
+	return newMatrix;
+}
+
+
 function loadTexture(gl, url) {
 	const texture = gl.createTexture();
 	gl.bindTexture(gl.TEXTURE_2D, texture);
 
-	// Так как изображение будет загружено из интернета,
-	// может потребоваться время для полной загрузки.
-	// Поэтому сначала мы помещаем в текстуру единственный пиксель, чтобы
-	// её можно было использовать сразу. После завершения загрузки
-	// изображения мы обновим текстуру.
 	const level = 0;
 	const internalFormat = gl.RGBA;
 	const width = 1;
@@ -558,7 +495,7 @@ function loadTexture(gl, url) {
 	const border = 0;
 	const srcFormat = gl.RGBA;
 	const srcType = gl.UNSIGNED_BYTE;
-	const pixel = new Uint8Array([0, 0, 255, 255]);  // непрозрачный синий
+	const pixel = new Uint8Array([0, 0, 255, 255]);
 	gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
 		width, height, border, srcFormat, srcType,
 		pixel);
@@ -569,15 +506,9 @@ function loadTexture(gl, url) {
 		gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,
 			srcFormat, srcType, image);
 
-		// У WebGL1 иные требования к изображениям, имеющим размер степени 2,
-		// и к не имеющим размер степени 2, поэтому проверяем, что изображение
-		// имеет размер степени 2 в обеих измерениях.
 		if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
-			// Размер соответствует степени 2. Создаём MIP'ы.
 			gl.generateMipmap(gl.TEXTURE_2D);
 		} else {
-			// Размер не соответствует степени 2.
-			// Отключаем MIP'ы и устанавливаем натяжение по краям
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
