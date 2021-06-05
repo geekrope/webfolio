@@ -119,13 +119,22 @@ function CreateSphere() {
     var vertices = [];
     var colors = [];
     var indices = [];
-    var step = 0.01;
-    for (var y = -1; y <= 1; y += step) {
-        var xStart = -Math.sqrt(1 - Math.pow(y, 2));
+    var parallelsCount = 26;
+    var count = 2;
+    for (var y = 1; y < parallelsCount; y += 1) {
+        var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
+        var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
         var radius = -xStart;
-        for (var x = xStart; x <= -xStart; x += step) {
-            var z = Math.sin(Math.acos(x / radius)) * radius;
-            vertices.push(x, y, z);
+        for (var x = -count / 2; x <= count / 2; x += 1) {
+            var absoluteX = x / count * 2 * radius;
+            var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
+            vertices.push(absoluteX, absoluteY, z);
+        }
+        if (y < parallelsCount / 2) {
+            count *= 2;
+        }
+        else {
+            count /= 2;
         }
     }
     for (var index = 0; index < vertices.length - 1; index++) {
