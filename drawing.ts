@@ -4,10 +4,26 @@ var accuracy = 3;
 
 var zoom = 6;
 
+var colorsBuffer = [];
+
 window.onload = () => {
 	DrawScene();
 	document.getElementById("approve").onclick = () => {
 		accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
+	}
+	for (let i = 0; i < 24597; i++) {
+		var r = Math.random();
+		var g = Math.random();
+		var b = Math.random();
+		colorsBuffer.push(r);
+		colorsBuffer.push(g);
+		colorsBuffer.push(b);
+		colorsBuffer.push(r);
+		colorsBuffer.push(g);
+		colorsBuffer.push(b);
+		colorsBuffer.push(r);
+		colorsBuffer.push(g);
+		colorsBuffer.push(b);
 	}
 }
 
@@ -192,7 +208,7 @@ function CreateSphere() {
 		for (let x: number = -count / 2; x <= count / 2; x += 1) {
 			var absoluteX = x / count * 2 * radius;
 			var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
-			vertices.push(absoluteX, absoluteY, z);			
+			vertices.push(absoluteX, absoluteY, z);
 		}
 		if (y < parallelsCount / 2) {
 			count *= 2;
@@ -202,20 +218,47 @@ function CreateSphere() {
 		}
 	}
 
-	for (let index: number = 0; index < vertices.length - 1; index++) {
-		indices.push(index, index + 1, index + 2);
+	count = 2;
+
+	let index1 = 0;
+	let index2 = 0;
+	var bounds = 0;
+	for (let y: number = 1; y < parallelsCount / 2; y += 1) {
+		index1 = bounds;
+		bounds += count;
+		index2 += count;		
+		for (; index1 < bounds - 1; index1++) {
+			indices.push(index1);
+			indices.push(index2);
+			indices.push(index2 + 1);
+
+			indices.push(index1);
+			indices.push(index1 + 1);
+			indices.push(index2 + 1);
+
+			indices.push(index1 + 1);
+			indices.push(index2 + 1);
+			indices.push(index2 + 2);
+
+			indices.push(index1 + 1);
+			indices.push(index2 + 2);
+			indices.push(index2 + 3);
+
+			index2 += 3;
+		}
+		count *= 2;
 	}
 
 	const vertexNormals = [
 
 	];
 
-	InitGL(vertices, colors, indices);
+	InitGL(vertices, colorsBuffer, indices);
 
 	gl.enable(gl.DEPTH_TEST);
 	gl.depthFunc(gl.LEQUAL);
 
-	gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
 	mov_matrix[14] = -zoom;
 }
