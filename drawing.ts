@@ -30,6 +30,7 @@ function DrawScene() {
 
 	//CreatePlane();
 	InitSimpleShape();
+	CreateSphere();
 
 	requestAnimationFrame(DrawScene);
 }
@@ -53,23 +54,23 @@ function InitGL(vertices: number[], colors: number[], indices: number[]) {
 
 	/*=================== Shaders =========================*/
 
-	var vertCode = 'attribute vec3 position;' +
-		'uniform mat4 Pmatrix;' +
-		'uniform mat4 Vmatrix;' +
-		'uniform mat4 Mmatrix;' +
-		'attribute vec3 color;' + //the color of the point
-		'varying vec3 vColor;' +
+	var vertCode = `attribute vec3 position;
+		uniform mat4 Pmatrix;
+		uniform mat4 Vmatrix;
+		uniform mat4 Mmatrix;
+		attribute vec3 color;
+		varying vec3 vColor;
 
-		'void main(void) { ' +//pre-built function
-		'gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);' +
-		'vColor = color;' +
-		'}';
+		void main(void) {
+		gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);
+		vColor = color;
+		}`;
 
-	var fragCode = 'precision mediump float;' +
-		'varying vec3 vColor;' +
-		'void main(void) {' +
-		'gl_FragColor = vec4(vColor, 1.);' +
-		'}';
+	var fragCode = `precision mediump float;
+		varying vec3 vColor;
+		void main(void) {
+		gl_FragColor = vec4(vColor, 1.);
+		}`;
 
 	var vertShader = gl.createShader(gl.VERTEX_SHADER);
 	gl.shaderSource(vertShader, vertCode);
@@ -166,6 +167,48 @@ function CreatePlane() {
 	for (let index = 0; index < 2; index++) {
 		CreatePlaneSegment(-index * 2, Math.PI / 2);
 	}
+}
+
+function CreateSphere() {
+	mov_matrix[14] = -zoom;
+
+	let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
+
+	var vertices = [
+	];
+
+	var colors = [
+	];
+
+	var indices = [
+	];
+
+	const step = 0.01;
+	for (let y: number = -1; y <= 1; y += step) {
+		var xStart = -Math.sqrt(1 - Math.pow(y, 2));
+		var radius = -xStart;
+		for (let x: number = xStart; x <= -xStart; x += step) {
+			var z = Math.sin(Math.acos(x / radius)) * radius;
+			vertices.push(x, y, z);
+		}
+	}
+
+	for (let index: number = 0; index < vertices.length - 1; index++) {
+		indices.push(index, index + 1, index + 2);
+	}
+
+	const vertexNormals = [
+
+	];
+
+	InitGL(vertices, colors, indices);
+
+	gl.enable(gl.DEPTH_TEST);
+	gl.depthFunc(gl.LEQUAL);
+
+	gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+	mov_matrix[14] = -zoom;
 }
 
 function InitSimpleShape() {
@@ -295,7 +338,7 @@ function InitSimpleShape() {
 	gl.enable(gl.DEPTH_TEST);
 	gl.depthFunc(gl.LEQUAL);
 
-	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+	//gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
 	if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
 		currentAngleX += deltaX;

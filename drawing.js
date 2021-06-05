@@ -21,6 +21,7 @@ function DrawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     //CreatePlane();
     InitSimpleShape();
+    CreateSphere();
     requestAnimationFrame(DrawScene);
 }
 function InitGL(vertices, colors, indices) {
@@ -37,21 +38,8 @@ function InitGL(vertices, colors, indices) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
     /*=================== Shaders =========================*/
-    var vertCode = 'attribute vec3 position;' +
-        'uniform mat4 Pmatrix;' +
-        'uniform mat4 Vmatrix;' +
-        'uniform mat4 Mmatrix;' +
-        'attribute vec3 color;' + //the color of the point
-        'varying vec3 vColor;' +
-        'void main(void) { ' + //pre-built function
-        'gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);' +
-        'vColor = color;' +
-        '}';
-    var fragCode = 'precision mediump float;' +
-        'varying vec3 vColor;' +
-        'void main(void) {' +
-        'gl_FragColor = vec4(vColor, 1.);' +
-        '}';
+    var vertCode = "attribute vec3 position;\n\t\tuniform mat4 Pmatrix;\n\t\tuniform mat4 Vmatrix;\n\t\tuniform mat4 Mmatrix;\n\t\tattribute vec3 color;\n\t\tvarying vec3 vColor;\n\n\t\tvoid main(void) {\n\t\tgl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);\n\t\tvColor = color;\n\t\t}";
+    var fragCode = "precision mediump float;\n\t\tvarying vec3 vColor;\n\t\tvoid main(void) {\n\t\tgl_FragColor = vec4(vColor, 1.);\n\t\t}";
     var vertShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertShader, vertCode);
     gl.compileShader(vertShader);
@@ -124,6 +112,31 @@ function CreatePlane() {
     for (var index = 0; index < 2; index++) {
         CreatePlaneSegment(-index * 2, Math.PI / 2);
     }
+}
+function CreateSphere() {
+    mov_matrix[14] = -zoom;
+    var gl = document.getElementById("cnvs").getContext("webgl");
+    var vertices = [];
+    var colors = [];
+    var indices = [];
+    var step = 0.01;
+    for (var y = -1; y <= 1; y += step) {
+        var xStart = -Math.sqrt(1 - Math.pow(y, 2));
+        var radius = -xStart;
+        for (var x = xStart; x <= -xStart; x += step) {
+            var z = Math.sin(Math.acos(x / radius)) * radius;
+            vertices.push(x, y, z);
+        }
+    }
+    for (var index = 0; index < vertices.length - 1; index++) {
+        indices.push(index, index + 1, index + 2);
+    }
+    var vertexNormals = [];
+    InitGL(vertices, colors, indices);
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
+    mov_matrix[14] = -zoom;
 }
 function InitSimpleShape() {
     mov_matrix[14] = -zoom;
@@ -211,7 +224,7 @@ function InitSimpleShape() {
     InitGL(vertices, colors, indices);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
-    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+    //gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
     if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
         currentAngleX += deltaX;
         rotateY(mov_matrix, deltaX / 180 * Math.PI);
