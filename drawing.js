@@ -134,7 +134,7 @@ function CreateSphere() {
     var vertices = [];
     var colors = [];
     var indices = [];
-    var parallelsCount = 20;
+    var parallelsCount = 30;
     var count = 2;
     for (var y = 1; y < parallelsCount; y += 1) {
         var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);

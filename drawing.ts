@@ -199,7 +199,7 @@ function CreateSphere() {
 	var indices = [
 	];
 
-	const parallelsCount = 20;
+	const parallelsCount = 30;
 	var count = 2;
 	for (let y: number = 1; y < parallelsCount; y += 1) {
 		var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
