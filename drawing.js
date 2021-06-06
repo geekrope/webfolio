@@ -134,14 +134,14 @@ function CreateSphere() {
     var vertices = [];
     var colors = [];
     var indices = [];
-    var parallelsCount = 26;
+    var parallelsCount = 20;
     var count = 2;
     for (var y = 1; y < parallelsCount; y += 1) {
         var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
         var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
         var radius = -xStart;
-        for (var x = -count / 2; x <= count / 2; x += 1) {
-            var absoluteX = x / count * 2 * radius;
+        for (var x = 0; x < count; x += 1) {
+            var absoluteX = (x) / (count - 1) * 2 * radius + xStart;
             var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
             vertices.push(absoluteX, absoluteY, z);
         }
@@ -154,12 +154,12 @@ function CreateSphere() {
     }
     count = 2;
     var index1 = 0;
-    var index2 = 0;
+    var index2 = count;
     var bounds = 0;
     for (var y = 1; y < parallelsCount / 2; y += 1) {
         index1 = bounds;
         bounds += count;
-        index2 += count;
+        index2 = bounds;
         for (; index1 < bounds - 1; index1++) {
             indices.push(index1);
             indices.push(index2);
