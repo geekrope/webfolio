@@ -222,8 +222,8 @@ function CreateSphere() {
 	var indices = [
 	];
 
-	const parallelsCount = 20;
-	var count = 20;
+	const parallelsCount = 30;
+	var count = 30;
 
 	var addColor = () => {
 		for (let index: number = 0; index < colorsBuffer.length; index++) {
@@ -307,7 +307,7 @@ function CreateSphere() {
 	gl.enable(gl.DEPTH_TEST);
 	gl.depthFunc(gl.LEQUAL);
 
-	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
 
 	mov_matrix[14] = -zoom;
 }

@@ -156,8 +156,8 @@ function CreateSphere() {
     var vertices = [];
     var colors = [];
     var indices = [];
-    var parallelsCount = 20;
-    var count = 20;
+    var parallelsCount = 30;
+    var count = 30;
     var addColor = function () {
         for (var index = 0; index < colorsBuffer.length; index++) {
             colors.push(colorsBuffer[index]);
@@ -228,7 +228,7 @@ function CreateSphere() {
     InitGL(vertices, colors, indices);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
-    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
     mov_matrix[14] = -zoom;
 }
 function InitSimpleShape() {
