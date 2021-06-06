@@ -1,26 +1,16 @@
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 var accuracy = 3;
-var zoom = 6;
-var colorsBuffer = [];
+var zoom = 10;
+var colorsBuffer = [
+    1, 1, 0,
+    1, 0, 1,
+    0, 1, 1
+];
 window.onload = function () {
     DrawScene();
     document.getElementById("approve").onclick = function () {
         accuracy = parseInt(document.getElementById("anglesCount").value) / 2;
     };
-    for (var i = 0; i < 24597; i++) {
-        var r = Math.random();
-        var g = Math.random();
-        var b = Math.random();
-        colorsBuffer.push(r);
-        colorsBuffer.push(g);
-        colorsBuffer.push(b);
-        colorsBuffer.push(r);
-        colorsBuffer.push(g);
-        colorsBuffer.push(b);
-        colorsBuffer.push(r);
-        colorsBuffer.push(g);
-        colorsBuffer.push(b);
-    }
 };
 function Circle(angle, r) {
     return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
@@ -34,8 +24,9 @@ function DrawScene() {
     gl.clearDepth(1.0);
     gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    Rotate();
     //CreatePlane();
-    InitSimpleShape();
+    //InitSimpleShape();
     CreateSphere();
     requestAnimationFrame(DrawScene);
 }
@@ -123,8 +114,39 @@ function CreatePlaneSegment(zOffset, rotationAngle) {
     //rotateX(mov_matrix, -rotationAngle);
     mov_matrix[14] = -zoom;
 }
+function Rotate() {
+    if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
+        currentAngleX += deltaX;
+        rotateY(mov_matrix, deltaX / 180 * Math.PI);
+    }
+    else if (deltaX > 0 && currentAngleX + deltaX <= angleX) {
+        currentAngleX += deltaX;
+        rotateY(mov_matrix, deltaX / 180 * Math.PI);
+    }
+    else if (deltaY < 0 && currentAngleY + deltaY >= angleY) {
+        currentAngleY += deltaY;
+        if (currentAngleY < angleY) {
+            deltaY = angleY - currentAngleY - deltaY;
+        }
+        rotateX(mov_matrix, deltaY / 180 * Math.PI);
+    }
+    else if (deltaY > 0 && currentAngleY + deltaY <= angleY) {
+        currentAngleY += deltaY;
+        if (currentAngleY > angleY) {
+            deltaY = angleY - currentAngleY - deltaY;
+        }
+        rotateX(mov_matrix, deltaY / 180 * Math.PI);
+    }
+    else {
+        rotationEnded = true;
+        currentAngleX = angleX;
+        currentAngleY = angleY;
+        deltaX = 0;
+        deltaY = 0;
+    }
+}
 function CreatePlane() {
-    for (var index = 0; index < 2; index++) {
+    for (var index = 0; index < 10; index++) {
         CreatePlaneSegment(-index * 2, Math.PI / 2);
     }
 }
@@ -134,8 +156,13 @@ function CreateSphere() {
     var vertices = [];
     var colors = [];
     var indices = [];
-    var parallelsCount = 30;
-    var count = 100;
+    var parallelsCount = 20;
+    var count = 20;
+    var addColor = function () {
+        for (var index = 0; index < colorsBuffer.length; index++) {
+            colors.push(colorsBuffer[index]);
+        }
+    };
     for (var y = 0; y <= parallelsCount; y += 1) {
         var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
         var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
@@ -147,6 +174,7 @@ function CreateSphere() {
                 z = 0;
             }
             vertices.push(absoluteX, absoluteY, z);
+            addColor();
         }
     }
     for (var y = 0; y <= parallelsCount; y += 1) {
@@ -160,6 +188,7 @@ function CreateSphere() {
                 z = 0;
             }
             vertices.push(absoluteX, absoluteY, -z);
+            addColor();
         }
     }
     var index1 = 0;
@@ -196,7 +225,7 @@ function CreateSphere() {
         }
     }
     var vertexNormals = [];
-    InitGL(vertices, colorsBuffer, indices);
+    InitGL(vertices, colors, indices);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
@@ -288,36 +317,7 @@ function InitSimpleShape() {
     InitGL(vertices, colors, indices);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
-    //gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-    if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
-        currentAngleX += deltaX;
-        rotateY(mov_matrix, deltaX / 180 * Math.PI);
-    }
-    else if (deltaX > 0 && currentAngleX + deltaX <= angleX) {
-        currentAngleX += deltaX;
-        rotateY(mov_matrix, deltaX / 180 * Math.PI);
-    }
-    else if (deltaY < 0 && currentAngleY + deltaY >= angleY) {
-        currentAngleY += deltaY;
-        if (currentAngleY < angleY) {
-            deltaY = angleY - currentAngleY - deltaY;
-        }
-        rotateX(mov_matrix, deltaY / 180 * Math.PI);
-    }
-    else if (deltaY > 0 && currentAngleY + deltaY <= angleY) {
-        currentAngleY += deltaY;
-        if (currentAngleY > angleY) {
-            deltaY = angleY - currentAngleY - deltaY;
-        }
-        rotateX(mov_matrix, deltaY / 180 * Math.PI);
-    }
-    else {
-        rotationEnded = true;
-        currentAngleX = angleX;
-        currentAngleY = angleY;
-        deltaX = 0;
-        deltaY = 0;
-    }
+    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
     mov_matrix[14] = -zoom;
 }
 function rotateZ(m, angle) {
