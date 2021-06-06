@@ -200,34 +200,44 @@ function CreateSphere() {
 	];
 
 	const parallelsCount = 30;
-	var count = 2;
-	for (let y: number = 1; y < parallelsCount; y += 1) {
+	var count = 100;
+
+	for (let y: number = 0; y <= parallelsCount; y += 1) {
 		var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
 		var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
 		var radius = -xStart;
 		for (let x: number = 0; x < count; x += 1) {
 			var absoluteX = (x) / (count - 1) * 2 * radius + xStart;
 			var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
+			if (isNaN(z)) {
+				z = 0;
+			}
 			vertices.push(absoluteX, absoluteY, z);
-		}
-		if (y < parallelsCount / 2) {
-			count *= 2;
-		}
-		else {
-			count /= 2;
 		}
 	}
 
-	count = 2;
+	for (let y: number = 0; y <= parallelsCount; y += 1) {
+		var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
+		var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
+		var radius = -xStart;
+		for (let x: number = 0; x < count; x += 1) {
+			var absoluteX = (x) / (count - 1) * 2 * radius + xStart;
+			var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
+			if (isNaN(z)) {
+				z = 0;
+			}
+			vertices.push(absoluteX, absoluteY, -z);
+		}
+	}
 
 	let index1 = 0;
 	let index2 = count;
 	var bounds = 0;
-	for (let y: number = 1; y < parallelsCount / 2; y += 1) {
+	for (let y: number = 0; y <= parallelsCount; y += 1) {
 		index1 = bounds;
 		bounds += count;
 		index2 = bounds;
-		for (; index1 < bounds - 1; index1++) {
+		for (; index1 < bounds - 1;) {
 			indices.push(index1);
 			indices.push(index2);
 			indices.push(index2 + 1);
@@ -235,18 +245,26 @@ function CreateSphere() {
 			indices.push(index1);
 			indices.push(index1 + 1);
 			indices.push(index2 + 1);
+			index1++;
+			index2++;
+		}
+	}	
 
+	for (let y: number = 0; y <= parallelsCount; y += 1) {
+		index1 = bounds;
+		bounds += count;
+		index2 = bounds;
+		for (; index1 < bounds - 1;) {
+			indices.push(index1);
+			indices.push(index2);
+			indices.push(index2 + 1);
+
+			indices.push(index1);
 			indices.push(index1 + 1);
 			indices.push(index2 + 1);
-			indices.push(index2 + 2);
-
-			indices.push(index1 + 1);
-			indices.push(index2 + 2);
-			indices.push(index2 + 3);
-
-			index2 += 3;
+			index1++;
+			index2++;
 		}
-		count *= 2;
 	}
 
 	const vertexNormals = [
