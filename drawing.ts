@@ -189,7 +189,7 @@ class Shape implements Drawable {
 	}
 }
 
-class Circle extends Shape {
+class Sphere extends Shape {
 	protected mov_matrix: number[];
 	protected vertices: number[];
 	protected indices: number[];
@@ -221,10 +221,10 @@ class Circle extends Shape {
 		super.scaleX(value);
 	}
 	public scaleY(value: number): void {
-		super.scaleX(value);
+		super.scaleY(value);
 	}
 	public scaleZ(value: number): void {
-		super.scaleX(value);
+		super.scaleZ(value);
 	}
 	public CalculateEdges(): void {
 		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
@@ -268,8 +268,8 @@ class Circle extends Shape {
 			var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
 			var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
 			var radius = -xStart;
-			for (let x: number = 0; x < count; x += 1) {
-				var absoluteX = (x) / (count - 1) * 2 * radius + xStart;
+			for (let angleRelativeX: number = 0; angleRelativeX < count; angleRelativeX += 1) {
+				var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
 				var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
 				if (isNaN(z)) {
 					z = 0;
@@ -288,8 +288,8 @@ class Circle extends Shape {
 			var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
 			var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
 			var radius = -xStart;
-			for (let x: number = 0; x < count; x += 1) {
-				var absoluteX = (x) / (count - 1) * 2 * radius + xStart;
+			for (let angleRelativeX: number = 0; angleRelativeX < count; angleRelativeX += 1) {
+				var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
 				var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
 				if (isNaN(z)) {
 					z = 0;
@@ -398,10 +398,10 @@ class RegularPolygon extends Shape {
 		super.scaleX(value);
 	}
 	public scaleY(value: number): void {
-		super.scaleX(value);
+		super.scaleY(value);
 	}
 	public scaleZ(value: number): void {
-		super.scaleX(value);
+		super.scaleZ(value);
 	}
 	public CalculateEdges(): void {
 		let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
@@ -552,7 +552,7 @@ var c3 = [1, 1, 0];
 
 var currentShape: Shape;
 
-var Shapes: Shape[];
+var Shapes: Shape[] = [];
 
 var zoom = 10;
 
@@ -632,8 +632,8 @@ window.onload = () => {
 	document.getElementById("approve").onclick = () => {
 		//accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
 	}
-	window.onresize(new UIEvent("resize"));	
-	currentShape = new RegularPolygon();
+	window.onresize(new UIEvent("resize"));
+	currentShape = new Sphere();
 	Shapes.push(currentShape);
 	DrawScene();
 }

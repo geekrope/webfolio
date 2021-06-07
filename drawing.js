@@ -152,42 +152,42 @@ var Shape = /** @class */ (function () {
     };
     return Shape;
 }());
-var Circle = /** @class */ (function (_super) {
-    __extends(Circle, _super);
-    function Circle() {
+var Sphere = /** @class */ (function (_super) {
+    __extends(Sphere, _super);
+    function Sphere() {
         return _super.call(this) || this;
     }
-    Circle.prototype.InitGL = function (vertices, colors, indices) {
+    Sphere.prototype.InitGL = function (vertices, colors, indices) {
         _super.prototype.InitGL.call(this, vertices, colors, indices);
     };
-    Circle.prototype.rotateZ = function (angle) {
+    Sphere.prototype.rotateZ = function (angle) {
         _super.prototype.rotateZ.call(this, angle);
     };
-    Circle.prototype.rotateX = function (angle) {
+    Sphere.prototype.rotateX = function (angle) {
         _super.prototype.rotateX.call(this, angle);
     };
-    Circle.prototype.rotateY = function (angle) {
+    Sphere.prototype.rotateY = function (angle) {
         _super.prototype.rotateY.call(this, angle);
     };
-    Circle.prototype.translateX = function (offset) {
+    Sphere.prototype.translateX = function (offset) {
         _super.prototype.translateX.call(this, offset);
     };
-    Circle.prototype.translateY = function (offset) {
+    Sphere.prototype.translateY = function (offset) {
         _super.prototype.translateY.call(this, offset);
     };
-    Circle.prototype.translateZ = function (offset) {
+    Sphere.prototype.translateZ = function (offset) {
         _super.prototype.translateZ.call(this, offset);
     };
-    Circle.prototype.scaleX = function (value) {
+    Sphere.prototype.scaleX = function (value) {
         _super.prototype.scaleX.call(this, value);
     };
-    Circle.prototype.scaleY = function (value) {
-        _super.prototype.scaleX.call(this, value);
+    Sphere.prototype.scaleY = function (value) {
+        _super.prototype.scaleY.call(this, value);
     };
-    Circle.prototype.scaleZ = function (value) {
-        _super.prototype.scaleX.call(this, value);
+    Sphere.prototype.scaleZ = function (value) {
+        _super.prototype.scaleZ.call(this, value);
     };
-    Circle.prototype.CalculateEdges = function () {
+    Sphere.prototype.CalculateEdges = function () {
         var gl = document.getElementById(id).getContext("webgl");
         var vertices = [];
         var colors = [];
@@ -216,8 +216,8 @@ var Circle = /** @class */ (function (_super) {
             var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
             var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
             var radius = -xStart;
-            for (var x = 0; x < count; x += 1) {
-                var absoluteX = (x) / (count - 1) * 2 * radius + xStart;
+            for (var angleRelativeX = 0; angleRelativeX < count; angleRelativeX += 1) {
+                var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
                 var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
                 if (isNaN(z)) {
                     z = 0;
@@ -235,8 +235,8 @@ var Circle = /** @class */ (function (_super) {
             var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
             var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
             var radius = -xStart;
-            for (var x = 0; x < count; x += 1) {
-                var absoluteX = (x) / (count - 1) * 2 * radius + xStart;
+            for (var angleRelativeX = 0; angleRelativeX < count; angleRelativeX += 1) {
+                var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
                 var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
                 if (isNaN(z)) {
                     z = 0;
@@ -289,12 +289,12 @@ var Circle = /** @class */ (function (_super) {
         this.Colors = colors;
         this.mov_matrix[14] = -zoom;
     };
-    Circle.prototype.Draw = function () {
+    Sphere.prototype.Draw = function () {
         var gl = document.getElementById(id).getContext("webgl");
         this.InitGL(this.vertices, this.Colors, this.indices);
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     };
-    return Circle;
+    return Sphere;
 }(Shape));
 var RegularPolygon = /** @class */ (function (_super) {
     __extends(RegularPolygon, _super);
@@ -332,10 +332,10 @@ var RegularPolygon = /** @class */ (function (_super) {
         _super.prototype.scaleX.call(this, value);
     };
     RegularPolygon.prototype.scaleY = function (value) {
-        _super.prototype.scaleX.call(this, value);
+        _super.prototype.scaleY.call(this, value);
     };
     RegularPolygon.prototype.scaleZ = function (value) {
-        _super.prototype.scaleX.call(this, value);
+        _super.prototype.scaleZ.call(this, value);
     };
     RegularPolygon.prototype.CalculateEdges = function () {
         var gl = document.getElementById("cnvs").getContext("webgl");
@@ -437,7 +437,7 @@ var c1 = [0, 0, 0];
 var c2 = [1, 0, 0];
 var c3 = [1, 1, 0];
 var currentShape;
-var Shapes;
+var Shapes = [];
 var zoom = 10;
 var id = "cnvs";
 var EasingType;
@@ -509,7 +509,7 @@ window.onload = function () {
         //accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
     };
     window.onresize(new UIEvent("resize"));
-    currentShape = new RegularPolygon();
+    currentShape = new Sphere();
     Shapes.push(currentShape);
     DrawScene();
 };
