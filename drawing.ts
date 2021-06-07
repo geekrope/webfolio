@@ -11,7 +11,6 @@ class Shape implements Drawable {
 		this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 		this.Visible = true;
 		this.Opacity = 1;
-		this.CalculateEdges();
 	}
 	public Visible: boolean;
 	public Opacity: number;
@@ -195,6 +194,7 @@ class Sphere extends Shape {
 	protected indices: number[];
 	public Visible: boolean;
 	public Opacity: number;
+	public Quality: number;
 	public Colors: number[];
 	public InitGL(vertices: number[], colors: number[], indices: number[]) {
 		super.InitGL(vertices, colors, indices);
@@ -238,8 +238,8 @@ class Sphere extends Shape {
 		var indices = [
 		];
 
-		const parallelsCount = 50;
-		var count = 100;
+		const parallelsCount = this.Quality;
+		var count = this.Quality;
 
 		var yellow = [
 			1, 1, 0,
@@ -264,18 +264,25 @@ class Sphere extends Shape {
 			}
 		};
 
-		for (let y: number = 0; y <= parallelsCount; y += 1) {
-			var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
-			var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
-			var radius = -xStart;
-			for (let angleRelativeX: number = 0; angleRelativeX < count; angleRelativeX += 1) {
-				var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
-				var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
-				if (isNaN(z)) {
-					z = 0;
+		var calcHalf = (zSign: number) => {
+			for (let angleRelativeY: number = 0; angleRelativeY < parallelsCount; angleRelativeY += 1) {
+				var absoluteY = Math.sin((angleRelativeY / (parallelsCount-1) * Math.PI) + Math.PI / 2);
+				var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
+				var radius = -xStart;
+				for (let angleRelativeX: number = 0; angleRelativeX < count; angleRelativeX += 1) {
+					var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
+					var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
+					if (isNaN(z)) {
+						z = 0;
+					}
+					vertices.push(absoluteX, absoluteY, z * zSign);					
 				}
-				vertices.push(absoluteX, absoluteY, z);
-				if (y < parallelsCount / 2) {
+			}
+		}		
+
+		for (let i = 0; i < parallelsCount; i++) {
+			for (let i2 = 0; i2 < count; i2++) {
+				if (i < (parallelsCount - 1) / 2) {
 					addColor(yellow);
 				}
 				else {
@@ -284,25 +291,19 @@ class Sphere extends Shape {
 			}
 		}
 
-		for (let y: number = 0; y <= parallelsCount; y += 1) {
-			var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
-			var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
-			var radius = -xStart;
-			for (let angleRelativeX: number = 0; angleRelativeX < count; angleRelativeX += 1) {
-				var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
-				var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
-				if (isNaN(z)) {
-					z = 0;
-				}
-				vertices.push(absoluteX, absoluteY, -z);
-				if (y < parallelsCount / 2) {
+		for (let i = 0; i < parallelsCount; i++) {
+			for (let i2 = 0; i2 < count; i2++) {
+				if (i < (parallelsCount-1) / 2) {
 					addColor(red);
 				}
 				else {
 					addColor(pink);
 				}
-			}
+			}			
 		}
+
+		calcHalf(1);
+		calcHalf(-1);
 
 		let index1 = 0;
 		let index2 = count;
@@ -353,6 +354,8 @@ class Sphere extends Shape {
 	}
 	public constructor() {
 		super();
+		this.Quality = 50;
+		this.CalculateEdges();
 	}
 	public Draw(): void {
 		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");

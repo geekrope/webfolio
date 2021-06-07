@@ -18,7 +18,6 @@ var Shape = /** @class */ (function () {
         this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         this.Visible = true;
         this.Opacity = 1;
-        this.CalculateEdges();
     }
     Shape.prototype.InitGL = function (vertices, colors, indices) {
         var gl = document.getElementById("cnvs").getContext("webgl");
@@ -155,7 +154,10 @@ var Shape = /** @class */ (function () {
 var Sphere = /** @class */ (function (_super) {
     __extends(Sphere, _super);
     function Sphere() {
-        return _super.call(this) || this;
+        var _this = _super.call(this) || this;
+        _this.Quality = 50;
+        _this.CalculateEdges();
+        return _this;
     }
     Sphere.prototype.InitGL = function (vertices, colors, indices) {
         _super.prototype.InitGL.call(this, vertices, colors, indices);
@@ -192,8 +194,8 @@ var Sphere = /** @class */ (function (_super) {
         var vertices = [];
         var colors = [];
         var indices = [];
-        var parallelsCount = 50;
-        var count = 100;
+        var parallelsCount = this.Quality;
+        var count = this.Quality;
         var yellow = [
             1, 1, 0,
         ];
@@ -212,18 +214,24 @@ var Sphere = /** @class */ (function (_super) {
                 colors.push(buffer[index]);
             }
         };
-        for (var y = 0; y <= parallelsCount; y += 1) {
-            var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
-            var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
-            var radius = -xStart;
-            for (var angleRelativeX = 0; angleRelativeX < count; angleRelativeX += 1) {
-                var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
-                var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
-                if (isNaN(z)) {
-                    z = 0;
+        var calcHalf = function (zSign) {
+            for (var angleRelativeY = 0; angleRelativeY < parallelsCount; angleRelativeY += 1) {
+                var absoluteY = Math.sin((angleRelativeY / (parallelsCount - 1) * Math.PI) + Math.PI / 2);
+                var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
+                var radius = -xStart;
+                for (var angleRelativeX = 0; angleRelativeX < count; angleRelativeX += 1) {
+                    var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
+                    var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
+                    if (isNaN(z)) {
+                        z = 0;
+                    }
+                    vertices.push(absoluteX, absoluteY, z * zSign);
                 }
-                vertices.push(absoluteX, absoluteY, z);
-                if (y < parallelsCount / 2) {
+            }
+        };
+        for (var i = 0; i < parallelsCount; i++) {
+            for (var i2 = 0; i2 < count; i2++) {
+                if (i < (parallelsCount - 1) / 2) {
                     addColor(yellow);
                 }
                 else {
@@ -231,18 +239,9 @@ var Sphere = /** @class */ (function (_super) {
                 }
             }
         }
-        for (var y = 0; y <= parallelsCount; y += 1) {
-            var absoluteY = (y - parallelsCount / 2) / (parallelsCount / 2);
-            var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
-            var radius = -xStart;
-            for (var angleRelativeX = 0; angleRelativeX < count; angleRelativeX += 1) {
-                var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
-                var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
-                if (isNaN(z)) {
-                    z = 0;
-                }
-                vertices.push(absoluteX, absoluteY, -z);
-                if (y < parallelsCount / 2) {
+        for (var i = 0; i < parallelsCount; i++) {
+            for (var i2 = 0; i2 < count; i2++) {
+                if (i < (parallelsCount - 1) / 2) {
                     addColor(red);
                 }
                 else {
@@ -250,6 +249,8 @@ var Sphere = /** @class */ (function (_super) {
                 }
             }
         }
+        calcHalf(1);
+        calcHalf(-1);
         var index1 = 0;
         var index2 = count;
         var bounds = 0;
