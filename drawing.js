@@ -14,8 +14,8 @@ window.onload = function () {
 };
 var EasingType;
 (function (EasingType) {
-    EasingType[EasingType["bezier"] = 0] = "bezier";
-    EasingType[EasingType["arc"] = 1] = "arc";
+    EasingType[EasingType["arc"] = 0] = "arc";
+    EasingType[EasingType["linear"] = 1] = "linear";
 })(EasingType || (EasingType = {}));
 // 0<=t<=1
 // 1>=return value>=0
@@ -25,6 +25,10 @@ function EasingFunction(t, type, concomitantParam) {
         var y = Math.sin(Math.acos(x));
         return y;
     }
+    else if (type == EasingType.linear) {
+        return t;
+    }
+    return 0;
 }
 function Circle(angle, r) {
     return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
@@ -131,46 +135,27 @@ function CreatePlaneSegment(zOffset, rotationAngle) {
 function Rotate() {
     var param = [];
     var easing = EasingType.arc;
-    if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
-        rotateY(mov_matrix, -currentAngleX / 180 * Math.PI * EasingFunction(rotateT, easing, param));
-        currentAngleX += deltaX;
-        rotateT += defaultDelta / 90;
-        rotateY(mov_matrix, currentAngleX / 180 * Math.PI * EasingFunction(rotateT, easing, param));
-    }
-    else if (deltaX > 0 && currentAngleX + deltaX <= angleX) {
-        rotateY(mov_matrix, -currentAngleX / 180 * Math.PI * EasingFunction(rotateT, easing, param));
-        currentAngleX += deltaX;
-        rotateT += defaultDelta / 90;
-        rotateY(mov_matrix, currentAngleX / 180 * Math.PI * EasingFunction(rotateT, easing, param));
-    }
-    else if (deltaY < 0 && currentAngleY + deltaY >= angleY) {
-        rotateX(mov_matrix, -currentAngleY / 180 * Math.PI * EasingFunction(rotateT, easing, param));
-        currentAngleY += deltaY;
-        rotateT += defaultDelta / 90;
-        if (currentAngleY < angleY) {
-            deltaY = angleY - currentAngleY - deltaY;
+    if (rotateT < 90 && (deltaY != 0 || deltaX != 0)) {
+        if (deltaY != 0) {
+            rotateX(mov_matrix, -deltaY / Math.abs(deltaY) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
         }
-        rotateX(mov_matrix, currentAngleY / 180 * Math.PI * EasingFunction(rotateT, easing, param));
-    }
-    else if (deltaY > 0 && currentAngleY + deltaY <= angleY) {
-        rotateX(mov_matrix, -currentAngleY / 180 * Math.PI * EasingFunction(rotateT, easing, param));
-        currentAngleY += deltaY;
-        rotateT += defaultDelta / 90;
-        if (currentAngleY > angleY) {
-            deltaY = angleY - currentAngleY - deltaY;
+        if (deltaX != 0) {
+            rotateY(mov_matrix, -deltaX / Math.abs(deltaX) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
         }
-        rotateX(mov_matrix, currentAngleY / 180 * Math.PI * EasingFunction(rotateT, easing, param));
+        rotateT += defaultDelta;
+        if (deltaY != 0) {
+            rotateX(mov_matrix, deltaY / Math.abs(deltaY) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
+        }
+        if (deltaX != 0) {
+            rotateY(mov_matrix, deltaX / Math.abs(deltaX) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
+        }
     }
     else {
         rotationEnded = true;
-        currentAngleX = angleX;
-        currentAngleY = angleY;
         deltaX = 0;
         deltaY = 0;
         rotateT = 0;
     }
-    console.log(currentAngleX);
-    console.log(currentAngleY);
 }
 function CreatePlane() {
     for (var index = 0; index < 10; index++) {
@@ -398,10 +383,6 @@ function scaleY(m, value) {
 function scaleZ(m, value) {
     m[10] *= value;
 }
-var currentAngleX = 0;
-var angleX = 0;
-var currentAngleY = 0;
-var angleY = 0;
 var defaultDelta = 3;
 var deltaX = 0;
 var deltaY = 0;
@@ -419,7 +400,11 @@ document.onmousedown = function (ev) {
     mouseDown.y = ev.pageY;
 };
 document.onwheel = function (ev) {
-    zoom += ev.deltaY / 1200;
+    //zoom += ev.deltaY / 1200;
+    var value = ev.deltaY / Math.abs(ev.deltaY) * 0.1 + 1;
+    scaleX(mov_matrix, value);
+    scaleY(mov_matrix, value);
+    scaleZ(mov_matrix, value);
 };
 document.onmouseup = function (ev) {
     if (!rotationEnded) {
@@ -430,24 +415,20 @@ document.onmouseup = function (ev) {
     }
     if (Math.abs(ev.pageX - mouseDown.x) > Math.abs(ev.pageY - mouseDown.y)) {
         if (ev.pageX - mouseDown.x < 0) {
-            angleX -= 90;
             deltaX = -defaultDelta;
             rotationEnded = false;
         }
         else {
-            angleX += 90;
             deltaX = defaultDelta;
             rotationEnded = false;
         }
     }
     else {
         if (ev.pageY - mouseDown.y < 0) {
-            angleY -= 90;
             deltaY = -defaultDelta;
             rotationEnded = false;
         }
         else {
-            angleY += 90;
             deltaY = defaultDelta;
             rotationEnded = false;
         }
