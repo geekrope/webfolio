@@ -11,6 +11,7 @@ var EasingType;
 (function (EasingType) {
     EasingType[EasingType["arc"] = 0] = "arc";
     EasingType[EasingType["linear"] = 1] = "linear";
+    EasingType[EasingType["quad"] = 2] = "quad";
 })(EasingType || (EasingType = {}));
 function EasingFunction(t, type, concomitantParam) {
     if (type == EasingType.arc) {
@@ -20,6 +21,9 @@ function EasingFunction(t, type, concomitantParam) {
     }
     else if (type == EasingType.linear) {
         return t;
+    }
+    else if (type == EasingType.quad) {
+        return t * t;
     }
     return 0;
 }
@@ -127,7 +131,7 @@ function CreatePlaneSegment(zOffset, rotationAngle) {
 }
 function Rotate() {
     var param = [];
-    var easing = EasingType.arc;
+    var easing = EasingType.quad;
     if (rotateT < 90 && (deltaY != 0 || deltaX != 0)) {
         if (deltaY != 0) {
             rotateX(mov_matrix, -deltaY / Math.abs(deltaY) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
@@ -161,18 +165,24 @@ function CreateSphere() {
     var vertices = [];
     var colors = [];
     var indices = [];
-    var parallelsCount = 100;
-    var count = 200;
-    var colorsBuffer = [
+    var parallelsCount = 50;
+    var count = 100;
+    var yellow = [
         1, 1, 0,
-        0, 0, 0,
     ];
-    var addColor = function () {
-        for (var i = 0; i < 3; i++) {
-            var index = 0;
-            for (; index < colorsBuffer.length; index++) {
-                colors.push(colorsBuffer[index]);
-            }
+    var green = [
+        0, 1, 0,
+    ];
+    var red = [
+        1, 0, 0,
+    ];
+    var pink = [
+        1, 0, 1,
+    ];
+    var addColor = function (buffer) {
+        var index = 0;
+        for (; index < buffer.length; index++) {
+            colors.push(buffer[index]);
         }
     };
     for (var y = 0; y <= parallelsCount; y += 1) {
@@ -186,7 +196,12 @@ function CreateSphere() {
                 z = 0;
             }
             vertices.push(absoluteX, absoluteY, z);
-            addColor();
+            if (y < parallelsCount / 2) {
+                addColor(yellow);
+            }
+            else {
+                addColor(green);
+            }
         }
     }
     for (var y = 0; y <= parallelsCount; y += 1) {
@@ -200,7 +215,12 @@ function CreateSphere() {
                 z = 0;
             }
             vertices.push(absoluteX, absoluteY, -z);
-            addColor();
+            if (y < parallelsCount / 2) {
+                addColor(red);
+            }
+            else {
+                addColor(pink);
+            }
         }
     }
     var index1 = 0;
