@@ -17,6 +17,20 @@ window.onload = () => {
 	}
 }
 
+enum EasingType {
+	bezier, arc
+}
+
+// 0<=t<=1
+// 1>=return value>=0
+function EasingFunction(t: number, type: EasingType, concomitantParam: any): number {
+	if (type == EasingType.arc) {
+		var x = -(1 - t);
+		var y = Math.sin(Math.acos(x));		
+		return y;
+	}
+}
+
 function Circle(angle: number, r: number) {
 	return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
 }
@@ -37,7 +51,7 @@ function DrawScene() {
 	Rotate();
 	//CreatePlane();
 	//InitSimpleShape();
-	CreateSphere();	
+	CreateSphere();
 
 	requestAnimationFrame(DrawScene);
 }
@@ -171,27 +185,37 @@ function CreatePlaneSegment(zOffset: number, rotationAngle: number) {
 }
 
 function Rotate() {
+	var param = [];
+	var easing = EasingType.arc;
 	if (deltaX < 0 && currentAngleX + deltaX >= angleX) {
+		rotateY(mov_matrix, -currentAngleX / 180 * Math.PI * EasingFunction(rotateT, easing, param));
 		currentAngleX += deltaX;
-		rotateY(mov_matrix, deltaX / 180 * Math.PI);
+		rotateT += defaultDelta / 90;
+		rotateY(mov_matrix, currentAngleX / 180 * Math.PI * EasingFunction(rotateT, easing, param));
 	}
 	else if (deltaX > 0 && currentAngleX + deltaX <= angleX) {
+		rotateY(mov_matrix, -currentAngleX / 180 * Math.PI * EasingFunction(rotateT, easing, param));
 		currentAngleX += deltaX;
-		rotateY(mov_matrix, deltaX / 180 * Math.PI);
+		rotateT += defaultDelta / 90;
+		rotateY(mov_matrix, currentAngleX / 180 * Math.PI * EasingFunction(rotateT, easing, param));
 	}
 	else if (deltaY < 0 && currentAngleY + deltaY >= angleY) {
+		rotateX(mov_matrix, -currentAngleY / 180 * Math.PI * EasingFunction(rotateT, easing, param));
 		currentAngleY += deltaY;
+		rotateT += defaultDelta / 90;
 		if (currentAngleY < angleY) {
 			deltaY = angleY - currentAngleY - deltaY;
 		}
-		rotateX(mov_matrix, deltaY / 180 * Math.PI);
+		rotateX(mov_matrix, currentAngleY / 180 * Math.PI * EasingFunction(rotateT, easing, param));
 	}
 	else if (deltaY > 0 && currentAngleY + deltaY <= angleY) {
+		rotateX(mov_matrix, -currentAngleY / 180 * Math.PI * EasingFunction(rotateT, easing, param));
 		currentAngleY += deltaY;
+		rotateT += defaultDelta / 90;
 		if (currentAngleY > angleY) {
 			deltaY = angleY - currentAngleY - deltaY;
 		}
-		rotateX(mov_matrix, deltaY / 180 * Math.PI);
+		rotateX(mov_matrix, currentAngleY / 180 * Math.PI * EasingFunction(rotateT, easing, param));
 	}
 	else {
 		rotationEnded = true;
@@ -199,7 +223,11 @@ function Rotate() {
 		currentAngleY = angleY;
 		deltaX = 0;
 		deltaY = 0;
+		rotateT = 0;
 	}
+
+	console.log(currentAngleX);
+	console.log(currentAngleY);
 }
 
 function CreatePlane() {
@@ -439,7 +467,7 @@ function InitSimpleShape() {
 	gl.enable(gl.DEPTH_TEST);
 	gl.depthFunc(gl.LEQUAL);
 
-	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);	
+	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
 	mov_matrix[14] = -zoom;
 }
@@ -517,6 +545,7 @@ var angleY = 0;
 const defaultDelta = 3;
 var deltaX = 0;
 var deltaY = 0;
+var rotateT = 0;
 var rotationEnded = true;
 var scaled = false;
 
@@ -596,7 +625,6 @@ function inverseMat4(matrix: number[]): number[] {
 	];
 	return newMatrix;
 }
-
 
 function loadTexture(gl, url) {
 	const texture = gl.createTexture();
