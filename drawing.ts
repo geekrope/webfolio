@@ -4,12 +4,6 @@ var accuracy = 3;
 
 var zoom = 10;
 
-var colorsBuffer = [
-	1, 1, 0,
-	1, 0, 1,
-	0, 1, 1
-];
-
 window.onload = () => {
 	DrawScene();
 	document.getElementById("approve").onclick = () => {
@@ -21,8 +15,6 @@ enum EasingType {
 	arc, linear
 }
 
-// 0<=t<=1
-// 1>=return value>=0
 function EasingFunction(t: number, type: EasingType, concomitantParam: number[]): number {
 	if (type == EasingType.arc) {
 		var x = -(1 - t);
@@ -234,12 +226,20 @@ function CreateSphere() {
 	var indices = [
 	];
 
-	const parallelsCount = 30;
-	var count = 30;
+	const parallelsCount = 100;
+	var count = 200;
+
+	var colorsBuffer = [
+		1, 1, 0,
+		0, 0, 0,
+	];	
 
 	var addColor = () => {
-		for (let index: number = 0; index < colorsBuffer.length; index++) {
-			colors.push(colorsBuffer[index]);
+		for (let i = 0; i < 3; i++) {
+			let index: number = 0;			
+			for (; index < colorsBuffer.length; index++) {
+				colors.push(colorsBuffer[index]);
+			}			
 		}
 	};
 
@@ -248,7 +248,7 @@ function CreateSphere() {
 		var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
 		var radius = -xStart;
 		for (let x: number = 0; x < count; x += 1) {
-			var absoluteX = (x) / (count - 1) * 2 * radius + xStart;
+			var absoluteX = (x) / (count - 1) * 2 * radius + xStart;			
 			var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
 			if (isNaN(z)) {
 				z = 0;
@@ -319,7 +319,7 @@ function CreateSphere() {
 	gl.enable(gl.DEPTH_TEST);
 	gl.depthFunc(gl.LEQUAL);
 
-	gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
+	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
 	mov_matrix[14] = -zoom;
 }
@@ -535,10 +535,6 @@ var rotateT = 0;
 var rotationEnded = true;
 var scaled = false;
 
-document.ondblclick = () => {
-
-}
-
 var mouseDown = new DOMPoint();
 
 document.onmousedown = (ev) => {
@@ -649,4 +645,10 @@ function loadTexture(gl, url) {
 
 function isPowerOf2(value) {
 	return (value & (value - 1)) == 0;
+}
+
+window.onresize = (ev) => {
+	var cnvs = document.getElementById("cnvs");
+	cnvs.setAttribute("width", (innerWidth).toString());
+	cnvs.setAttribute("height", (innerHeight).toString());
 }

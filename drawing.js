@@ -1,11 +1,6 @@
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 var accuracy = 3;
 var zoom = 10;
-var colorsBuffer = [
-    1, 1, 0,
-    1, 0, 1,
-    0, 1, 1
-];
 window.onload = function () {
     DrawScene();
     document.getElementById("approve").onclick = function () {
@@ -17,8 +12,6 @@ var EasingType;
     EasingType[EasingType["arc"] = 0] = "arc";
     EasingType[EasingType["linear"] = 1] = "linear";
 })(EasingType || (EasingType = {}));
-// 0<=t<=1
-// 1>=return value>=0
 function EasingFunction(t, type, concomitantParam) {
     if (type == EasingType.arc) {
         var x = -(1 - t);
@@ -168,11 +161,18 @@ function CreateSphere() {
     var vertices = [];
     var colors = [];
     var indices = [];
-    var parallelsCount = 30;
-    var count = 30;
+    var parallelsCount = 100;
+    var count = 200;
+    var colorsBuffer = [
+        1, 1, 0,
+        0, 0, 0,
+    ];
     var addColor = function () {
-        for (var index = 0; index < colorsBuffer.length; index++) {
-            colors.push(colorsBuffer[index]);
+        for (var i = 0; i < 3; i++) {
+            var index = 0;
+            for (; index < colorsBuffer.length; index++) {
+                colors.push(colorsBuffer[index]);
+            }
         }
     };
     for (var y = 0; y <= parallelsCount; y += 1) {
@@ -240,7 +240,7 @@ function CreateSphere() {
     InitGL(vertices, colors, indices);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
-    gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
     mov_matrix[14] = -zoom;
 }
 function InitSimpleShape() {
@@ -395,8 +395,6 @@ var deltaY = 0;
 var rotateT = 0;
 var rotationEnded = true;
 var scaled = false;
-document.ondblclick = function () {
-};
 var mouseDown = new DOMPoint();
 document.onmousedown = function (ev) {
     if (!rotationEnded) {
@@ -495,4 +493,9 @@ function loadTexture(gl, url) {
 function isPowerOf2(value) {
     return (value & (value - 1)) == 0;
 }
+window.onresize = function (ev) {
+    var cnvs = document.getElementById("cnvs");
+    cnvs.setAttribute("width", (innerWidth).toString());
+    cnvs.setAttribute("height", (innerHeight).toString());
+};
 //# sourceMappingURL=drawing.js.map
