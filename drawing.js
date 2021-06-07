@@ -376,12 +376,18 @@ function translateZ(m, offset) {
 }
 function scaleX(m, value) {
     m[0] *= value;
+    m[1] *= value;
+    m[2] *= value;
 }
 function scaleY(m, value) {
+    m[4] *= value;
     m[5] *= value;
+    m[6] *= value;
 }
 function scaleZ(m, value) {
     m[10] *= value;
+    m[9] *= value;
+    m[8] *= value;
 }
 var defaultDelta = 3;
 var deltaX = 0;
