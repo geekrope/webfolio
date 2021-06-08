@@ -586,7 +586,7 @@ class ParticlesGenerator extends Shape {
 	protected started: boolean;
 	protected finished: number;
 	protected generated: number;
-	protected GenerateParticle() {
+	protected GenerateParticle(): Particle {
 		var angleX = Math.random() * Math.PI;
 		var angleY = Math.random() * Math.PI;
 		var angleZ = Math.random() * Math.PI;
@@ -597,7 +597,7 @@ class ParticlesGenerator extends Shape {
 
 		var scale = Math.random() * (this.Properties.maxSize - this.Properties.minSize) + this.Properties.minSize;
 		//180deg
-		this.particles.push(new Particle(angleX, angleY, angleZ, 0, scale, rotationX, rotationY, rotationZ));
+		return new Particle(angleX, angleY, angleZ, 0, scale, rotationX, rotationY, rotationZ);
 	}
 	public get Type(): ParticleType {
 		return this._type;
@@ -729,7 +729,7 @@ class ParticlesGenerator extends Shape {
 	}
 	public Start(): void {
 		if (this.Properties.count != 0) {
-			this.GenerateParticle();
+			this.particles.push(this.GenerateParticle());
 		}
 		this.started = true;
 	}
@@ -781,23 +781,13 @@ class ParticlesGenerator extends Shape {
 
 				this.mov_matrix = movMatrix;
 
-				console.log(this.mov_matrix);
-
-				if (this.particles[index].distance >= this.Properties.distance) {
+				if (this.particles[index].distance >= this.Properties.distance && this.generated < this.Properties.count) {
 					this.finished++;
-					this.particles.splice(index, 1);
-					index--;
+					this.generated++;
+					this.particles[index] = this.GenerateParticle();
 					continue;
 				}
-
 				this.particles[index].distance += this.Properties.speed;
-			}
-			if (this.generated < this.Properties.count) {
-				this.GenerateParticle();
-				this.generated++;
-			}
-			else {
-				console.log(">>>");
 			}
 			if (this.finished >= this.Properties.count) {
 				this.particles = [];
