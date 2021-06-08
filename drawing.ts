@@ -186,6 +186,9 @@ class Shape implements Drawable {
 		m[9] *= value;
 		m[8] *= value;
 	}
+	public clearMatrix(): void {
+		this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+	}
 }
 
 class Sphere extends Shape {
@@ -266,7 +269,7 @@ class Sphere extends Shape {
 
 		var calcHalf = (zSign: number) => {
 			for (let angleRelativeY: number = 0; angleRelativeY < parallelsCount; angleRelativeY += 1) {
-				var absoluteY = Math.sin((angleRelativeY / (parallelsCount-1) * Math.PI) + Math.PI / 2);
+				var absoluteY = Math.sin((angleRelativeY / (parallelsCount - 1) * Math.PI) + Math.PI / 2);
 				var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
 				var radius = -xStart;
 				for (let angleRelativeX: number = 0; angleRelativeX < count; angleRelativeX += 1) {
@@ -275,10 +278,10 @@ class Sphere extends Shape {
 					if (isNaN(z)) {
 						z = 0;
 					}
-					vertices.push(absoluteX, absoluteY, z * zSign);					
+					vertices.push(absoluteX, absoluteY, z * zSign);
 				}
 			}
-		}		
+		}
 
 		for (let i = 0; i < parallelsCount; i++) {
 			for (let i2 = 0; i2 < count; i2++) {
@@ -293,13 +296,13 @@ class Sphere extends Shape {
 
 		for (let i = 0; i < parallelsCount; i++) {
 			for (let i2 = 0; i2 < count; i2++) {
-				if (i < (parallelsCount-1) / 2) {
+				if (i < (parallelsCount - 1) / 2) {
 					addColor(red);
 				}
 				else {
 					addColor(pink);
 				}
-			}			
+			}
 		}
 
 		calcHalf(1);
@@ -362,6 +365,9 @@ class Sphere extends Shape {
 		this.InitGL(this.vertices, this.Colors, this.indices);
 
 		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+	}
+	public clearMatrix() {
+		super.clearMatrix();
 	}
 }
 
@@ -545,6 +551,212 @@ class RegularPolygon extends Shape {
 
 		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
 	}
+	public clearMatrix() {
+		super.clearMatrix();
+	}
+}
+
+enum ParticleType {
+	Cube, Sphere
+}
+
+class Particle {
+	public angleX: number;
+	public angleY: number;
+	public angleZ: number;
+	public distance: number;
+	public constructor(angleX: number, angleY: number, angleZ: number, distance: number) {
+		this.angleX = angleX;
+		this.angleY = angleY;
+		this.angleZ = angleZ;
+		this.distance = distance;
+	}
+}
+
+class ParticlesGenerator extends Shape {
+	protected mov_matrix: number[];
+	protected vertices: number[];
+	protected indices: number[];
+	protected particles: Particle[] = [];
+	protected _type: ParticleType;
+	protected started: boolean;
+	protected GenerateParticle() {
+		var angleX = Math.random() * Math.PI;
+		var angleY = Math.random() * Math.PI;
+		var angleZ = Math.random() * Math.PI;
+		//180deg
+		this.particles.push(new Particle(angleX, angleY, angleZ, 0));
+	}
+	public get Type(): ParticleType {
+		return this._type;
+	}
+	public set Type(value: ParticleType) {
+		this._type = value;
+		this.CalculateEdges();
+	}
+	public Visible: boolean;
+	public Opacity: number;
+	public Colors: number[];
+	public Properties: {
+		count: number,
+		colorBuffer: number[],
+		distance: number,
+		speed: number
+	};
+	public InitGL(vertices: number[], colors: number[], indices: number[]) {
+		super.InitGL(vertices, colors, indices);
+	}
+	public rotateZ(angle: number): void {
+		super.rotateZ(angle);
+	}
+	public rotateX(angle: number): void {
+		super.rotateX(angle);
+	}
+	public rotateY(angle: number): void {
+		super.rotateY(angle);
+	}
+	public translateX(offset: number): void {
+		super.translateX(offset);
+	}
+	public translateY(offset: number): void {
+		super.translateY(offset);
+	}
+	public translateZ(offset: number): void {
+		super.translateZ(offset);
+	}
+	public scaleX(value: number): void {
+		super.scaleX(value);
+	}
+	public scaleY(value: number): void {
+		super.scaleY(value);
+	}
+	public scaleZ(value: number): void {
+		super.scaleZ(value);
+	}
+	public CalculateEdges(): void {
+		let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
+
+		var vertices = [
+			-1.0, -1.0, 1.0,
+			1.0, -1.0, 1.0,
+			1.0, 1.0, 1.0,
+			-1.0, 1.0, 1.0,
+
+			-1.0, -1.0, -1.0,
+			-1.0, 1.0, -1.0,
+			1.0, 1.0, -1.0,
+			1.0, -1.0, -1.0,
+
+			-1.0, 1.0, -1.0,
+			-1.0, 1.0, 1.0,
+			1.0, 1.0, 1.0,
+			1.0, 1.0, -1.0,
+
+			-1.0, -1.0, -1.0,
+			1.0, -1.0, -1.0,
+			1.0, -1.0, 1.0,
+			-1.0, -1.0, 1.0,
+
+			1.0, -1.0, -1.0,
+			1.0, 1.0, -1.0,
+			1.0, 1.0, 1.0,
+			1.0, -1.0, 1.0,
+
+			-1.0, -1.0, -1.0,
+			-1.0, -1.0, 1.0,
+			-1.0, 1.0, 1.0,
+			-1.0, 1.0, -1.0
+		];
+
+		var colors = [
+			1, 0, 0,
+			1, 0, 0,
+			1, 0, 0,
+			1, 0, 0,
+
+			0, 1, 0,
+			0, 1, 0,
+			0, 1, 0,
+			0, 1, 0,
+
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+
+			1, 0, 1,
+			1, 0, 1,
+			1, 0, 1,
+			1, 0, 1,
+
+			1, 1, 1,
+			1, 1, 1,
+			1, 1, 1,
+			1, 1, 1,
+
+			1, 1, 0,
+			1, 1, 0,
+			1, 1, 0,
+			1, 1, 0,
+		];
+
+		var indices = [
+			0, 1, 2, 0, 2, 3,
+			4, 5, 6, 4, 6, 7,
+			8, 9, 10, 8, 10, 11,
+			12, 13, 14, 12, 14, 15,
+			16, 17, 18, 16, 18, 19,
+			20, 21, 22, 20, 22, 23
+		];
+
+		this.vertices = vertices;
+		this.indices = indices;
+		this.Colors = colors;
+
+		this.mov_matrix[14] = -zoom;
+	}
+	public Start(): void {
+		if (this.Properties.count != 0) {
+			this.GenerateParticle();
+		}
+		this.started = true;
+	}
+	public constructor() {
+		super();
+		this.CalculateEdges();
+		this.Properties = {
+			count: 100,
+			distance: 1,
+			speed: 0.1,
+			colorBuffer: [1, 0, 1]
+		}
+	}
+	public Draw(): void {
+		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
+		if (this.started) {
+			for (let index = 0; index < this.particles.length; index++) {
+				var x = Math.cos(this.particles[index].angleX) * this.particles[index].distance;
+				var y = Math.sin(this.particles[index].angleY) * this.particles[index].distance;
+				var z = Math.sin(this.particles[index].angleZ) * this.particles[index].distance;
+				if (isNaN(z)) {
+					z = 0;
+				}
+				this.translateX(x);
+				this.translateY(y);
+				this.translateZ(z);
+				this.InitGL(this.vertices, this.Colors, this.indices);
+				gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+				this.translateX(-x);
+				this.translateY(-y);
+				this.translateZ(-z);
+				this.particles[index].distance += this.Properties.speed;
+			}
+			this.GenerateParticle();
+		}
+	}
+	public clearMatrix() {
+		super.clearMatrix();
+	}
 }
 
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
@@ -599,7 +811,7 @@ function DrawScene() {
 
 function Rotate() {
 	var param = [];
-	var easing = EasingType.quad;
+	var easing = EasingType.arc;
 	if (rotateT < 90 && (deltaY != 0 || deltaX != 0)) {
 		if (deltaY != 0) {
 			currentShape.rotateX(-deltaY / Math.abs(deltaY) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
@@ -636,7 +848,8 @@ window.onload = () => {
 		//accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
 	}
 	window.onresize(new UIEvent("resize"));
-	currentShape = new Sphere();
+	currentShape = new ParticlesGenerator();
+	(<ParticlesGenerator>currentShape).Start();
 	Shapes.push(currentShape);
 	DrawScene();
 }

@@ -149,6 +149,9 @@ var Shape = /** @class */ (function () {
         m[9] *= value;
         m[8] *= value;
     };
+    Shape.prototype.clearMatrix = function () {
+        this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    };
     return Shape;
 }());
 var Sphere = /** @class */ (function (_super) {
@@ -295,6 +298,9 @@ var Sphere = /** @class */ (function (_super) {
         this.InitGL(this.vertices, this.Colors, this.indices);
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     };
+    Sphere.prototype.clearMatrix = function () {
+        _super.prototype.clearMatrix.call(this);
+    };
     return Sphere;
 }(Shape));
 var RegularPolygon = /** @class */ (function (_super) {
@@ -431,7 +437,187 @@ var RegularPolygon = /** @class */ (function (_super) {
         this.InitGL(this.vertices, this.Colors, this.indices);
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     };
+    RegularPolygon.prototype.clearMatrix = function () {
+        _super.prototype.clearMatrix.call(this);
+    };
     return RegularPolygon;
+}(Shape));
+var ParticleType;
+(function (ParticleType) {
+    ParticleType[ParticleType["Cube"] = 0] = "Cube";
+    ParticleType[ParticleType["Sphere"] = 1] = "Sphere";
+})(ParticleType || (ParticleType = {}));
+var Particle = /** @class */ (function () {
+    function Particle(angleX, angleY, angleZ, distance) {
+        this.angleX = angleX;
+        this.angleY = angleY;
+        this.angleZ = angleZ;
+        this.distance = distance;
+    }
+    return Particle;
+}());
+var ParticlesGenerator = /** @class */ (function (_super) {
+    __extends(ParticlesGenerator, _super);
+    function ParticlesGenerator() {
+        var _this = _super.call(this) || this;
+        _this.particles = [];
+        _this.CalculateEdges();
+        _this.Properties = {
+            count: 100,
+            distance: 1,
+            speed: 0.1,
+            colorBuffer: [1, 0, 1]
+        };
+        return _this;
+    }
+    ParticlesGenerator.prototype.GenerateParticle = function () {
+        var angleX = Math.random() * Math.PI;
+        var angleY = Math.random() * Math.PI;
+        var angleZ = Math.random() * Math.PI;
+        //180deg
+        this.particles.push(new Particle(angleX, angleY, angleZ, 0));
+    };
+    Object.defineProperty(ParticlesGenerator.prototype, "Type", {
+        get: function () {
+            return this._type;
+        },
+        set: function (value) {
+            this._type = value;
+            this.CalculateEdges();
+        },
+        enumerable: false,
+        configurable: true
+    });
+    ParticlesGenerator.prototype.InitGL = function (vertices, colors, indices) {
+        _super.prototype.InitGL.call(this, vertices, colors, indices);
+    };
+    ParticlesGenerator.prototype.rotateZ = function (angle) {
+        _super.prototype.rotateZ.call(this, angle);
+    };
+    ParticlesGenerator.prototype.rotateX = function (angle) {
+        _super.prototype.rotateX.call(this, angle);
+    };
+    ParticlesGenerator.prototype.rotateY = function (angle) {
+        _super.prototype.rotateY.call(this, angle);
+    };
+    ParticlesGenerator.prototype.translateX = function (offset) {
+        _super.prototype.translateX.call(this, offset);
+    };
+    ParticlesGenerator.prototype.translateY = function (offset) {
+        _super.prototype.translateY.call(this, offset);
+    };
+    ParticlesGenerator.prototype.translateZ = function (offset) {
+        _super.prototype.translateZ.call(this, offset);
+    };
+    ParticlesGenerator.prototype.scaleX = function (value) {
+        _super.prototype.scaleX.call(this, value);
+    };
+    ParticlesGenerator.prototype.scaleY = function (value) {
+        _super.prototype.scaleY.call(this, value);
+    };
+    ParticlesGenerator.prototype.scaleZ = function (value) {
+        _super.prototype.scaleZ.call(this, value);
+    };
+    ParticlesGenerator.prototype.CalculateEdges = function () {
+        var gl = document.getElementById("cnvs").getContext("webgl");
+        var vertices = [
+            -1.0, -1.0, 1.0,
+            1.0, -1.0, 1.0,
+            1.0, 1.0, 1.0,
+            -1.0, 1.0, 1.0,
+            -1.0, -1.0, -1.0,
+            -1.0, 1.0, -1.0,
+            1.0, 1.0, -1.0,
+            1.0, -1.0, -1.0,
+            -1.0, 1.0, -1.0,
+            -1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0,
+            1.0, 1.0, -1.0,
+            -1.0, -1.0, -1.0,
+            1.0, -1.0, -1.0,
+            1.0, -1.0, 1.0,
+            -1.0, -1.0, 1.0,
+            1.0, -1.0, -1.0,
+            1.0, 1.0, -1.0,
+            1.0, 1.0, 1.0,
+            1.0, -1.0, 1.0,
+            -1.0, -1.0, -1.0,
+            -1.0, -1.0, 1.0,
+            -1.0, 1.0, 1.0,
+            -1.0, 1.0, -1.0
+        ];
+        var colors = [
+            1, 0, 0,
+            1, 0, 0,
+            1, 0, 0,
+            1, 0, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            1, 0, 1,
+            1, 0, 1,
+            1, 0, 1,
+            1, 0, 1,
+            1, 1, 1,
+            1, 1, 1,
+            1, 1, 1,
+            1, 1, 1,
+            1, 1, 0,
+            1, 1, 0,
+            1, 1, 0,
+            1, 1, 0,
+        ];
+        var indices = [
+            0, 1, 2, 0, 2, 3,
+            4, 5, 6, 4, 6, 7,
+            8, 9, 10, 8, 10, 11,
+            12, 13, 14, 12, 14, 15,
+            16, 17, 18, 16, 18, 19,
+            20, 21, 22, 20, 22, 23
+        ];
+        this.vertices = vertices;
+        this.indices = indices;
+        this.Colors = colors;
+        this.mov_matrix[14] = -zoom;
+    };
+    ParticlesGenerator.prototype.Start = function () {
+        if (this.Properties.count != 0) {
+            this.GenerateParticle();
+        }
+        this.started = true;
+    };
+    ParticlesGenerator.prototype.Draw = function () {
+        var gl = document.getElementById(id).getContext("webgl");
+        if (this.started) {
+            for (var index = 0; index < this.particles.length; index++) {
+                var x = Math.cos(this.particles[index].angleX) * this.particles[index].distance;
+                var y = Math.sin(this.particles[index].angleY) * this.particles[index].distance;
+                var z = Math.sin(this.particles[index].angleZ) * this.particles[index].distance;
+                if (isNaN(z)) {
+                    z = 0;
+                }
+                this.translateX(x);
+                this.translateY(y);
+                this.translateZ(z);
+                this.InitGL(this.vertices, this.Colors, this.indices);
+                gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+                this.translateX(-x);
+                this.translateY(-y);
+                this.translateZ(-z);
+                this.particles[index].distance += this.Properties.speed;
+            }
+            this.GenerateParticle();
+        }
+    };
+    ParticlesGenerator.prototype.clearMatrix = function () {
+        _super.prototype.clearMatrix.call(this);
+    };
+    return ParticlesGenerator;
 }(Shape));
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 var c1 = [0, 0, 0];
@@ -475,7 +661,7 @@ function DrawScene() {
 }
 function Rotate() {
     var param = [];
-    var easing = EasingType.quad;
+    var easing = EasingType.arc;
     if (rotateT < 90 && (deltaY != 0 || deltaX != 0)) {
         if (deltaY != 0) {
             currentShape.rotateX(-deltaY / Math.abs(deltaY) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
@@ -510,7 +696,8 @@ window.onload = function () {
         //accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
     };
     window.onresize(new UIEvent("resize"));
-    currentShape = new Sphere();
+    currentShape = new ParticlesGenerator();
+    currentShape.Start();
     Shapes.push(currentShape);
     DrawScene();
 };
