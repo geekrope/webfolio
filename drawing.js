@@ -16,7 +16,6 @@ var __extends = (this && this.__extends) || (function () {
 var Shape = /** @class */ (function () {
     function Shape() {
         this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-        this.Visible = true;
         this.Opacity = 1;
     }
     Shape.prototype.InitGL = function (vertices, colors, indices) {
@@ -448,11 +447,12 @@ var ParticleType;
     ParticleType[ParticleType["Sphere"] = 1] = "Sphere";
 })(ParticleType || (ParticleType = {}));
 var Particle = /** @class */ (function () {
-    function Particle(angleX, angleY, angleZ, distance) {
+    function Particle(angleX, angleY, angleZ, distance, scale) {
         this.angleX = angleX;
         this.angleY = angleY;
         this.angleZ = angleZ;
         this.distance = distance;
+        this.scale = scale;
     }
     return Particle;
 }());
@@ -463,19 +463,23 @@ var ParticlesGenerator = /** @class */ (function (_super) {
         _this.particles = [];
         _this.CalculateEdges();
         _this.Properties = {
-            count: 100,
-            distance: 1,
+            count: 20,
+            distance: 5,
             speed: 0.1,
-            colorBuffer: [1, 0, 1]
+            colorBuffer: [1, 0, 1],
+            minSize: 0.1,
+            maxSize: 0.4
         };
+        _this.finished = 0;
         return _this;
     }
     ParticlesGenerator.prototype.GenerateParticle = function () {
         var angleX = Math.random() * Math.PI;
         var angleY = Math.random() * Math.PI;
         var angleZ = Math.random() * Math.PI;
+        var scale = Math.random() * (this.Properties.maxSize - this.Properties.minSize) + this.Properties.minSize;
         //180deg
-        this.particles.push(new Particle(angleX, angleY, angleZ, 0));
+        this.particles.push(new Particle(angleX, angleY, angleZ, 0, scale));
     };
     Object.defineProperty(ParticlesGenerator.prototype, "Type", {
         get: function () {
@@ -604,14 +608,30 @@ var ParticlesGenerator = /** @class */ (function (_super) {
                 this.translateX(x);
                 this.translateY(y);
                 this.translateZ(z);
+                this.scaleX(this.particles[index].scale);
+                this.scaleY(this.particles[index].scale);
+                this.scaleZ(this.particles[index].scale);
                 this.InitGL(this.vertices, this.Colors, this.indices);
                 gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
                 this.translateX(-x);
                 this.translateY(-y);
                 this.translateZ(-z);
+                this.scaleX(1 / this.particles[index].scale);
+                this.scaleY(1 / this.particles[index].scale);
+                this.scaleZ(1 / this.particles[index].scale);
+                if (this.particles[index].distance >= this.Properties.distance) {
+                    this.finished++;
+                }
                 this.particles[index].distance += this.Properties.speed;
             }
-            this.GenerateParticle();
+            if (this.particles.length < this.Properties.count) {
+                this.GenerateParticle();
+            }
+            if (this.finished >= this.Properties.count) {
+                this.particles = [];
+                this.finished = 0;
+                this.started = false;
+            }
         }
     };
     ParticlesGenerator.prototype.clearMatrix = function () {

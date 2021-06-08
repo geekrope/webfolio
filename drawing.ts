@@ -9,10 +9,8 @@ class Shape implements Drawable {
 	protected indices: number[];
 	public constructor() {
 		this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-		this.Visible = true;
 		this.Opacity = 1;
 	}
-	public Visible: boolean;
 	public Opacity: number;
 	public Colors: number[];
 	public InitGL(vertices: number[], colors: number[], indices: number[]) {
@@ -195,7 +193,6 @@ class Sphere extends Shape {
 	protected mov_matrix: number[];
 	protected vertices: number[];
 	protected indices: number[];
-	public Visible: boolean;
 	public Opacity: number;
 	public Quality: number;
 	public Colors: number[];
@@ -378,7 +375,6 @@ class RegularPolygon extends Shape {
 	private Circle(angle: number, r: number): DOMPoint {
 		return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
 	}
-	public Visible: boolean;
 	public Opacity: number;
 	public N: number;
 	public Colors: number[];
@@ -564,12 +560,14 @@ class Particle {
 	public angleX: number;
 	public angleY: number;
 	public angleZ: number;
+	public scale: number;
 	public distance: number;
-	public constructor(angleX: number, angleY: number, angleZ: number, distance: number) {
+	public constructor(angleX: number, angleY: number, angleZ: number, distance: number, scale: number) {
 		this.angleX = angleX;
 		this.angleY = angleY;
 		this.angleZ = angleZ;
 		this.distance = distance;
+		this.scale = scale;
 	}
 }
 
@@ -580,12 +578,14 @@ class ParticlesGenerator extends Shape {
 	protected particles: Particle[] = [];
 	protected _type: ParticleType;
 	protected started: boolean;
+	protected finished: number;
 	protected GenerateParticle() {
 		var angleX = Math.random() * Math.PI;
 		var angleY = Math.random() * Math.PI;
 		var angleZ = Math.random() * Math.PI;
+		var scale = Math.random() * (this.Properties.maxSize - this.Properties.minSize) + this.Properties.minSize;
 		//180deg
-		this.particles.push(new Particle(angleX, angleY, angleZ, 0));
+		this.particles.push(new Particle(angleX, angleY, angleZ, 0, scale));
 	}
 	public get Type(): ParticleType {
 		return this._type;
@@ -594,14 +594,14 @@ class ParticlesGenerator extends Shape {
 		this._type = value;
 		this.CalculateEdges();
 	}
-	public Visible: boolean;
 	public Opacity: number;
-	public Colors: number[];
 	public Properties: {
 		count: number,
 		colorBuffer: number[],
 		distance: number,
-		speed: number
+		speed: number,
+		minSize: number,
+		maxSize: number
 	};
 	public InitGL(vertices: number[], colors: number[], indices: number[]) {
 		super.InitGL(vertices, colors, indices);
@@ -725,11 +725,14 @@ class ParticlesGenerator extends Shape {
 		super();
 		this.CalculateEdges();
 		this.Properties = {
-			count: 100,
-			distance: 1,
+			count: 20,
+			distance: 5,
 			speed: 0.1,
-			colorBuffer: [1, 0, 1]
+			colorBuffer: [1, 0, 1],
+			minSize: 0.1,
+			maxSize: 0.4
 		}
+		this.finished = 0;		
 	}
 	public Draw(): void {
 		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
@@ -744,14 +747,30 @@ class ParticlesGenerator extends Shape {
 				this.translateX(x);
 				this.translateY(y);
 				this.translateZ(z);
+				this.scaleX(this.particles[index].scale);
+				this.scaleY(this.particles[index].scale);
+				this.scaleZ(this.particles[index].scale);
 				this.InitGL(this.vertices, this.Colors, this.indices);
 				gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
 				this.translateX(-x);
 				this.translateY(-y);
 				this.translateZ(-z);
+				this.scaleX(1 / this.particles[index].scale);
+				this.scaleY(1 / this.particles[index].scale);
+				this.scaleZ(1 / this.particles[index].scale);
+				if (this.particles[index].distance >= this.Properties.distance) {
+					this.finished++;
+				}
 				this.particles[index].distance += this.Properties.speed;
 			}
-			this.GenerateParticle();
+			if (this.particles.length < this.Properties.count) {
+				this.GenerateParticle();
+			}
+			if (this.finished >= this.Properties.count) {
+				this.particles = [];
+				this.finished = 0;
+				this.started = false;
+			}
 		}
 	}
 	public clearMatrix() {
