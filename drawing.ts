@@ -560,14 +560,20 @@ class Particle {
 	public angleX: number;
 	public angleY: number;
 	public angleZ: number;
+	public rotationX: number;
+	public rotationY: number;
+	public rotationZ: number;
 	public scale: number;
 	public distance: number;
-	public constructor(angleX: number, angleY: number, angleZ: number, distance: number, scale: number) {
+	public constructor(angleX: number, angleY: number, angleZ: number, distance: number, scale: number, rotationX: number, rotationY: number, rotationZ: number) {
 		this.angleX = angleX;
 		this.angleY = angleY;
 		this.angleZ = angleZ;
 		this.distance = distance;
 		this.scale = scale;
+		this.rotationX = rotationX;
+		this.rotationY = rotationY;
+		this.rotationZ = rotationZ;
 	}
 }
 
@@ -584,9 +590,14 @@ class ParticlesGenerator extends Shape {
 		var angleX = Math.random() * Math.PI;
 		var angleY = Math.random() * Math.PI;
 		var angleZ = Math.random() * Math.PI;
+
+		var rotationX = Math.random() * Math.PI;
+		var rotationY = Math.random() * Math.PI;
+		var rotationZ = Math.random() * Math.PI;
+
 		var scale = Math.random() * (this.Properties.maxSize - this.Properties.minSize) + this.Properties.minSize;
 		//180deg
-		this.particles.push(new Particle(angleX, angleY, angleZ, 0, scale));
+		this.particles.push(new Particle(angleX, angleY, angleZ, 0, scale, rotationX, rotationY, rotationZ));
 	}
 	public get Type(): ParticleType {
 		return this._type;
@@ -743,30 +754,42 @@ class ParticlesGenerator extends Shape {
 				var x = Math.cos(this.particles[index].angleX) * this.particles[index].distance;
 				var y = Math.sin(this.particles[index].angleY) * this.particles[index].distance;
 				var z = Math.sin(this.particles[index].angleZ) * this.particles[index].distance;
+
 				if (isNaN(z)) {
 					z = 0;
 				}
+
+				var movMatrix = Array.from(this.mov_matrix);
+
 				this.translateX(x);
 				this.translateY(y);
 				this.translateZ(z);
+
+				this.rotateX(this.particles[index].rotationX);
+				this.rotateY(this.particles[index].rotationY);
+				this.rotateZ(this.particles[index].rotationZ);
+
 				var scaleValue = 1 - this.particles[index].distance / this.Properties.distance;
+
 				this.scaleX(this.particles[index].scale * scaleValue);
 				this.scaleY(this.particles[index].scale * scaleValue);
 				this.scaleZ(this.particles[index].scale * scaleValue);
+
 				this.InitGL(this.vertices, this.Colors, this.indices);
+
 				gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
-				this.translateX(-x);
-				this.translateY(-y);
-				this.translateZ(-z);
-				this.scaleX(1 / (this.particles[index].scale * scaleValue));
-				this.scaleY(1 / (this.particles[index].scale * scaleValue));
-				this.scaleZ(1 / (this.particles[index].scale * scaleValue));
+
+				this.mov_matrix = movMatrix;
+
+				console.log(this.mov_matrix);
+
 				if (this.particles[index].distance >= this.Properties.distance) {
 					this.finished++;
 					this.particles.splice(index, 1);
 					index--;
 					continue;
 				}
+
 				this.particles[index].distance += this.Properties.speed;
 			}
 			if (this.generated < this.Properties.count) {

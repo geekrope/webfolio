@@ -1,25 +1,10 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var Shape = /** @class */ (function () {
-    function Shape() {
+class Shape {
+    constructor() {
         this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         this.Opacity = 1;
     }
-    Shape.prototype.InitGL = function (vertices, colors, indices) {
-        var gl = document.getElementById("cnvs").getContext("webgl");
+    InitGL(vertices, colors, indices) {
+        let gl = document.getElementById("cnvs").getContext("webgl");
         var vertex_buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -32,8 +17,22 @@ var Shape = /** @class */ (function () {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
         /*=================== Shaders =========================*/
-        var vertCode = "attribute vec3 position;\n\t\tuniform mat4 Pmatrix;\n\t\tuniform mat4 Vmatrix;\n\t\tuniform mat4 Mmatrix;\n\t\tattribute vec3 color;\n\t\tvarying vec3 vColor;\n\n\t\tvoid main(void) {\n\t\tgl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);\n\t\tvColor = color;\n\t\t}";
-        var fragCode = "precision mediump float;\n\t\tvarying vec3 vColor;\n\t\tvoid main(void) {\n\t\tgl_FragColor = vec4(vColor, " + this.Opacity + ");\n\t\t}";
+        var vertCode = `attribute vec3 position;
+		uniform mat4 Pmatrix;
+		uniform mat4 Vmatrix;
+		uniform mat4 Mmatrix;
+		attribute vec3 color;
+		varying vec3 vColor;
+
+		void main(void) {
+		gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);
+		vColor = color;
+		}`;
+        var fragCode = `precision mediump float;
+		varying vec3 vColor;
+		void main(void) {
+		gl_FragColor = vec4(vColor, ${this.Opacity});
+		}`;
         var vertShader = gl.createShader(gl.VERTEX_SHADER);
         gl.shaderSource(vertShader, vertCode);
         gl.compileShader(vertShader);
@@ -77,12 +76,12 @@ var Shape = /** @class */ (function () {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
-    };
-    Shape.prototype.CalculateEdges = function () {
-    };
-    Shape.prototype.Draw = function () {
-    };
-    Shape.prototype.rotateZ = function (angle) {
+    }
+    CalculateEdges() {
+    }
+    Draw() {
+    }
+    rotateZ(angle) {
         var m = this.mov_matrix;
         var c = Math.cos(angle);
         var s = Math.sin(angle);
@@ -93,8 +92,8 @@ var Shape = /** @class */ (function () {
         m[1] = c * m[1] + s * mv0;
         m[5] = c * m[5] + s * mv4;
         m[9] = c * m[9] + s * mv8;
-    };
-    Shape.prototype.rotateX = function (angle) {
+    }
+    rotateX(angle) {
         var m = this.mov_matrix;
         var c = Math.cos(angle);
         var s = Math.sin(angle);
@@ -105,8 +104,8 @@ var Shape = /** @class */ (function () {
         m[2] = m[2] * c + mv1 * s;
         m[6] = m[6] * c + mv5 * s;
         m[10] = m[10] * c + mv9 * s;
-    };
-    Shape.prototype.rotateY = function (angle) {
+    }
+    rotateY(angle) {
         var m = this.mov_matrix;
         var c = Math.cos(angle);
         var s = Math.sin(angle);
@@ -117,86 +116,83 @@ var Shape = /** @class */ (function () {
         m[2] = c * m[2] - s * mv0;
         m[6] = c * m[6] - s * mv4;
         m[10] = c * m[10] - s * mv8;
-    };
-    Shape.prototype.translateX = function (offset) {
+    }
+    translateX(offset) {
         var m = this.mov_matrix;
         m[12] += offset;
-    };
-    Shape.prototype.translateY = function (offset) {
+    }
+    translateY(offset) {
         var m = this.mov_matrix;
         m[13] += offset;
-    };
-    Shape.prototype.translateZ = function (offset) {
+    }
+    translateZ(offset) {
         var m = this.mov_matrix;
         m[14] += offset;
-    };
-    Shape.prototype.scaleX = function (value) {
+    }
+    scaleX(value) {
         var m = this.mov_matrix;
         m[0] *= value;
         m[1] *= value;
         m[2] *= value;
-    };
-    Shape.prototype.scaleY = function (value) {
+    }
+    scaleY(value) {
         var m = this.mov_matrix;
         m[4] *= value;
         m[5] *= value;
         m[6] *= value;
-    };
-    Shape.prototype.scaleZ = function (value) {
+    }
+    scaleZ(value) {
         var m = this.mov_matrix;
         m[10] *= value;
         m[9] *= value;
         m[8] *= value;
-    };
-    Shape.prototype.clearMatrix = function () {
-        this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-    };
-    return Shape;
-}());
-var Sphere = /** @class */ (function (_super) {
-    __extends(Sphere, _super);
-    function Sphere() {
-        var _this = _super.call(this) || this;
-        _this.Quality = 50;
-        _this.CalculateEdges();
-        return _this;
     }
-    Sphere.prototype.InitGL = function (vertices, colors, indices) {
-        _super.prototype.InitGL.call(this, vertices, colors, indices);
-    };
-    Sphere.prototype.rotateZ = function (angle) {
-        _super.prototype.rotateZ.call(this, angle);
-    };
-    Sphere.prototype.rotateX = function (angle) {
-        _super.prototype.rotateX.call(this, angle);
-    };
-    Sphere.prototype.rotateY = function (angle) {
-        _super.prototype.rotateY.call(this, angle);
-    };
-    Sphere.prototype.translateX = function (offset) {
-        _super.prototype.translateX.call(this, offset);
-    };
-    Sphere.prototype.translateY = function (offset) {
-        _super.prototype.translateY.call(this, offset);
-    };
-    Sphere.prototype.translateZ = function (offset) {
-        _super.prototype.translateZ.call(this, offset);
-    };
-    Sphere.prototype.scaleX = function (value) {
-        _super.prototype.scaleX.call(this, value);
-    };
-    Sphere.prototype.scaleY = function (value) {
-        _super.prototype.scaleY.call(this, value);
-    };
-    Sphere.prototype.scaleZ = function (value) {
-        _super.prototype.scaleZ.call(this, value);
-    };
-    Sphere.prototype.CalculateEdges = function () {
-        var gl = document.getElementById(id).getContext("webgl");
+    clearMatrix() {
+        this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+    }
+}
+class Sphere extends Shape {
+    constructor() {
+        super();
+        this.Quality = 50;
+        this.CalculateEdges();
+    }
+    InitGL(vertices, colors, indices) {
+        super.InitGL(vertices, colors, indices);
+    }
+    rotateZ(angle) {
+        super.rotateZ(angle);
+    }
+    rotateX(angle) {
+        super.rotateX(angle);
+    }
+    rotateY(angle) {
+        super.rotateY(angle);
+    }
+    translateX(offset) {
+        super.translateX(offset);
+    }
+    translateY(offset) {
+        super.translateY(offset);
+    }
+    translateZ(offset) {
+        super.translateZ(offset);
+    }
+    scaleX(value) {
+        super.scaleX(value);
+    }
+    scaleY(value) {
+        super.scaleY(value);
+    }
+    scaleZ(value) {
+        super.scaleZ(value);
+    }
+    CalculateEdges() {
+        let gl = document.getElementById(id).getContext("webgl");
         var vertices = [];
         var colors = [];
         var indices = [];
-        var parallelsCount = this.Quality;
+        const parallelsCount = this.Quality;
         var count = this.Quality;
         var yellow = [
             1, 1, 0,
@@ -210,18 +206,18 @@ var Sphere = /** @class */ (function (_super) {
         var pink = [
             1, 0, 1,
         ];
-        var addColor = function (buffer) {
-            var index = 0;
+        var addColor = (buffer) => {
+            let index = 0;
             for (; index < buffer.length; index++) {
                 colors.push(buffer[index]);
             }
         };
-        var calcHalf = function (zSign) {
-            for (var angleRelativeY = 0; angleRelativeY < parallelsCount; angleRelativeY += 1) {
+        var calcHalf = (zSign) => {
+            for (let angleRelativeY = 0; angleRelativeY < parallelsCount; angleRelativeY += 1) {
                 var absoluteY = Math.sin((angleRelativeY / (parallelsCount - 1) * Math.PI) + Math.PI / 2);
                 var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
                 var radius = -xStart;
-                for (var angleRelativeX = 0; angleRelativeX < count; angleRelativeX += 1) {
+                for (let angleRelativeX = 0; angleRelativeX < count; angleRelativeX += 1) {
                     var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
                     var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
                     if (isNaN(z)) {
@@ -231,8 +227,8 @@ var Sphere = /** @class */ (function (_super) {
                 }
             }
         };
-        for (var i = 0; i < parallelsCount; i++) {
-            for (var i2 = 0; i2 < count; i2++) {
+        for (let i = 0; i < parallelsCount; i++) {
+            for (let i2 = 0; i2 < count; i2++) {
                 if (i < (parallelsCount - 1) / 2) {
                     addColor(yellow);
                 }
@@ -241,8 +237,8 @@ var Sphere = /** @class */ (function (_super) {
                 }
             }
         }
-        for (var i = 0; i < parallelsCount; i++) {
-            for (var i2 = 0; i2 < count; i2++) {
+        for (let i = 0; i < parallelsCount; i++) {
+            for (let i2 = 0; i2 < count; i2++) {
                 if (i < (parallelsCount - 1) / 2) {
                     addColor(red);
                 }
@@ -253,10 +249,10 @@ var Sphere = /** @class */ (function (_super) {
         }
         calcHalf(1);
         calcHalf(-1);
-        var index1 = 0;
-        var index2 = count;
+        let index1 = 0;
+        let index2 = count;
         var bounds = 0;
-        for (var y = 0; y <= parallelsCount; y += 1) {
+        for (let y = 0; y <= parallelsCount; y += 1) {
             index1 = bounds;
             bounds += count;
             index2 = bounds;
@@ -271,7 +267,7 @@ var Sphere = /** @class */ (function (_super) {
                 index2++;
             }
         }
-        for (var y = 0; y <= parallelsCount; y += 1) {
+        for (let y = 0; y <= parallelsCount; y += 1) {
             index1 = bounds;
             bounds += count;
             index2 = bounds;
@@ -286,71 +282,68 @@ var Sphere = /** @class */ (function (_super) {
                 index2++;
             }
         }
-        var vertexNormals = [];
+        const vertexNormals = [];
         this.vertices = vertices;
         this.indices = indices;
         this.Colors = colors;
         this.mov_matrix[14] = -zoom;
-    };
-    Sphere.prototype.Draw = function () {
-        var gl = document.getElementById(id).getContext("webgl");
+    }
+    Draw() {
+        let gl = document.getElementById(id).getContext("webgl");
         this.InitGL(this.vertices, this.Colors, this.indices);
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
-    };
-    Sphere.prototype.clearMatrix = function () {
-        _super.prototype.clearMatrix.call(this);
-    };
-    return Sphere;
-}(Shape));
-var RegularPolygon = /** @class */ (function (_super) {
-    __extends(RegularPolygon, _super);
-    function RegularPolygon() {
-        var _this = _super.call(this) || this;
-        _this.N = 4;
-        _this.CalculateEdges();
-        return _this;
     }
-    RegularPolygon.prototype.Circle = function (angle, r) {
+    clearMatrix() {
+        super.clearMatrix();
+    }
+}
+class RegularPolygon extends Shape {
+    constructor() {
+        super();
+        this.N = 4;
+        this.CalculateEdges();
+    }
+    Circle(angle, r) {
         return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
-    };
-    RegularPolygon.prototype.InitGL = function (vertices, colors, indices) {
-        _super.prototype.InitGL.call(this, vertices, colors, indices);
-    };
-    RegularPolygon.prototype.rotateZ = function (angle) {
-        _super.prototype.rotateZ.call(this, angle);
-    };
-    RegularPolygon.prototype.rotateX = function (angle) {
-        _super.prototype.rotateX.call(this, angle);
-    };
-    RegularPolygon.prototype.rotateY = function (angle) {
-        _super.prototype.rotateY.call(this, angle);
-    };
-    RegularPolygon.prototype.translateX = function (offset) {
-        _super.prototype.translateX.call(this, offset);
-    };
-    RegularPolygon.prototype.translateY = function (offset) {
-        _super.prototype.translateY.call(this, offset);
-    };
-    RegularPolygon.prototype.translateZ = function (offset) {
-        _super.prototype.translateZ.call(this, offset);
-    };
-    RegularPolygon.prototype.scaleX = function (value) {
-        _super.prototype.scaleX.call(this, value);
-    };
-    RegularPolygon.prototype.scaleY = function (value) {
-        _super.prototype.scaleY.call(this, value);
-    };
-    RegularPolygon.prototype.scaleZ = function (value) {
-        _super.prototype.scaleZ.call(this, value);
-    };
-    RegularPolygon.prototype.CalculateEdges = function () {
-        var gl = document.getElementById("cnvs").getContext("webgl");
+    }
+    InitGL(vertices, colors, indices) {
+        super.InitGL(vertices, colors, indices);
+    }
+    rotateZ(angle) {
+        super.rotateZ(angle);
+    }
+    rotateX(angle) {
+        super.rotateX(angle);
+    }
+    rotateY(angle) {
+        super.rotateY(angle);
+    }
+    translateX(offset) {
+        super.translateX(offset);
+    }
+    translateY(offset) {
+        super.translateY(offset);
+    }
+    translateZ(offset) {
+        super.translateZ(offset);
+    }
+    scaleX(value) {
+        super.scaleX(value);
+    }
+    scaleY(value) {
+        super.scaleY(value);
+    }
+    scaleZ(value) {
+        super.scaleZ(value);
+    }
+    CalculateEdges() {
+        let gl = document.getElementById("cnvs").getContext("webgl");
         var accuracy = this.N / 2;
         var vertices = [];
         var colors = [];
-        var r = 1;
-        var vertexNormals = [];
-        for (var angle = 0; angle < accuracy * 2; angle += 1) {
+        let r = 1;
+        const vertexNormals = [];
+        for (let angle = 0; angle < accuracy * 2; angle += 1) {
             var radians = (angle / accuracy) * Math.PI;
             var p1 = this.Circle(radians, r);
             var p2 = this.Circle(radians + Math.PI / accuracy, r);
@@ -358,7 +351,7 @@ var RegularPolygon = /** @class */ (function (_super) {
             var y = p1.y;
             var x2 = p2.x;
             var y2 = p2.y;
-            for (var i = 0; i < c1.length * 4; i++) {
+            for (let i = 0; i < c1.length * 4; i++) {
                 colors.push(c1[i % 3]);
             }
             var nP = this.Circle((radians + radians + Math.PI / accuracy) / 2, r);
@@ -372,10 +365,10 @@ var RegularPolygon = /** @class */ (function (_super) {
             vertices.push(x, y, 1);
         }
         vertices.push(0, 0, 1);
-        for (var i = 0; i < c2.length; i++) {
+        for (let i = 0; i < c2.length; i++) {
             colors.push(c2[i % 3]);
         }
-        for (var angle = 0; angle < accuracy * 2; angle += 1) {
+        for (let angle = 0; angle < accuracy * 2; angle += 1) {
             var radians = (angle / accuracy) * Math.PI;
             var p1 = this.Circle(radians, r);
             var p2 = this.Circle(radians + Math.PI / accuracy, r);
@@ -383,17 +376,17 @@ var RegularPolygon = /** @class */ (function (_super) {
             var y = p1.y;
             var x2 = p2.x;
             var y2 = p2.y;
-            for (var i = 0; i < c2.length * 2; i++) {
+            for (let i = 0; i < c2.length * 2; i++) {
                 colors.push(c2[i % 3]);
             }
             vertices.push(x2, y2, 1);
             vertices.push(x, y, 1);
         }
         vertices.push(0, 0, -1);
-        for (var i = 0; i < c3.length; i++) {
+        for (let i = 0; i < c3.length; i++) {
             colors.push(c3[i % 3]);
         }
-        for (var angle = 0; angle < accuracy * 2; angle += 1) {
+        for (let angle = 0; angle < accuracy * 2; angle += 1) {
             var radians = (angle / accuracy) * Math.PI;
             var p1 = this.Circle(radians, r);
             var p2 = this.Circle(radians + Math.PI / accuracy, r);
@@ -401,14 +394,14 @@ var RegularPolygon = /** @class */ (function (_super) {
             var y = p1.y;
             var x2 = p2.x;
             var y2 = p2.y;
-            for (var i = 0; i < c3.length * 2; i++) {
+            for (let i = 0; i < c3.length * 2; i++) {
                 colors.push(c3[i % 3]);
             }
             vertices.push(x2, y2, -1);
             vertices.push(x, y, -1);
         }
         var indices = [];
-        for (var index = 0; index < accuracy * 2 * 4; index += 4) {
+        for (let index = 0; index < accuracy * 2 * 4; index += 4) {
             indices.push(index);
             indices.push(index + 1);
             indices.push(index + 2);
@@ -416,12 +409,12 @@ var RegularPolygon = /** @class */ (function (_super) {
             indices.push(index + 2);
             indices.push(index + 3);
         }
-        for (var index = accuracy * 2 * 4; index < accuracy * 2 * 4 + accuracy * 2 * 2; index += 2) {
+        for (let index = accuracy * 2 * 4; index < accuracy * 2 * 4 + accuracy * 2 * 2; index += 2) {
             indices.push(accuracy * 2 * 4);
             indices.push(index + 1);
             indices.push(index + 2);
         }
-        for (var index = accuracy * 2 * 4 + accuracy * 2 * 2 + 1; index < accuracy * 2 * 4 + accuracy * 2 * 2 + accuracy * 2 * 2; index += 2) {
+        for (let index = accuracy * 2 * 4 + accuracy * 2 * 2 + 1; index < accuracy * 2 * 4 + accuracy * 2 * 2 + accuracy * 2 * 2; index += 2) {
             indices.push(accuracy * 2 * 4 + accuracy * 2 * 2 + 1);
             indices.push(index + 1);
             indices.push(index + 2);
@@ -430,39 +423,39 @@ var RegularPolygon = /** @class */ (function (_super) {
         this.indices = indices;
         this.Colors = colors;
         this.mov_matrix[14] = -zoom;
-    };
-    RegularPolygon.prototype.Draw = function () {
-        var gl = document.getElementById(id).getContext("webgl");
+    }
+    Draw() {
+        let gl = document.getElementById(id).getContext("webgl");
         this.InitGL(this.vertices, this.Colors, this.indices);
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
-    };
-    RegularPolygon.prototype.clearMatrix = function () {
-        _super.prototype.clearMatrix.call(this);
-    };
-    return RegularPolygon;
-}(Shape));
+    }
+    clearMatrix() {
+        super.clearMatrix();
+    }
+}
 var ParticleType;
 (function (ParticleType) {
     ParticleType[ParticleType["Cube"] = 0] = "Cube";
     ParticleType[ParticleType["Sphere"] = 1] = "Sphere";
 })(ParticleType || (ParticleType = {}));
-var Particle = /** @class */ (function () {
-    function Particle(angleX, angleY, angleZ, distance, scale) {
+class Particle {
+    constructor(angleX, angleY, angleZ, distance, scale, rotationX, rotationY, rotationZ) {
         this.angleX = angleX;
         this.angleY = angleY;
         this.angleZ = angleZ;
         this.distance = distance;
         this.scale = scale;
+        this.rotationX = rotationX;
+        this.rotationY = rotationY;
+        this.rotationZ = rotationZ;
     }
-    return Particle;
-}());
-var ParticlesGenerator = /** @class */ (function (_super) {
-    __extends(ParticlesGenerator, _super);
-    function ParticlesGenerator() {
-        var _this = _super.call(this) || this;
-        _this.particles = [];
-        _this.CalculateEdges();
-        _this.Properties = {
+}
+class ParticlesGenerator extends Shape {
+    constructor() {
+        super();
+        this.particles = [];
+        this.CalculateEdges();
+        this.Properties = {
             count: 1000,
             distance: 5,
             speed: 0.1,
@@ -470,61 +463,59 @@ var ParticlesGenerator = /** @class */ (function (_super) {
             minSize: 0.1,
             maxSize: 0.4
         };
-        _this.finished = 0;
-        _this.generated = 0;
-        return _this;
+        this.finished = 0;
+        this.generated = 0;
     }
-    ParticlesGenerator.prototype.GenerateParticle = function () {
+    GenerateParticle() {
         var angleX = Math.random() * Math.PI;
         var angleY = Math.random() * Math.PI;
         var angleZ = Math.random() * Math.PI;
+        var rotationX = Math.random() * Math.PI;
+        var rotationY = Math.random() * Math.PI;
+        var rotationZ = Math.random() * Math.PI;
         var scale = Math.random() * (this.Properties.maxSize - this.Properties.minSize) + this.Properties.minSize;
         //180deg
-        this.particles.push(new Particle(angleX, angleY, angleZ, 0, scale));
-    };
-    Object.defineProperty(ParticlesGenerator.prototype, "Type", {
-        get: function () {
-            return this._type;
-        },
-        set: function (value) {
-            this._type = value;
-            this.CalculateEdges();
-        },
-        enumerable: false,
-        configurable: true
-    });
-    ParticlesGenerator.prototype.InitGL = function (vertices, colors, indices) {
-        _super.prototype.InitGL.call(this, vertices, colors, indices);
-    };
-    ParticlesGenerator.prototype.rotateZ = function (angle) {
-        _super.prototype.rotateZ.call(this, angle);
-    };
-    ParticlesGenerator.prototype.rotateX = function (angle) {
-        _super.prototype.rotateX.call(this, angle);
-    };
-    ParticlesGenerator.prototype.rotateY = function (angle) {
-        _super.prototype.rotateY.call(this, angle);
-    };
-    ParticlesGenerator.prototype.translateX = function (offset) {
-        _super.prototype.translateX.call(this, offset);
-    };
-    ParticlesGenerator.prototype.translateY = function (offset) {
-        _super.prototype.translateY.call(this, offset);
-    };
-    ParticlesGenerator.prototype.translateZ = function (offset) {
-        _super.prototype.translateZ.call(this, offset);
-    };
-    ParticlesGenerator.prototype.scaleX = function (value) {
-        _super.prototype.scaleX.call(this, value);
-    };
-    ParticlesGenerator.prototype.scaleY = function (value) {
-        _super.prototype.scaleY.call(this, value);
-    };
-    ParticlesGenerator.prototype.scaleZ = function (value) {
-        _super.prototype.scaleZ.call(this, value);
-    };
-    ParticlesGenerator.prototype.CalculateEdges = function () {
-        var gl = document.getElementById("cnvs").getContext("webgl");
+        this.particles.push(new Particle(angleX, angleY, angleZ, 0, scale, rotationX, rotationY, rotationZ));
+    }
+    get Type() {
+        return this._type;
+    }
+    set Type(value) {
+        this._type = value;
+        this.CalculateEdges();
+    }
+    InitGL(vertices, colors, indices) {
+        super.InitGL(vertices, colors, indices);
+    }
+    rotateZ(angle) {
+        super.rotateZ(angle);
+    }
+    rotateX(angle) {
+        super.rotateX(angle);
+    }
+    rotateY(angle) {
+        super.rotateY(angle);
+    }
+    translateX(offset) {
+        super.translateX(offset);
+    }
+    translateY(offset) {
+        super.translateY(offset);
+    }
+    translateZ(offset) {
+        super.translateZ(offset);
+    }
+    scaleX(value) {
+        super.scaleX(value);
+    }
+    scaleY(value) {
+        super.scaleY(value);
+    }
+    scaleZ(value) {
+        super.scaleZ(value);
+    }
+    CalculateEdges() {
+        let gl = document.getElementById("cnvs").getContext("webgl");
         var vertices = [
             -1.0, -1.0, 1.0,
             1.0, -1.0, 1.0,
@@ -589,38 +580,38 @@ var ParticlesGenerator = /** @class */ (function (_super) {
         this.indices = indices;
         this.Colors = colors;
         this.mov_matrix[14] = -zoom;
-    };
-    ParticlesGenerator.prototype.Start = function () {
+    }
+    Start() {
         if (this.Properties.count != 0) {
             this.GenerateParticle();
         }
         this.started = true;
-    };
-    ParticlesGenerator.prototype.Draw = function () {
-        var gl = document.getElementById(id).getContext("webgl");
+    }
+    Draw() {
+        let gl = document.getElementById(id).getContext("webgl");
         if (this.started) {
-            for (var index = 0; index < this.particles.length; index++) {
+            for (let index = 0; index < this.particles.length; index++) {
                 var x = Math.cos(this.particles[index].angleX) * this.particles[index].distance;
                 var y = Math.sin(this.particles[index].angleY) * this.particles[index].distance;
                 var z = Math.sin(this.particles[index].angleZ) * this.particles[index].distance;
                 if (isNaN(z)) {
                     z = 0;
                 }
+                var movMatrix = Array.from(this.mov_matrix);
                 this.translateX(x);
                 this.translateY(y);
                 this.translateZ(z);
+                this.rotateX(this.particles[index].rotationX);
+                this.rotateY(this.particles[index].rotationY);
+                this.rotateZ(this.particles[index].rotationZ);
                 var scaleValue = 1 - this.particles[index].distance / this.Properties.distance;
                 this.scaleX(this.particles[index].scale * scaleValue);
                 this.scaleY(this.particles[index].scale * scaleValue);
                 this.scaleZ(this.particles[index].scale * scaleValue);
                 this.InitGL(this.vertices, this.Colors, this.indices);
                 gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
-                this.translateX(-x);
-                this.translateY(-y);
-                this.translateZ(-z);
-                this.scaleX(1 / (this.particles[index].scale * scaleValue));
-                this.scaleY(1 / (this.particles[index].scale * scaleValue));
-                this.scaleZ(1 / (this.particles[index].scale * scaleValue));
+                this.mov_matrix = movMatrix;
+                console.log(this.mov_matrix);
                 if (this.particles[index].distance >= this.Properties.distance) {
                     this.finished++;
                     this.particles.splice(index, 1);
@@ -643,12 +634,11 @@ var ParticlesGenerator = /** @class */ (function (_super) {
                 this.started = false;
             }
         }
-    };
-    ParticlesGenerator.prototype.clearMatrix = function () {
-        _super.prototype.clearMatrix.call(this);
-    };
-    return ParticlesGenerator;
-}(Shape));
+    }
+    clearMatrix() {
+        super.clearMatrix();
+    }
+}
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 var c1 = [0, 0, 0];
 var c2 = [1, 0, 0];
@@ -656,7 +646,7 @@ var c3 = [1, 1, 0];
 var currentShape;
 var Shapes = [];
 var zoom = 10;
-var id = "cnvs";
+const id = "cnvs";
 var EasingType;
 (function (EasingType) {
     EasingType[EasingType["arc"] = 0] = "arc";
@@ -678,13 +668,13 @@ function EasingFunction(t, type, concomitantParam) {
     return 0;
 }
 function DrawScene() {
-    var gl = document.getElementById("cnvs").getContext("webgl");
+    let gl = document.getElementById("cnvs").getContext("webgl");
     gl.clearColor(0.5, 0.5, 0.5, 1);
     gl.clearDepth(1.0);
     gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     Rotate();
-    for (var index = 0; index < Shapes.length; index++) {
+    for (let index = 0; index < Shapes.length; index++) {
         Shapes[index].Draw();
     }
     requestAnimationFrame(DrawScene);
@@ -714,15 +704,15 @@ function Rotate() {
         rotateT = 0;
     }
 }
-var defaultDelta = 3;
+const defaultDelta = 3;
 var deltaX = 0;
 var deltaY = 0;
 var rotateT = 0;
 var rotationEnded = true;
 var scaled = false;
 var mouseDown = new DOMPoint();
-window.onload = function () {
-    document.getElementById("approve").onclick = function () {
+window.onload = () => {
+    document.getElementById("approve").onclick = () => {
         //accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
     };
     window.onresize(new UIEvent("resize"));
@@ -731,25 +721,25 @@ window.onload = function () {
     Shapes.push(currentShape);
     DrawScene();
 };
-document.onmousedown = function (ev) {
+document.onmousedown = (ev) => {
     if (!rotationEnded) {
         return;
     }
     mouseDown.x = ev.pageX;
     mouseDown.y = ev.pageY;
 };
-document.onwheel = function (ev) {
+document.onwheel = (ev) => {
     var value = ev.deltaY / Math.abs(ev.deltaY) * 0.1 + 1;
     currentShape.scaleX(value);
     currentShape.scaleY(value);
     currentShape.scaleZ(value);
 };
-window.onresize = function (ev) {
+window.onresize = (ev) => {
     var cnvs = document.getElementById("cnvs");
     cnvs.setAttribute("width", (innerWidth).toString());
     cnvs.setAttribute("height", (innerHeight).toString());
 };
-document.onmouseup = function (ev) {
+document.onmouseup = (ev) => {
     if (!rotationEnded) {
         return;
     }
@@ -784,7 +774,7 @@ function transposeMat4(matrix) {
         0, 0, 0, 0,
         0, 0, 0, 0
     ];
-    for (var index = 0; index < matrix.length; index++) {
+    for (let index = 0; index < matrix.length; index++) {
         var col = index % 4;
         var row = Math.floor(index / 4);
         var newIndex = col * 4 + row;
