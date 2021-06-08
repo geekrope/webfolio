@@ -463,7 +463,7 @@ var ParticlesGenerator = /** @class */ (function (_super) {
         _this.particles = [];
         _this.CalculateEdges();
         _this.Properties = {
-            count: 20,
+            count: 1000,
             distance: 5,
             speed: 0.1,
             colorBuffer: [1, 0, 1],
@@ -471,6 +471,7 @@ var ParticlesGenerator = /** @class */ (function (_super) {
             maxSize: 0.4
         };
         _this.finished = 0;
+        _this.generated = 0;
         return _this;
     }
     ParticlesGenerator.prototype.GenerateParticle = function () {
@@ -608,28 +609,37 @@ var ParticlesGenerator = /** @class */ (function (_super) {
                 this.translateX(x);
                 this.translateY(y);
                 this.translateZ(z);
-                this.scaleX(this.particles[index].scale);
-                this.scaleY(this.particles[index].scale);
-                this.scaleZ(this.particles[index].scale);
+                var scaleValue = 1 - this.particles[index].distance / this.Properties.distance;
+                this.scaleX(this.particles[index].scale * scaleValue);
+                this.scaleY(this.particles[index].scale * scaleValue);
+                this.scaleZ(this.particles[index].scale * scaleValue);
                 this.InitGL(this.vertices, this.Colors, this.indices);
                 gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
                 this.translateX(-x);
                 this.translateY(-y);
                 this.translateZ(-z);
-                this.scaleX(1 / this.particles[index].scale);
-                this.scaleY(1 / this.particles[index].scale);
-                this.scaleZ(1 / this.particles[index].scale);
+                this.scaleX(1 / (this.particles[index].scale * scaleValue));
+                this.scaleY(1 / (this.particles[index].scale * scaleValue));
+                this.scaleZ(1 / (this.particles[index].scale * scaleValue));
                 if (this.particles[index].distance >= this.Properties.distance) {
                     this.finished++;
+                    this.particles.splice(index, 1);
+                    index--;
+                    continue;
                 }
                 this.particles[index].distance += this.Properties.speed;
             }
-            if (this.particles.length < this.Properties.count) {
+            if (this.generated < this.Properties.count) {
                 this.GenerateParticle();
+                this.generated++;
+            }
+            else {
+                console.log(">>>");
             }
             if (this.finished >= this.Properties.count) {
                 this.particles = [];
                 this.finished = 0;
+                this.generated = 0;
                 this.started = false;
             }
         }
