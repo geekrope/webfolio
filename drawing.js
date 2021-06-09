@@ -1,3 +1,5 @@
+function InitBuffers() {
+}
 class Shape {
     constructor() {
         this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
@@ -8,15 +10,12 @@ class Shape {
         var vertex_buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        // Create and store data into color buffer
         var color_buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-        // Create and store data into index buffer
         var index_buffer = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-        /*=================== Shaders =========================*/
         var vertCode = `attribute vec3 position;
 		uniform mat4 Pmatrix;
 		uniform mat4 Vmatrix;
@@ -43,24 +42,20 @@ class Shape {
         gl.attachShader(shaderProgram, vertShader);
         gl.attachShader(shaderProgram, fragShader);
         gl.linkProgram(shaderProgram);
-        /* ====== Associating attributes to vertex shader =====*/
         var Pmatrix = gl.getUniformLocation(shaderProgram, "Pmatrix");
         var Vmatrix = gl.getUniformLocation(shaderProgram, "Vmatrix");
         var Mmatrix = gl.getUniformLocation(shaderProgram, "Mmatrix");
         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
         var position = gl.getAttribLocation(shaderProgram, "position");
         gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 0, 0);
-        // Position
         gl.enableVertexAttribArray(position);
         gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
         var color = gl.getAttribLocation(shaderProgram, "color");
         gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 0, 0);
-        // Color
         gl.enableVertexAttribArray(color);
         gl.useProgram(shaderProgram);
-        /*==================== MATRIX =====================*/
         function get_projection(angle, a, zMin, zMax) {
-            var ang = Math.tan((angle * .5) * Math.PI / 180); //angle*.5
+            var ang = Math.tan((angle * .5) * Math.PI / 180);
             return [
                 0.5 / ang, 0, 0, 0,
                 0, 0.5 * a / ang, 0, 0,
@@ -188,7 +183,6 @@ class Sphere extends Shape {
         super.scaleZ(value);
     }
     CalculateEdges() {
-        let gl = document.getElementById(id).getContext("webgl");
         var vertices = [];
         var colors = [];
         var indices = [];
@@ -454,14 +448,15 @@ class ParticlesGenerator extends Shape {
     constructor() {
         super();
         this.particles = [];
-        this.CalculateEdges();
+        this.Type = ParticleType.Sphere;
         this.Properties = {
-            count: 1000,
+            count: -1,
             distance: 5,
             speed: 0.1,
             colorBuffer: [1, 0, 1],
-            minSize: 0.1,
-            maxSize: 0.4
+            minSize: 0.01,
+            maxSize: 0.1,
+            countOnFrame: 20
         };
         this.finished = 0;
         this.generated = 0;
@@ -515,70 +510,170 @@ class ParticlesGenerator extends Shape {
         super.scaleZ(value);
     }
     CalculateEdges() {
-        let gl = document.getElementById("cnvs").getContext("webgl");
-        var vertices = [
-            -1.0, -1.0, 1.0,
-            1.0, -1.0, 1.0,
-            1.0, 1.0, 1.0,
-            -1.0, 1.0, 1.0,
-            -1.0, -1.0, -1.0,
-            -1.0, 1.0, -1.0,
-            1.0, 1.0, -1.0,
-            1.0, -1.0, -1.0,
-            -1.0, 1.0, -1.0,
-            -1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0,
-            1.0, 1.0, -1.0,
-            -1.0, -1.0, -1.0,
-            1.0, -1.0, -1.0,
-            1.0, -1.0, 1.0,
-            -1.0, -1.0, 1.0,
-            1.0, -1.0, -1.0,
-            1.0, 1.0, -1.0,
-            1.0, 1.0, 1.0,
-            1.0, -1.0, 1.0,
-            -1.0, -1.0, -1.0,
-            -1.0, -1.0, 1.0,
-            -1.0, 1.0, 1.0,
-            -1.0, 1.0, -1.0
-        ];
-        var colors = [
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            1, 0, 1,
-            1, 0, 1,
-            1, 0, 1,
-            1, 0, 1,
-            1, 1, 1,
-            1, 1, 1,
-            1, 1, 1,
-            1, 1, 1,
-            1, 1, 0,
-            1, 1, 0,
-            1, 1, 0,
-            1, 1, 0,
-        ];
-        var indices = [
-            0, 1, 2, 0, 2, 3,
-            4, 5, 6, 4, 6, 7,
-            8, 9, 10, 8, 10, 11,
-            12, 13, 14, 12, 14, 15,
-            16, 17, 18, 16, 18, 19,
-            20, 21, 22, 20, 22, 23
-        ];
-        this.vertices = vertices;
-        this.indices = indices;
-        this.Colors = colors;
+        var vertices = [];
+        var colors = [];
+        var indices = [];
+        if (this._type == ParticleType.Cube) {
+            vertices = [
+                -1.0, -1.0, 1.0,
+                1.0, -1.0, 1.0,
+                1.0, 1.0, 1.0,
+                -1.0, 1.0, 1.0,
+                -1.0, -1.0, -1.0,
+                -1.0, 1.0, -1.0,
+                1.0, 1.0, -1.0,
+                1.0, -1.0, -1.0,
+                -1.0, 1.0, -1.0,
+                -1.0, 1.0, 1.0,
+                1.0, 1.0, 1.0,
+                1.0, 1.0, -1.0,
+                -1.0, -1.0, -1.0,
+                1.0, -1.0, -1.0,
+                1.0, -1.0, 1.0,
+                -1.0, -1.0, 1.0,
+                1.0, -1.0, -1.0,
+                1.0, 1.0, -1.0,
+                1.0, 1.0, 1.0,
+                1.0, -1.0, 1.0,
+                -1.0, -1.0, -1.0,
+                -1.0, -1.0, 1.0,
+                -1.0, 1.0, 1.0,
+                -1.0, 1.0, -1.0
+            ];
+            colors = [
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                1, 0, 1,
+                1, 0, 1,
+                1, 0, 1,
+                1, 0, 1,
+                1, 1, 1,
+                1, 1, 1,
+                1, 1, 1,
+                1, 1, 1,
+                1, 1, 0,
+                1, 1, 0,
+                1, 1, 0,
+                1, 1, 0,
+            ];
+            indices = [
+                0, 1, 2, 0, 2, 3,
+                4, 5, 6, 4, 6, 7,
+                8, 9, 10, 8, 10, 11,
+                12, 13, 14, 12, 14, 15,
+                16, 17, 18, 16, 18, 19,
+                20, 21, 22, 20, 22, 23
+            ];
+            this.vertices = vertices;
+            this.indices = indices;
+            this.Colors = colors;
+        }
+        else if (this._type == ParticleType.Sphere) {
+            const parallelsCount = 15;
+            var count = 15;
+            var yellow = [
+                1, 1, 0,
+            ];
+            var green = [
+                0, 1, 0,
+            ];
+            var red = [
+                1, 0, 0,
+            ];
+            var pink = [
+                1, 0, 1,
+            ];
+            var addColor = (buffer) => {
+                let index = 0;
+                for (; index < buffer.length; index++) {
+                    colors.push(buffer[index]);
+                }
+            };
+            var calcHalf = (zSign) => {
+                for (let angleRelativeY = 0; angleRelativeY < parallelsCount; angleRelativeY += 1) {
+                    var absoluteY = Math.sin((angleRelativeY / (parallelsCount - 1) * Math.PI) + Math.PI / 2);
+                    var xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
+                    var radius = -xStart;
+                    for (let angleRelativeX = 0; angleRelativeX < count; angleRelativeX += 1) {
+                        var absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
+                        var z = Math.sin(Math.acos(absoluteX / radius)) * radius;
+                        if (isNaN(z)) {
+                            z = 0;
+                        }
+                        vertices.push(absoluteX, absoluteY, z * zSign);
+                    }
+                }
+            };
+            for (let i = 0; i < parallelsCount; i++) {
+                for (let i2 = 0; i2 < count; i2++) {
+                    if (i < (parallelsCount - 1) / 2) {
+                        addColor(yellow);
+                    }
+                    else {
+                        addColor(green);
+                    }
+                }
+            }
+            for (let i = 0; i < parallelsCount; i++) {
+                for (let i2 = 0; i2 < count; i2++) {
+                    if (i < (parallelsCount - 1) / 2) {
+                        addColor(red);
+                    }
+                    else {
+                        addColor(pink);
+                    }
+                }
+            }
+            calcHalf(1);
+            calcHalf(-1);
+            let index1 = 0;
+            let index2 = count;
+            var bounds = 0;
+            for (let y = 0; y <= parallelsCount; y += 1) {
+                index1 = bounds;
+                bounds += count;
+                index2 = bounds;
+                for (; index1 < bounds - 1;) {
+                    indices.push(index1);
+                    indices.push(index2);
+                    indices.push(index2 + 1);
+                    indices.push(index1);
+                    indices.push(index1 + 1);
+                    indices.push(index2 + 1);
+                    index1++;
+                    index2++;
+                }
+            }
+            for (let y = 0; y <= parallelsCount; y += 1) {
+                index1 = bounds;
+                bounds += count;
+                index2 = bounds;
+                for (; index1 < bounds - 1;) {
+                    indices.push(index1);
+                    indices.push(index2);
+                    indices.push(index2 + 1);
+                    indices.push(index1);
+                    indices.push(index1 + 1);
+                    indices.push(index2 + 1);
+                    index1++;
+                    index2++;
+                }
+            }
+            const vertexNormals = [];
+            this.vertices = vertices;
+            this.indices = indices;
+            this.Colors = colors;
+        }
         this.mov_matrix[14] = -zoom;
     }
     Start() {
@@ -611,7 +706,7 @@ class ParticlesGenerator extends Shape {
                 this.InitGL(this.vertices, this.Colors, this.indices);
                 gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
                 this.mov_matrix = movMatrix;
-                if (this.particles[index].distance >= this.Properties.distance && this.generated < this.Properties.count) {
+                if (this.particles[index].distance >= this.Properties.distance && (this.generated < this.Properties.count || this.Properties.count == -1)) {
                     this.finished++;
                     this.generated++;
                     this.particles[index] = this.GenerateParticle();
@@ -619,7 +714,10 @@ class ParticlesGenerator extends Shape {
                 }
                 this.particles[index].distance += this.Properties.speed;
             }
-            if (this.finished >= this.Properties.count) {
+            if (this.particles.length < this.Properties.countOnFrame) {
+                this.particles.push(this.GenerateParticle());
+            }
+            if (this.finished >= this.Properties.count && this.Properties.count != -1) {
                 this.particles = [];
                 this.finished = 0;
                 this.generated = 0;
