@@ -300,6 +300,13 @@ class RegularPolygon extends Shape {
     Circle(angle, r) {
         return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
     }
+    get N() {
+        return this.n;
+    }
+    set N(value) {
+        this.n = value;
+        this.CalculateEdges();
+    }
     InitGL(vertices, colors, indices) {
         super.InitGL(vertices, colors, indices);
     }
@@ -433,7 +440,7 @@ var ParticleType;
     ParticleType[ParticleType["Sphere"] = 1] = "Sphere";
 })(ParticleType || (ParticleType = {}));
 class Particle {
-    constructor(angleX, angleY, angleZ, distance, scale, rotationX, rotationY, rotationZ) {
+    constructor(angleX, angleY, angleZ, distance, scale, rotationX, rotationY, rotationZ, distanceMax) {
         this.angleX = angleX;
         this.angleY = angleY;
         this.angleZ = angleZ;
@@ -442,6 +449,7 @@ class Particle {
         this.rotationX = rotationX;
         this.rotationY = rotationY;
         this.rotationZ = rotationZ;
+        this.distanceMax = distanceMax;
     }
 }
 class ParticlesGenerator extends Shape {
@@ -451,7 +459,8 @@ class ParticlesGenerator extends Shape {
         this.Type = ParticleType.Sphere;
         this.Properties = {
             count: -1,
-            distance: 5,
+            maxDistance: 5,
+            minDistance: 1,
             speed: 0.1,
             colorBuffer: [1, 0, 1],
             minSize: 0.01,
@@ -470,7 +479,7 @@ class ParticlesGenerator extends Shape {
         var rotationZ = Math.random() * Math.PI;
         var scale = Math.random() * (this.Properties.maxSize - this.Properties.minSize) + this.Properties.minSize;
         //180deg
-        return new Particle(angleX, angleY, angleZ, 0, scale, rotationX, rotationY, rotationZ);
+        return new Particle(angleX, angleY, angleZ, 0, scale, rotationX, rotationY, rotationZ, Math.random() * (this.Properties.maxDistance - this.Properties.minDistance) + this.Properties.minDistance);
     }
     get Type() {
         return this._type;
@@ -699,14 +708,14 @@ class ParticlesGenerator extends Shape {
                 this.rotateX(this.particles[index].rotationX);
                 this.rotateY(this.particles[index].rotationY);
                 this.rotateZ(this.particles[index].rotationZ);
-                var scaleValue = 1 - this.particles[index].distance / this.Properties.distance;
+                var scaleValue = 1 - this.particles[index].distance / this.particles[index].distanceMax;
                 this.scaleX(this.particles[index].scale * scaleValue);
                 this.scaleY(this.particles[index].scale * scaleValue);
                 this.scaleZ(this.particles[index].scale * scaleValue);
                 this.InitGL(this.vertices, this.Colors, this.indices);
                 gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
                 this.mov_matrix = movMatrix;
-                if (this.particles[index].distance >= this.Properties.distance && (this.generated < this.Properties.count || this.Properties.count == -1)) {
+                if (this.particles[index].distance >= this.particles[index].distanceMax && (this.generated < this.Properties.count || this.Properties.count == -1)) {
                     this.finished++;
                     this.generated++;
                     this.particles[index] = this.GenerateParticle();

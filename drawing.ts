@@ -565,7 +565,8 @@ class Particle {
 	public rotationZ: number;
 	public scale: number;
 	public distance: number;
-	public constructor(angleX: number, angleY: number, angleZ: number, distance: number, scale: number, rotationX: number, rotationY: number, rotationZ: number) {
+	public distanceMax: number;
+	public constructor(angleX: number, angleY: number, angleZ: number, distance: number, scale: number, rotationX: number, rotationY: number, rotationZ: number, distanceMax) {
 		this.angleX = angleX;
 		this.angleY = angleY;
 		this.angleZ = angleZ;
@@ -574,6 +575,7 @@ class Particle {
 		this.rotationX = rotationX;
 		this.rotationY = rotationY;
 		this.rotationZ = rotationZ;
+		this.distanceMax = distanceMax;
 	}
 }
 
@@ -597,7 +599,7 @@ class ParticlesGenerator extends Shape {
 
 		var scale = Math.random() * (this.Properties.maxSize - this.Properties.minSize) + this.Properties.minSize;
 		//180deg
-		return new Particle(angleX, angleY, angleZ, 0, scale, rotationX, rotationY, rotationZ);
+		return new Particle(angleX, angleY, angleZ, 0, scale, rotationX, rotationY, rotationZ, Math.random() * (this.Properties.maxDistance - this.Properties.minDistance) + this.Properties.minDistance);
 	}
 	public get Type(): ParticleType {
 		return this._type;
@@ -610,7 +612,8 @@ class ParticlesGenerator extends Shape {
 	public Properties: {
 		count: number,
 		colorBuffer: number[],
-		distance: number,
+		maxDistance: number,
+		minDistance: number,
 		speed: number,
 		minSize: number,
 		maxSize: number,
@@ -853,7 +856,8 @@ class ParticlesGenerator extends Shape {
 		this.Type = ParticleType.Sphere;
 		this.Properties = {
 			count: -1,
-			distance: 5,
+			maxDistance: 5,
+			minDistance: 1,
 			speed: 0.1,
 			colorBuffer: [1, 0, 1],
 			minSize: 0.01,
@@ -885,7 +889,7 @@ class ParticlesGenerator extends Shape {
 				this.rotateY(this.particles[index].rotationY);
 				this.rotateZ(this.particles[index].rotationZ);
 
-				var scaleValue = 1 - this.particles[index].distance / this.Properties.distance;
+				var scaleValue = 1 - this.particles[index].distance / this.particles[index].distanceMax;
 
 				this.scaleX(this.particles[index].scale * scaleValue);
 				this.scaleY(this.particles[index].scale * scaleValue);
@@ -897,7 +901,7 @@ class ParticlesGenerator extends Shape {
 
 				this.mov_matrix = movMatrix;
 
-				if (this.particles[index].distance >= this.Properties.distance && (this.generated < this.Properties.count || this.Properties.count == -1)) {
+				if (this.particles[index].distance >= this.particles[index].distanceMax && (this.generated < this.Properties.count || this.Properties.count == -1)) {
 					this.finished++;
 					this.generated++;
 					this.particles[index] = this.GenerateParticle();
