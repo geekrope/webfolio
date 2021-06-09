@@ -365,11 +365,18 @@ class RegularPolygon extends Shape {
 	protected mov_matrix: number[];
 	protected vertices: number[];
 	protected indices: number[];
+	protected n: number;
 	private Circle(angle: number, r: number): DOMPoint {
 		return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
 	}
 	public Opacity: number;
-	public N: number;
+	public get N() {
+		return this.n;
+	}
+	public set N(value: number) {
+		this.n = value;
+		CalculateEdges();
+	}
 	public Colors: number[];
 	public InitGL(vertices: number[], colors: number[], indices: number[]) {
 		super.InitGL(vertices, colors, indices);
@@ -854,7 +861,7 @@ class ParticlesGenerator extends Shape {
 			countOnFrame: 20
 		}
 		this.finished = 0;
-		this.generated = 0;	
+		this.generated = 0;
 	}
 	public Draw(): void {
 		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
@@ -893,7 +900,7 @@ class ParticlesGenerator extends Shape {
 				if (this.particles[index].distance >= this.Properties.distance && (this.generated < this.Properties.count || this.Properties.count == -1)) {
 					this.finished++;
 					this.generated++;
-					this.particles[index] = this.GenerateParticle();					
+					this.particles[index] = this.GenerateParticle();
 					continue;
 				}
 				this.particles[index].distance += this.Properties.speed;
