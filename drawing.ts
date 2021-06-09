@@ -375,7 +375,7 @@ class RegularPolygon extends Shape {
 	}
 	public set N(value: number) {
 		this.n = value;
-		CalculateEdges();
+		this.CalculateEdges();
 	}
 	public Colors: number[];
 	public InitGL(vertices: number[], colors: number[], indices: number[]) {
