@@ -105,7 +105,10 @@ class Shape implements Drawable {
 
 	}
 	public Draw(): void {
+		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
+		this.InitGL(this.vertices, this.Colors, this.indices);
 
+		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
 	}
 	public rotateZ(angle: number): void {
 		var m = this.mov_matrix;
@@ -188,8 +191,15 @@ class Sphere extends Shape {
 	protected mov_matrix: number[];
 	protected vertices: number[];
 	protected indices: number[];
+	protected quality: number;
 	public Opacity: number;
-	public Quality: number;
+	public get Quality(): number {
+		return this.quality;
+	}
+	public set Quality(value: number) {
+		this.quality = value;
+		this.CalculateEdges();
+	}
 	public Colors: number[];
 	public InitGL(vertices: number[], colors: number[], indices: number[]) {
 		super.InitGL(vertices, colors, indices);
@@ -351,10 +361,7 @@ class Sphere extends Shape {
 		this.CalculateEdges();
 	}
 	public Draw(): void {
-		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
-		this.InitGL(this.vertices, this.Colors, this.indices);
-
-		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+		super.Draw();
 	}
 	public clearMatrix() {
 		super.clearMatrix();
@@ -409,8 +416,6 @@ class RegularPolygon extends Shape {
 		super.scaleZ(value);
 	}
 	public CalculateEdges(): void {
-		let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
-
 		var accuracy = this.N / 2;
 
 		var vertices = [
@@ -542,10 +547,7 @@ class RegularPolygon extends Shape {
 		this.CalculateEdges();
 	}
 	public Draw(): void {
-		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
-		this.InitGL(this.vertices, this.Colors, this.indices);
-
-		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+		super.Draw();
 	}
 	public clearMatrix() {
 		super.clearMatrix();
@@ -579,6 +581,17 @@ class Particle {
 	}
 }
 
+class ParticlesGeneratorProperties {
+	public count: number;
+	public colorBuffer: number[];
+	public maxDistance: number;
+	public minDistance: number;
+	public speed: number;
+	public minSize: number;
+	public maxSize: number;
+	public countOnFrame: number;
+}
+
 class ParticlesGenerator extends Shape {
 	protected mov_matrix: number[];
 	protected vertices: number[];
@@ -588,6 +601,7 @@ class ParticlesGenerator extends Shape {
 	protected started: boolean;
 	protected finished: number;
 	protected generated: number;
+	protected properties: ParticlesGeneratorProperties;
 	protected GenerateParticle(): Particle {
 		var angleX = Math.random() * Math.PI;
 		var angleY = Math.random() * Math.PI;
@@ -609,16 +623,12 @@ class ParticlesGenerator extends Shape {
 		this.CalculateEdges();
 	}
 	public Opacity: number;
-	public Properties: {
-		count: number,
-		colorBuffer: number[],
-		maxDistance: number,
-		minDistance: number,
-		speed: number,
-		minSize: number,
-		maxSize: number,
-		countOnFrame: number
-	};
+	public get Properties(): ParticlesGeneratorProperties {
+		return this.properties;
+	}
+	public set Properties(value: ParticlesGeneratorProperties) {
+		this.properties = value;		
+	}
 	public InitGL(vertices: number[], colors: number[], indices: number[]) {
 		super.InitGL(vertices, colors, indices);
 	}
@@ -1014,9 +1024,12 @@ window.onload = () => {
 		//accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
 	}
 	window.onresize(new UIEvent("resize"));
-	currentShape = new ParticlesGenerator();
-	(<ParticlesGenerator>currentShape).Start();
+	currentShape = new Sphere();
+	var generator = new ParticlesGenerator();
+	generator.Type = ParticleType.Cube;
+	generator.Start();
 	Shapes.push(currentShape);
+	Shapes.push(generator);
 	DrawScene();
 }
 

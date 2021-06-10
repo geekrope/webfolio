@@ -815,9 +815,12 @@ window.onload = () => {
         //accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
     };
     window.onresize(new UIEvent("resize"));
-    currentShape = new ParticlesGenerator();
-    currentShape.Start();
+    currentShape = new Sphere();
+    var generator = new ParticlesGenerator();
+    generator.Type = ParticleType.Cube;
+    generator.Start();
     Shapes.push(currentShape);
+    Shapes.push(generator);
     DrawScene();
 };
 document.onmousedown = (ev) => {
