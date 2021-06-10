@@ -92,6 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="drawing.ts" />
+    <TypeScriptCompile Include="rasterizesvg.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
