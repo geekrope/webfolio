@@ -68,6 +68,18 @@ function CalculatePolygons(paths) {
                         polygons.push(new Array());
                         continue;
                     }
+                    if (currentShapes[index] == "h") {
+                        var value = parseFloat(points[index]);
+                        movePoint = new DOMPoint(value, movePoint.y);
+                        polygons[pathIndex].push(movePoint);
+                        continue;
+                    }
+                    if (currentShapes[index] == "v") {
+                        var value = parseFloat(points[index]);
+                        movePoint = new DOMPoint(movePoint.x, value);
+                        polygons[pathIndex].push(movePoint);
+                        continue;
+                    }
                     var shapeControlPoints = [];
                     var split = points[index].split(" ");
                     for (let index = 0; index < split.length; index++) {

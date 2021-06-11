@@ -89,6 +89,18 @@ function CalculatePolygons(paths: Attribute[][]): DOMPoint[][] {
 						polygons.push(new Array<DOMPoint>());
 						continue;
 					}
+					if (currentShapes[index] == "h") {
+						var value = parseFloat(points[index]);
+						movePoint = new DOMPoint(value, movePoint.y);
+						polygons[pathIndex].push(movePoint);
+						continue;
+					}
+					if (currentShapes[index] == "v") {
+						var value = parseFloat(points[index]);
+						movePoint = new DOMPoint(movePoint.x, value);
+						polygons[pathIndex].push(movePoint);
+						continue;
+					}
 					var shapeControlPoints: DOMPoint[] = [];
 					var split = points[index].split(" ");
 					for (let index = 0; index < split.length; index++) {
