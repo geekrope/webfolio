@@ -57,8 +57,10 @@ function CalculatePolygons(paths) {
     let accuracy = 0.001;
     let movePoint = new DOMPoint();
     let mPoint = new DOMPoint();
-    for (let pathIndex = 0; pathIndex < paths.length; pathIndex++) {
+    let polygonIndex = 0;
+    for (let pathIndex = 0; pathIndex < paths.length;) {
         polygons.push(new Array());
+        let currentPolygon = polygons[polygonIndex];
         for (let attributeIndex = 0; attributeIndex < paths[pathIndex].length; attributeIndex++) {
             let attribute = paths[pathIndex][attributeIndex];
             if (attribute.name == "d") {
@@ -71,20 +73,22 @@ function CalculatePolygons(paths) {
                 let points = splitMulti(attribute.value, ...shapes);
                 for (let index = 0; index < currentShapes.length; index++) {
                     if (currentShapes[index] == "z") {
-                        polygons[pathIndex].push(mPoint);
+                        currentPolygon.push(mPoint);
                         polygons.push(new Array());
+                        polygonIndex++;
+                        currentPolygon = polygons[polygonIndex];
                         continue;
                     }
                     if (currentShapes[index] == "h") {
                         let value = parseFloat(points[index]);
                         movePoint = new DOMPoint(value, movePoint.y);
-                        polygons[pathIndex].push(movePoint);
+                        currentPolygon.push(movePoint);
                         continue;
                     }
                     if (currentShapes[index] == "v") {
                         let value = parseFloat(points[index]);
                         movePoint = new DOMPoint(movePoint.x, value);
-                        polygons[pathIndex].push(movePoint);
+                        currentPolygon.push(movePoint);
                         continue;
                     }
                     let shapeControlPoints = [];
@@ -113,7 +117,7 @@ function CalculatePolygons(paths) {
                         for (let t = 0; t < 1; t += accuracy) {
                             let x = (1 - t) * (1 - t) * p1.x + 2 * (1 - t) * t * p2.x + t * t * p3.x;
                             let y = (1 - t) * (1 - t) * p1.y + 2 * (1 - t) * t * p2.y + t * t * p3.y;
-                            polygons[pathIndex].push(new DOMPoint(x, y));
+                            currentPolygon.push(new DOMPoint(x, y));
                         }
                         movePoint = shapeControlPoints[1];
                     }
@@ -127,14 +131,16 @@ function CalculatePolygons(paths) {
                                 3 * (1 - t) * t * t * p3.x + Math.pow(t, 3) * p4.x;
                             let y = Math.pow((1 - t), 3) * p1.y + 3 * (1 - t) * (1 - t) * t * p2.y +
                                 3 * (1 - t) * t * t * p3.y + Math.pow(t, 3) * p4.y;
-                            polygons[pathIndex].push(new DOMPoint(x, y));
+                            currentPolygon.push(new DOMPoint(x, y));
                         }
                         movePoint = shapeControlPoints[1];
                     }
-                    polygons[pathIndex].push(movePoint);
+                    currentPolygon.push(movePoint);
                 }
             }
         }
+        polygonIndex++;
+        pathIndex++;
     }
     return polygons;
 }
