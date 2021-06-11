@@ -11,24 +11,28 @@ function ParseSvg(src) {
     var closeTag = "/>";
     var pathIndex = 0;
     for (;;) {
-        paths.push(content);
+        var ind1 = src.indexOf(openTag);
+        var ind2 = src.indexOf(closeTag);
         if (ind1 == -1 || ind2 == -1) {
             break;
         }
-        var ind1 = src.indexOf(openTag);
-        var ind2 = src.indexOf(closeTag);
         var content = src.substring(ind1 + openTag.length, ind2);
-        var split = content.split(" ");
+        src = src.replace(openTag + content + closeTag, "");
+        paths.push(content);
+        for (; content.indexOf(" ") == -1;) {
+            content = content.replace(" ", "");
+        }
+        var split = content.split(`"`);
         attrs.push(new Array());
-        for (let index = 0; index < split.length; index++) {
+        for (let index = 0; index < split.length; index += 2) {
             if (split[index] == "") {
                 split.splice(index);
                 index--;
             }
             else {
-                var fInd = split[index].indexOf(`"`);
-                var sInd = split[index].replace(`"`, "").indexOf(`"`);
-                attrs[pathIndex].push(new Attribute(split[index].split("=")[0], content.substring(fInd + 1, sInd)));
+                var name = split[index].replace("=", "");
+                var value = split[index + 1];
+                attrs[pathIndex].push(new Attribute(name, value));
             }
         }
         pathIndex++;
