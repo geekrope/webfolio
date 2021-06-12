@@ -313,6 +313,7 @@ var content = `
 <path d="M597.79 827.168C598.83 827.168 599.71 827.344 600.43 827.696C601.166 828.048 601.75 828.544 602.182 829.184C602.63 829.808 602.934 830.552 603.094 831.416C603.27 832.28 603.318 833.216 603.238 834.224H594.43C594.43 834.784 594.518 835.24 594.694 835.592C594.87 835.944 595.11 836.216 595.414 836.408C595.718 836.6 596.062 836.736 596.446 836.816C596.83 836.88 597.238 836.912 597.67 836.912C597.974 836.912 598.286 836.904 598.606 836.888C598.926 836.856 599.222 836.8 599.494 836.72C599.766 836.624 600.006 836.488 600.214 836.312C600.438 836.136 600.59 835.896 600.67 835.592H602.974C602.814 836.232 602.566 836.776 602.23 837.224C601.91 837.656 601.518 838.008 601.054 838.28C600.606 838.552 600.094 838.752 599.518 838.88C598.958 839.008 598.358 839.072 597.718 839.072C595.782 839.072 594.366 838.568 593.47 837.56C592.59 836.552 592.15 835.072 592.15 833.12C592.15 832.256 592.262 831.464 592.486 830.744C592.726 830.008 593.078 829.376 593.542 828.848C594.006 828.32 594.59 827.912 595.294 827.624C595.998 827.32 596.83 827.168 597.79 827.168ZM601.006 832.112C600.99 831.92 600.95 831.664 600.886 831.344C600.822 831.008 600.678 830.688 600.454 830.384C600.246 830.064 599.934 829.792 599.518 829.568C599.102 829.344 598.534 829.232 597.814 829.232C597.158 829.232 596.614 829.328 596.182 829.52C595.75 829.712 595.398 829.952 595.126 830.24C594.87 830.528 594.686 830.84 594.574 831.176C594.478 831.512 594.43 831.824 594.43 832.112H601.006Z" fill="#898989"/>
 <path d="M614.168 839.024L613.928 837.704H613.856C613.488 838.056 612.976 838.368 612.32 838.64C611.68 838.896 611.016 839.024 610.328 839.024C609.688 839.024 609.032 838.968 608.36 838.856C607.704 838.728 607.104 838.456 606.56 838.04C606.032 837.624 605.592 837.024 605.24 836.24C604.904 835.456 604.736 834.4 604.736 833.072C604.736 831.744 604.904 830.688 605.24 829.904C605.576 829.12 606.016 828.52 606.56 828.104C607.104 827.688 607.704 827.416 608.36 827.288C609.032 827.16 609.688 827.096 610.328 827.096C611.096 827.096 611.8 827.216 612.44 827.456C613.096 827.696 613.544 828 613.784 828.368H613.832V822.2H616.088V839.024H614.168ZM610.424 836.768C610.936 836.768 611.392 836.736 611.792 836.672C612.208 836.608 612.56 836.456 612.848 836.216C613.136 835.96 613.352 835.584 613.496 835.088C613.656 834.576 613.736 833.88 613.736 833C613.736 832.216 613.672 831.592 613.544 831.128C613.416 830.648 613.216 830.28 612.944 830.024C612.688 829.752 612.344 829.576 611.912 829.496C611.496 829.4 611 829.352 610.424 829.352C609.848 829.352 609.352 829.4 608.936 829.496C608.52 829.576 608.176 829.752 607.904 830.024C607.648 830.28 607.456 830.648 607.328 831.128C607.2 831.592 607.136 832.216 607.136 833C607.136 833.88 607.208 834.576 607.352 835.088C607.512 835.584 607.728 835.96 608 836.216C608.288 836.456 608.632 836.608 609.032 836.672C609.448 836.736 609.912 836.768 610.424 836.768Z" fill="#898989"/>
 </svg>
+
 `;
 class Attribute {
     constructor(name, value) {
@@ -351,7 +352,6 @@ function ParseSvg(src) {
             }
         }
         pathIndex++;
-        console.log(src.length);
     }
     return attrs;
 }
@@ -370,7 +370,7 @@ function splitMulti(str, ...tokens) {
 function CalculatePolygons(paths) {
     let shapes = ["m", "h", "v", "l", "q", "c", "z"];
     let polygons = [];
-    let steps = 2;
+    let steps = 5;
     let movePoint = new DOMPoint();
     let mPoint = new DOMPoint();
     let polygonIndex = 0;
@@ -430,10 +430,9 @@ function CalculatePolygons(paths) {
                             let p3 = shapeControlPoints[1];
                             for (let step = 0; step <= steps; step += 1) {
                                 let t = step / (steps);
-                                let x = (1 - t) * (1 - t) * p1.x + 2 * (1 - t) * t * p2.x + t * t * p3.x;
-                                let y = (1 - t) * (1 - t) * p1.y + 2 * (1 - t) * t * p2.y + t * t * p3.y;
+                                let x = (1.0 - t * t) * p1.x + 2.0 * (1 - t) * t * p2.x + t * t * p3.x;
+                                let y = (1.0 - t * t) * p1.y + 2.0 * (1 - t) * t * p2.y + t * t * p3.y;
                                 currentPolygon.push(new DOMPoint(x, y));
-                                //console.log(t);
                             }
                             movePoint = shapeControlPoints[1];
                         }
@@ -443,15 +442,14 @@ function CalculatePolygons(paths) {
                             let p3 = shapeControlPoints[1];
                             let p4 = shapeControlPoints[2];
                             for (let step = 0; step <= steps; step += 1) {
-                                let t = step / (steps);
-                                let x = Math.pow((1 - t), 3) * p1.x + 3 * (1 - t) * (1 - t) * t * p2.x +
-                                    3 * (1 - t) * t * t * p3.x + Math.pow(t, 3) * p4.x;
-                                let y = Math.pow((1 - t), 3) * p1.y + 3 * (1 - t) * (1 - t) * t * p2.y +
-                                    3 * (1 - t) * t * t * p3.y + Math.pow(t, 3) * p4.y;
+                                let t = step / steps;
+                                let x = (1 - t) * (1 - t) * (1 - t) * p1.x + 3 * (1 - t) * (1 - t) * t * p2.x +
+                                    3 * (1 - t) * t * t * p3.x + t * t * t * p4.x;
+                                let y = (1 - t) * (1 - t) * (1 - t) * p1.y + 3 * (1 - t) * (1 - t) * t * p2.y +
+                                    3 * (1 - t) * t * t * p3.y + t * t * t * p4.y;
                                 currentPolygon.push(new DOMPoint(x, y));
-                                //console.log(t);
                             }
-                            movePoint = shapeControlPoints[1];
+                            movePoint = shapeControlPoints[2];
                         }
                         currentPolygon.push(movePoint);
                     }
@@ -936,7 +934,6 @@ class ParticlesGenerator extends Shape {
             maxDistance: 5,
             minDistance: 1,
             speed: 0.1,
-            colorBuffer: [1, 0, 1],
             minSize: 0.01,
             maxSize: 0.1,
             countOnFrame: 20
@@ -1218,6 +1215,92 @@ class ParticlesGenerator extends Shape {
         super.clearMatrix();
     }
 }
+class Svg extends Shape {
+    constructor(svgcode) {
+        super();
+        this.Code = svgcode;
+        this.CalculateEdges();
+    }
+    InitGL(vertices, colors, indices) {
+        super.InitGL(vertices, colors, indices);
+    }
+    rotateZ(angle) {
+        super.rotateZ(angle);
+    }
+    rotateX(angle) {
+        super.rotateX(angle);
+    }
+    rotateY(angle) {
+        super.rotateY(angle);
+    }
+    translateX(offset) {
+        super.translateX(offset);
+    }
+    translateY(offset) {
+        super.translateY(offset);
+    }
+    translateZ(offset) {
+        super.translateZ(offset);
+    }
+    scaleX(value) {
+        super.scaleX(value);
+    }
+    scaleY(value) {
+        super.scaleY(value);
+    }
+    scaleZ(value) {
+        super.scaleZ(value);
+    }
+    CalculateEdges() {
+        let vertices = [];
+        let colors = [];
+        let indices = [];
+        let parse = ParseSvg(this.Code);
+        this.Points = CalculatePolygons(parse);
+        let polygonIndex = 0;
+        let totalLength = 0;
+        for (let index = 0; index < this.Points.length; index++) {
+            for (let index2 = 0; index2 < this.Points[index].length; index2++) {
+                vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, (this.Points[index][index2].y - 1080 / 2) / 500, 0);
+                colors.push(Math.random(), Math.random(), Math.random());
+                if (index2 + 1 < this.Points[index].length) {
+                    indices.push(index2 + polygonIndex);
+                    indices.push(index2 + polygonIndex + 1);
+                }
+            }
+            polygonIndex += this.Points[index].length;
+        }
+        //totalLength = polygonIndex;
+        //polygonIndex = 0;
+        //for (let index = 0; index < this.Points.length; index++) {
+        //	for (let index2 = 0; index2 < this.Points[index].length; index2++) {
+        //		vertices.push(this.Points[index][index2].x / 500, this.Points[index][index2].y / 500, -1);
+        //		colors.push(Math.random(), Math.random(), Math.random());
+        //		indices.push(index2 + polygonIndex);
+        //	}
+        //	polygonIndex += this.Points[index].length;
+        //}
+        //for (let index = 0; index < this.Points.length; index++) {
+        //	for (let index2 = 0; index2 < this.Points[index].length; index2++) {
+        //		indices.push(index2);
+        //		indices.push(index2 + totalLength);
+        //	}			
+        //}
+        const vertexNormals = [];
+        this.vertices = vertices;
+        this.indices = indices;
+        this.Colors = colors;
+        this.mov_matrix[14] = -zoom;
+    }
+    Draw() {
+        let gl = document.getElementById(id).getContext("webgl");
+        this.InitGL(this.vertices, this.Colors, this.indices);
+        gl.drawElements(gl.LINES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+    }
+    clearMatrix() {
+        super.clearMatrix();
+    }
+}
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 var c1 = [0, 0, 0];
 var c2 = [1, 0, 0];
@@ -1247,30 +1330,30 @@ function EasingFunction(t, type, concomitantParam) {
     return 0;
 }
 function DrawScene() {
-    //let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
-    //gl.clearColor(0.5, 0.5, 0.5, 1);
-    //gl.clearDepth(1.0);
-    //gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
-    //gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    //Rotate();
-    //for (let index = 0; index < Shapes.length; index++) {
-    //	Shapes[index].Draw();
-    //}
-    requestAnimationFrame(DrawScene);
-    let _2d = document.getElementById("cnvs").getContext("2d");
-    _2d.strokeStyle = "black";
-    _2d.lineCap = "round";
-    _2d.lineJoin = "round";
-    _2d.lineWidth = 1;
-    _2d.clearRect(0, 0, _2d.canvas.width, _2d.canvas.height);
-    for (let polygon = 0; polygon < points.length; polygon++) {
-        _2d.beginPath();
-        for (let point = 0; point < points[polygon].length; point++) {
-            _2d.lineTo(points[polygon][point].x * 2 + 100, points[polygon][point].y * 2 + 100);
-        }
-        _2d.closePath();
-        _2d.stroke();
+    let gl = document.getElementById("cnvs").getContext("webgl");
+    gl.clearColor(0.5, 0.5, 0.5, 1);
+    gl.clearDepth(1.0);
+    gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    Rotate();
+    for (let index = 0; index < Shapes.length; index++) {
+        Shapes[index].Draw();
     }
+    requestAnimationFrame(DrawScene);
+    //let _2d = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("2d");
+    //_2d.strokeStyle = "black";
+    //_2d.lineCap = "round";
+    //_2d.lineJoin = "round";
+    //_2d.lineWidth = 1;
+    //_2d.clearRect(0, 0, _2d.canvas.width, _2d.canvas.height);
+    //for (let polygon = 0; polygon < points.length; polygon++) {
+    //	_2d.beginPath();
+    //	for (let point = 0; point < points[polygon].length; point++) {
+    //		_2d.lineTo(points[polygon][point].x + 100, points[polygon][point].y + 100);
+    //	}
+    //	_2d.closePath();
+    //	_2d.stroke();
+    //}
 }
 const defaultDelta = 3;
 var deltaX = 0;
@@ -1310,15 +1393,13 @@ window.onload = () => {
         //accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
     };
     window.onresize(new UIEvent("resize"));
-    currentShape = new Sphere();
+    currentShape = new Svg(content);
     let generator = new ParticlesGenerator();
     generator.Type = ParticleType.Cube;
     generator.Start();
     Shapes.push(currentShape);
-    Shapes.push(generator);
+    //Shapes.push(generator);
     DrawScene();
-    let res = ParseSvg(content);
-    points = CalculatePolygons(res);
 };
 document.onmousedown = (ev) => {
     if (!rotationEnded) {

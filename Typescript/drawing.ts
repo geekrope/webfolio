@@ -586,7 +586,6 @@ class Particle {
 
 class ParticlesGeneratorProperties {
 	public count: number;
-	public colorBuffer: number[];
 	public maxDistance: number;
 	public minDistance: number;
 	public speed: number;
@@ -618,6 +617,8 @@ class ParticlesGenerator extends Shape {
 		//180deg
 		return new Particle(angleX, angleY, angleZ, 0, scale, rotationX, rotationY, rotationZ, Math.random() * (this.Properties.maxDistance - this.Properties.minDistance) + this.Properties.minDistance);
 	}
+	public Opacity: number;
+	public Colors: number[];
 	public get Type(): ParticleType {
 		return this._type;
 	}
@@ -625,7 +626,6 @@ class ParticlesGenerator extends Shape {
 		this._type = value;
 		this.CalculateEdges();
 	}
-	public Opacity: number;
 	public get Properties(): ParticlesGeneratorProperties {
 		return this.properties;
 	}
@@ -872,7 +872,6 @@ class ParticlesGenerator extends Shape {
 			maxDistance: 5,
 			minDistance: 1,
 			speed: 0.1,
-			colorBuffer: [1, 0, 1],
 			minSize: 0.01,
 			maxSize: 0.1,
 			countOnFrame: 20
@@ -938,6 +937,114 @@ class ParticlesGenerator extends Shape {
 	}
 }
 
+class Svg extends Shape {
+	protected mov_matrix: number[];
+	protected vertices: number[];
+	protected indices: number[];
+	protected Code: string;
+	protected Points: DOMPoint[][];
+	public Opacity: number;
+	public Colors: number[];
+	public InitGL(vertices: number[], colors: number[], indices: number[]) {
+		super.InitGL(vertices, colors, indices);
+	}
+	public rotateZ(angle: number): void {
+		super.rotateZ(angle);
+	}
+	public rotateX(angle: number): void {
+		super.rotateX(angle);
+	}
+	public rotateY(angle: number): void {
+		super.rotateY(angle);
+	}
+	public translateX(offset: number): void {
+		super.translateX(offset);
+	}
+	public translateY(offset: number): void {
+		super.translateY(offset);
+	}
+	public translateZ(offset: number): void {
+		super.translateZ(offset);
+	}
+	public scaleX(value: number): void {
+		super.scaleX(value);
+	}
+	public scaleY(value: number): void {
+		super.scaleY(value);
+	}
+	public scaleZ(value: number): void {
+		super.scaleZ(value);
+	}
+	public CalculateEdges(): void {
+		let vertices = [];
+		let colors = [];
+		let indices = [];
+
+		let parse = ParseSvg(this.Code);
+		this.Points = CalculatePolygons(parse);
+
+		let polygonIndex = 0;
+
+		let totalLength = 0;
+
+		for (let index = 0; index < this.Points.length; index++) {
+			for (let index2 = 0; index2 < this.Points[index].length; index2++) {
+				vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, (this.Points[index][index2].y - 1080 / 2) / 500, 0);
+				colors.push(Math.random(), Math.random(), Math.random());
+				if (index2 + 1 < this.Points[index].length) {
+					indices.push(index2 + polygonIndex);
+					indices.push(index2 + polygonIndex + 1);
+				}
+			}
+			polygonIndex += this.Points[index].length;
+		}
+
+		//totalLength = polygonIndex;
+
+		//polygonIndex = 0;
+
+		//for (let index = 0; index < this.Points.length; index++) {
+		//	for (let index2 = 0; index2 < this.Points[index].length; index2++) {
+		//		vertices.push(this.Points[index][index2].x / 500, this.Points[index][index2].y / 500, -1);
+		//		colors.push(Math.random(), Math.random(), Math.random());
+		//		indices.push(index2 + polygonIndex);
+		//	}
+		//	polygonIndex += this.Points[index].length;
+		//}
+
+		//for (let index = 0; index < this.Points.length; index++) {
+		//	for (let index2 = 0; index2 < this.Points[index].length; index2++) {
+		//		indices.push(index2);
+		//		indices.push(index2 + totalLength);
+		//	}			
+		//}
+
+		const vertexNormals = [
+
+		];
+
+		this.vertices = vertices;
+		this.indices = indices;
+		this.Colors = colors;
+
+		this.mov_matrix[14] = -zoom;
+	}
+	public constructor(svgcode: string) {
+		super();
+		this.Code = svgcode;
+		this.CalculateEdges();
+	}
+	public Draw(): void {
+		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
+		this.InitGL(this.vertices, this.Colors, this.indices);
+
+		gl.drawElements(gl.LINES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+	}
+	public clearMatrix() {
+		super.clearMatrix();
+	}
+}
+
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
 var c1 = [0, 0, 0];
@@ -972,36 +1079,36 @@ function EasingFunction(t: number, type: EasingType, concomitantParam: number[])
 }
 
 function DrawScene() {
-	//let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
+	let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
 
-	//gl.clearColor(0.5, 0.5, 0.5, 1);
-	//gl.clearDepth(1.0);
+	gl.clearColor(0.5, 0.5, 0.5, 1);
+	gl.clearDepth(1.0);
 
-	//gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
-	//gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	//Rotate();
-	//for (let index = 0; index < Shapes.length; index++) {
-	//	Shapes[index].Draw();
-	//}
+	Rotate();
+	for (let index = 0; index < Shapes.length; index++) {
+		Shapes[index].Draw();
+	}
 
 	requestAnimationFrame(DrawScene);
 
-	let _2d = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("2d");
-	_2d.strokeStyle = "black";
-	_2d.lineCap = "round";
-	_2d.lineJoin = "round";
-	_2d.lineWidth = 1;
-	_2d.clearRect(0, 0, _2d.canvas.width, _2d.canvas.height);
+	//let _2d = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("2d");
+	//_2d.strokeStyle = "black";
+	//_2d.lineCap = "round";
+	//_2d.lineJoin = "round";
+	//_2d.lineWidth = 1;
+	//_2d.clearRect(0, 0, _2d.canvas.width, _2d.canvas.height);
 
-	for (let polygon = 0; polygon < points.length; polygon++) {
-		_2d.beginPath();
-		for (let point = 0; point < points[polygon].length; point++) {
-			_2d.lineTo(points[polygon][point].x * 2 + 100, points[polygon][point].y * 2 + 100);
-		}
-		_2d.closePath();
-		_2d.stroke();
-	}
+	//for (let polygon = 0; polygon < points.length; polygon++) {
+	//	_2d.beginPath();
+	//	for (let point = 0; point < points[polygon].length; point++) {
+	//		_2d.lineTo(points[polygon][point].x + 100, points[polygon][point].y + 100);
+	//	}
+	//	_2d.closePath();
+	//	_2d.stroke();
+	//}
 }
 
 const defaultDelta = 3;
@@ -1044,16 +1151,13 @@ window.onload = () => {
 		//accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
 	}
 	window.onresize(new UIEvent("resize"));
-	currentShape = new Sphere();
+	currentShape = new Svg(content);
 	let generator = new ParticlesGenerator();
 	generator.Type = ParticleType.Cube;
 	generator.Start();
 	Shapes.push(currentShape);
-	Shapes.push(generator);
+	//Shapes.push(generator);
 	DrawScene();
-
-	let res = ParseSvg(content);
-	points = CalculatePolygons(res);
 }
 
 document.onmousedown = (ev) => {

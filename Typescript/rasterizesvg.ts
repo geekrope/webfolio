@@ -36,8 +36,7 @@ function ParseSvg(src: string): Attribute[][] {
 				attrs[pathIndex].push(new Attribute(name, value));
 			}
 		}
-		pathIndex++;
-		console.log(src.length);
+		pathIndex++;		
 	}
 	return attrs;
 }
@@ -74,8 +73,8 @@ function splitMulti(str: string, ...tokens: string[]) {
 
 function CalculatePolygons(paths: Attribute[][]): DOMPoint[][] {
 	let shapes = ["m", "h", "v", "l", "q", "c", "z"];
-	let polygons: DOMPoint[][] = [];	
-	let steps = 2;
+	let polygons: DOMPoint[][] = [];
+	let steps = 5;
 	let movePoint = new DOMPoint();
 	let mPoint = new DOMPoint();
 	let polygonIndex = 0;
@@ -136,10 +135,9 @@ function CalculatePolygons(paths: Attribute[][]): DOMPoint[][] {
 							let p3 = shapeControlPoints[1];
 							for (let step = 0; step <= steps; step += 1) {
 								let t = step / (steps);
-								let x = (1 - t) * (1 - t) * p1.x + 2 * (1 - t) * t * p2.x + t * t * p3.x;
-								let y = (1 - t) * (1 - t) * p1.y + 2 * (1 - t) * t * p2.y + t * t * p3.y;
-								currentPolygon.push(new DOMPoint(x, y));
-								//console.log(t);
+								let x = (1.0 - t * t) * p1.x + 2.0 * (1 - t) * t * p2.x + t * t * p3.x;
+								let y = (1.0 - t * t) * p1.y + 2.0 * (1 - t) * t * p2.y + t * t * p3.y;
+								currentPolygon.push(new DOMPoint(x, y));								
 							}
 							movePoint = shapeControlPoints[1];
 						}
@@ -149,15 +147,14 @@ function CalculatePolygons(paths: Attribute[][]): DOMPoint[][] {
 							let p3 = shapeControlPoints[1];
 							let p4 = shapeControlPoints[2];
 							for (let step = 0; step <= steps; step += 1) {
-								let t = step / (steps);
-								let x = Math.pow((1 - t), 3) * p1.x + 3 * (1 - t) * (1 - t) * t * p2.x +
-									3 * (1 - t) * t * t * p3.x + Math.pow(t, 3) * p4.x;
-								let y = Math.pow((1 - t), 3) * p1.y + 3 * (1 - t) * (1 - t) * t * p2.y +
-									3 * (1 - t) * t * t * p3.y + Math.pow(t, 3) * p4.y;
-								currentPolygon.push(new DOMPoint(x, y));
-								//console.log(t);
+								let t = step / steps;
+								let x = (1 - t) * (1 - t) * (1 - t) * p1.x + 3 * (1 - t) * (1 - t) * t * p2.x +
+									3 * (1 - t) * t * t * p3.x + t * t * t * p4.x;
+								let y = (1 - t) * (1 - t) * (1 - t) * p1.y + 3 * (1 - t) * (1 - t) * t * p2.y +
+									3 * (1 - t) * t * t * p3.y + t * t * t * p4.y;
+								currentPolygon.push(new DOMPoint(x, y));								
 							}
-							movePoint = shapeControlPoints[1];
+							movePoint = shapeControlPoints[2];
 						}
 						currentPolygon.push(movePoint);
 					}
