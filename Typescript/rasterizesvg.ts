@@ -37,6 +37,7 @@ function ParseSvg(src: string): Attribute[][] {
 			}
 		}
 		pathIndex++;
+		console.log(src.length);
 	}
 	return attrs;
 }
@@ -58,27 +59,27 @@ interface Bezier4 {
 	point3: DOMPoint;
 }
 
-function splitMulti(str: any, ...tokens: string[]) {
+function splitMulti(str: string, ...tokens: string[]) {
 	let tempChar = tokens[0];
+	let ret: string[];
 	for (let i = 1; i < tokens.length; i++) {
 		str = str.split(tokens[i]).join(tempChar);
 	}
-	str = str.split(tempChar);
-	if (str.length > 0) {
-		if (str[0] == "") {
-			str.splice(0, 1);
-		}
+	ret = str.split(tempChar);
+	if (ret.length > 0 && ret[0] == "") {
+		ret.splice(0, 1);
 	}
-	return str;
+	return ret;
 }
 
 function CalculatePolygons(paths: Attribute[][]): DOMPoint[][] {
 	let shapes = ["m", "h", "v", "l", "q", "c", "z"];
-	let polygons: DOMPoint[][] = [];
-	let accuracy = 0.001;
+	let polygons: DOMPoint[][] = [];	
+	let steps = 2;
 	let movePoint = new DOMPoint();
 	let mPoint = new DOMPoint();
 	let polygonIndex = 0;
+
 	for (let pathIndex = 0; pathIndex < paths.length;) {
 		polygons.push(new Array<DOMPoint>());
 		let currentPolygon = polygons[polygonIndex];
@@ -91,72 +92,75 @@ function CalculatePolygons(paths: Attribute[][]): DOMPoint[][] {
 						currentShapes.push(attribute.value[ind]);
 					}
 				}
-				let points = splitMulti(attribute.value, ...shapes);				
+				let points = splitMulti(attribute.value, ...shapes);
 				for (let index = 0; index < currentShapes.length; index++) {
-					if (currentShapes[index] == "z") {				
+					if (currentShapes[index] == "z") {
 						currentPolygon.push(mPoint);
 						polygons.push(new Array<DOMPoint>());
 						polygonIndex++;
 						currentPolygon = polygons[polygonIndex];
-						continue;
 					}
-					if (currentShapes[index] == "h") {
+					else if (currentShapes[index] == "h") {
 						let value = parseFloat(points[index]);
 						movePoint = new DOMPoint(value, movePoint.y);
 						currentPolygon.push(movePoint);
-						continue;
 					}
-					if (currentShapes[index] == "v") {
+					else if (currentShapes[index] == "v") {
 						let value = parseFloat(points[index]);
 						movePoint = new DOMPoint(movePoint.x, value);
 						currentPolygon.push(movePoint);
-						continue;
 					}
-					let shapeControlPoints: DOMPoint[] = [];
-					let split = points[index].split(" ");
-					for (let index = 0; index < split.length; index++) {
-						if (split[index] == "") {
-							split.splice(index, 1);
+					else {
+						let shapeControlPoints: DOMPoint[] = [];
+						let split = points[index].split(" ");
+						for (let index = 0; index < split.length; index++) {
+							if (split[index] == "") {
+								split.splice(index, 1);
+							}
 						}
-					}
-					for (let i = 0; i < split.length; i += 2) {
-						let x = parseFloat(split[i]);
-						let y = parseFloat(split[i + 1]);
-						shapeControlPoints.push(new DOMPoint(x, y));
-					}
-					if (currentShapes[index] == "m") {
-						mPoint = shapeControlPoints[0];
-						movePoint = shapeControlPoints[0];
-					}
-					else if (currentShapes[index] == "l") {
-						movePoint = shapeControlPoints[0];
-					}
-					else if (currentShapes[index] == "q") {
-						let p1 = movePoint;
-						let p2 = shapeControlPoints[0];
-						let p3 = shapeControlPoints[1];
-						for (let t = 0; t < 1; t += accuracy) {
-							let x = (1 - t) * (1 - t) * p1.x + 2 * (1 - t) * t * p2.x + t * t * p3.x;
-							let y = (1 - t) * (1 - t) * p1.y + 2 * (1 - t) * t * p2.y + t * t * p3.y;
-							currentPolygon.push(new DOMPoint(x, y));
+						for (let i = 0; i < split.length; i += 2) {
+							let x = parseFloat(split[i]);
+							let y = parseFloat(split[i + 1]);
+							shapeControlPoints.push(new DOMPoint(x, y));
 						}
-						movePoint = shapeControlPoints[1];
-					}
-					else if (currentShapes[index] == "c") {
-						let p1 = movePoint;
-						let p2 = shapeControlPoints[0];
-						let p3 = shapeControlPoints[1];
-						let p4 = shapeControlPoints[2];
-						for (let t = 0; t < 1; t += accuracy) {
-							let x = Math.pow((1 - t), 3) * p1.x + 3 * (1 - t) * (1 - t) * t * p2.x +
-								3 * (1 - t) * t * t * p3.x + Math.pow(t, 3) * p4.x;
-							let y = Math.pow((1 - t), 3) * p1.y + 3 * (1 - t) * (1 - t) * t * p2.y +
-								3 * (1 - t) * t * t * p3.y + Math.pow(t, 3) * p4.y;
-							currentPolygon.push(new DOMPoint(x, y));
+						if (currentShapes[index] == "m") {
+							mPoint = shapeControlPoints[0];
+							movePoint = shapeControlPoints[0];
 						}
-						movePoint = shapeControlPoints[1];
+						else if (currentShapes[index] == "l") {
+							movePoint = shapeControlPoints[0];
+						}
+						else if (currentShapes[index] == "q") {
+							let p1 = movePoint;
+							let p2 = shapeControlPoints[0];
+							let p3 = shapeControlPoints[1];
+							for (let step = 0; step <= steps; step += 1) {
+								let t = step / (steps);
+								let x = (1 - t) * (1 - t) * p1.x + 2 * (1 - t) * t * p2.x + t * t * p3.x;
+								let y = (1 - t) * (1 - t) * p1.y + 2 * (1 - t) * t * p2.y + t * t * p3.y;
+								currentPolygon.push(new DOMPoint(x, y));
+								//console.log(t);
+							}
+							movePoint = shapeControlPoints[1];
+						}
+						else if (currentShapes[index] == "c") {
+							let p1 = movePoint;
+							let p2 = shapeControlPoints[0];
+							let p3 = shapeControlPoints[1];
+							let p4 = shapeControlPoints[2];
+							for (let step = 0; step <= steps; step += 1) {
+								let t = step / (steps);
+								let x = Math.pow((1 - t), 3) * p1.x + 3 * (1 - t) * (1 - t) * t * p2.x +
+									3 * (1 - t) * t * t * p3.x + Math.pow(t, 3) * p4.x;
+								let y = Math.pow((1 - t), 3) * p1.y + 3 * (1 - t) * (1 - t) * t * p2.y +
+									3 * (1 - t) * t * t * p3.y + Math.pow(t, 3) * p4.y;
+								currentPolygon.push(new DOMPoint(x, y));
+								//console.log(t);
+							}
+							movePoint = shapeControlPoints[1];
+						}
+						currentPolygon.push(movePoint);
 					}
-					currentPolygon.push(movePoint);
 				}
 			}
 		}

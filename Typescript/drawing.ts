@@ -1,4 +1,5 @@
 ﻿/// <reference path="rasterizesvg.ts" />
+/// <reference path="description.ts" />
 
 interface Drawable {
 	CalculateEdges(): void;
@@ -988,13 +989,15 @@ function DrawScene() {
 
 	let _2d = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("2d");
 	_2d.strokeStyle = "black";
+	_2d.lineCap = "round";
+	_2d.lineJoin = "round";
 	_2d.lineWidth = 1;
 	_2d.clearRect(0, 0, _2d.canvas.width, _2d.canvas.height);
 
-	for (let polygon = 0; polygon < ps.length; polygon++) {
+	for (let polygon = 0; polygon < points.length; polygon++) {
 		_2d.beginPath();
-		for (let point = 0; point < ps[polygon].length; point++) {
-			_2d.lineTo(ps[polygon][point].x + 100, ps[polygon][point].y + 100);
+		for (let point = 0; point < points[polygon].length; point++) {
+			_2d.lineTo(points[polygon][point].x * 2 + 100, points[polygon][point].y * 2 + 100);
 		}
 		_2d.closePath();
 		_2d.stroke();
@@ -1008,7 +1011,7 @@ var rotateT = 0;
 var rotationEnded = true;
 var scaled = false;
 var mouseDown = new DOMPoint();
-var ps: DOMPoint[][] = [];
+var points: DOMPoint[][] = [];
 
 function Rotate() {
 	let param = [];
@@ -1049,27 +1052,8 @@ window.onload = () => {
 	Shapes.push(generator);
 	DrawScene();
 
-	let res = ParseSvg(
-		`
-	<svg width="4248" height="252" viewBox="0 0 4248 252" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M72 252V108H0V72H216V108H144V252H72Z" fill="white"/>
-<path d="M288 252V216H252V108H288V72H468V108H504V180H324V216H468V252H288ZM324 144H432V108H324V144Z" fill="white"/>
-<path d="M684 108H720V144H756V180H792V252H720V180H612V252H540V72H612V144H684V108ZM792 72V108H720V72H792Z" fill="white"/>
-<path d="M864 252V216H828V108H864V72H1044V108H1080V144H1008V108H900V216H1008V180H1080V216H1044V252H864Z" fill="white"/>
-<path d="M1224 252V108H1152V72H1368V108H1296V252H1224Z" fill="white"/>
-<path d="M1440 252V216H1404V108H1440V72H1620V108H1656V216H1620V252H1440ZM1476 216H1584V108H1476V216Z" fill="white"/>
-<path d="M1692 252V72H1908V108H1944V144H1908V180H1944V216H1908V252H1692ZM1764 144H1872V108H1764V144ZM1764 216H1872V180H1764V216Z" fill="white"/>
-<path d="M1980 252V72H2052V144H2124V252H1980ZM2160 252V72H2232V252H2160ZM2052 216H2088V180H2052V216Z" fill="white"/>
-<path d="M2484 0V36H2304V0H2484ZM2340 180H2376V216H2340V252H2268V72H2340V180ZM2520 72V252H2448V144H2412V108H2448V72H2520ZM2376 144H2412V180H2376V144Z" fill="white"/>
-<path d="M2952 252V108H2880V72H3096V108H3024V252H2952Z" fill="white"/>
-<path d="M3168 252V216H3132V108H3168V72H3348V108H3384V180H3204V216H3348V252H3168ZM3204 144H3312V108H3204V144Z" fill="white"/>
-<path d="M3564 108H3600V144H3636V180H3672V252H3600V180H3492V252H3420V72H3492V144H3564V108ZM3672 72V108H3600V72H3672Z" fill="white"/>
-<path d="M3744 252V216H3708V108H3744V72H3924V108H3960V144H3888V108H3780V216H3888V180H3960V216H3924V252H3744Z" fill="white"/>
-<path d="M4104 252V108H4032V72H4248V108H4176V252H4104Z" fill="white"/>
-</svg>
-	`
-	);
-	ps = CalculatePolygons(res);
+	let res = ParseSvg(content);
+	points = CalculatePolygons(res);
 }
 
 document.onmousedown = (ev) => {
