@@ -989,8 +989,8 @@ class Svg extends Shape {
 
 		for (let index = 0; index < this.Points.length; index++) {
 			for (let index2 = 0; index2 < this.Points[index].length; index2++) {
-				vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, (this.Points[index][index2].y - 1080 / 2) / 500, 0);
-				colors.push(Math.random(), Math.random(), Math.random());
+				vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, -(this.Points[index][index2].y - 1080 / 2) / 500, 2);
+				colors.push(0, 0, 0);
 				if (index2 + 1 < this.Points[index].length) {
 					indices.push(index2 + polygonIndex);
 					indices.push(index2 + polygonIndex + 1);
@@ -1005,9 +1005,11 @@ class Svg extends Shape {
 
 		//for (let index = 0; index < this.Points.length; index++) {
 		//	for (let index2 = 0; index2 < this.Points[index].length; index2++) {
-		//		vertices.push(this.Points[index][index2].x / 500, this.Points[index][index2].y / 500, -1);
-		//		colors.push(Math.random(), Math.random(), Math.random());
-		//		indices.push(index2 + polygonIndex);
+		//		vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, (this.Points[index][index2].y - 1080 / 2) / 500, -1);
+		//		if (index2 + 1 < this.Points[index].length) {
+		//			indices.push(index2 + polygonIndex + totalLength);
+		//			indices.push(index2 + polygonIndex + 1 + totalLength);
+		//		}
 		//	}
 		//	polygonIndex += this.Points[index].length;
 		//}
@@ -1119,6 +1121,7 @@ var rotationEnded = true;
 var scaled = false;
 var mouseDown = new DOMPoint();
 var points: DOMPoint[][] = [];
+var accuracy = 6;
 
 function Rotate() {
 	let param = [];
@@ -1148,15 +1151,16 @@ function Rotate() {
 
 window.onload = () => {
 	document.getElementById("approve").onclick = () => {
-		//accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
+		accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
 	}
 	window.onresize(new UIEvent("resize"));
-	currentShape = new Svg(content);
+	currentShape = new Sphere();
 	let generator = new ParticlesGenerator();
 	generator.Type = ParticleType.Cube;
 	generator.Start();
 	Shapes.push(currentShape);
-	//Shapes.push(generator);
+	Shapes.push(generator);
+	Shapes.push(new Svg(content));
 	DrawScene();
 }
 
@@ -1169,10 +1173,11 @@ document.onmousedown = (ev) => {
 }
 
 document.onwheel = (ev) => {
-	let value = ev.deltaY / Math.abs(ev.deltaY) * 0.1 + 1;
-	currentShape.scaleX(value);
-	currentShape.scaleY(value);
-	currentShape.scaleZ(value);
+	//Math.abs(ev.deltaY) * 0.1 + 1
+	let value = ev.deltaY / 1200;
+	for (let index = 0; index < Shapes.length; index++) {
+		Shapes[index].translateZ(value);
+	}
 }
 
 window.onresize = (ev) => {
