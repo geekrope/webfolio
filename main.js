@@ -463,15 +463,13 @@ function CalculatePolygons(paths) {
 }
 /// <reference path="rasterizesvg.ts" />
 /// <reference path="description.ts" />
-function InitBuffers() {
-}
 class Shape {
     constructor() {
         this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         this.Opacity = 1;
     }
     InitGL(vertices, colors, indices) {
-        let gl = document.getElementById("cnvs").getContext("webgl");
+        let gl = document.getElementById(id).getContext("webgl");
         let vertex_buffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
@@ -536,6 +534,7 @@ class Shape {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
+        webGlShaderProgram = shaderProgram;
     }
     CalculateEdges() {
     }
@@ -1261,8 +1260,8 @@ class Svg extends Shape {
         let totalLength = 0;
         for (let index = 0; index < this.Points.length; index++) {
             for (let index2 = 0; index2 < this.Points[index].length; index2++) {
-                vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, -(this.Points[index][index2].y - 1080 / 2) / 500, 2);
-                colors.push(0, 0, 0);
+                vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, -(this.Points[index][index2].y - 1080 / 2) / 500, 0);
+                colors.push(1, 1, 1);
                 if (index2 + 1 < this.Points[index].length) {
                     indices.push(index2 + polygonIndex);
                     indices.push(index2 + polygonIndex + 1);
@@ -1270,24 +1269,6 @@ class Svg extends Shape {
             }
             polygonIndex += this.Points[index].length;
         }
-        //totalLength = polygonIndex;
-        //polygonIndex = 0;
-        //for (let index = 0; index < this.Points.length; index++) {
-        //	for (let index2 = 0; index2 < this.Points[index].length; index2++) {
-        //		vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, (this.Points[index][index2].y - 1080 / 2) / 500, -1);
-        //		if (index2 + 1 < this.Points[index].length) {
-        //			indices.push(index2 + polygonIndex + totalLength);
-        //			indices.push(index2 + polygonIndex + 1 + totalLength);
-        //		}
-        //	}
-        //	polygonIndex += this.Points[index].length;
-        //}
-        //for (let index = 0; index < this.Points.length; index++) {
-        //	for (let index2 = 0; index2 < this.Points[index].length; index2++) {
-        //		indices.push(index2);
-        //		indices.push(index2 + totalLength);
-        //	}			
-        //}
         const vertexNormals = [];
         this.vertices = vertices;
         this.indices = indices;
@@ -1303,13 +1284,126 @@ class Svg extends Shape {
         super.clearMatrix();
     }
 }
+class Cube extends Shape {
+    constructor() {
+        super();
+        this.CalculateEdges();
+    }
+    InitGL(vertices, colors, indices) {
+        super.InitGL(vertices, colors, indices);
+    }
+    rotateZ(angle) {
+        super.rotateZ(angle);
+    }
+    rotateX(angle) {
+        super.rotateX(angle);
+    }
+    rotateY(angle) {
+        super.rotateY(angle);
+    }
+    translateX(offset) {
+        super.translateX(offset);
+    }
+    translateY(offset) {
+        super.translateY(offset);
+    }
+    translateZ(offset) {
+        super.translateZ(offset);
+    }
+    scaleX(value) {
+        super.scaleX(value);
+    }
+    scaleY(value) {
+        super.scaleY(value);
+    }
+    scaleZ(value) {
+        super.scaleZ(value);
+    }
+    CalculateEdges() {
+        let vertices = [
+            -1.0, -1.0, 1.0,
+            1.0, -1.0, 1.0,
+            1.0, 1.0, 1.0,
+            -1.0, 1.0, 1.0,
+            -1.0, -1.0, -1.0,
+            -1.0, 1.0, -1.0,
+            1.0, 1.0, -1.0,
+            1.0, -1.0, -1.0,
+            -1.0, 1.0, -1.0,
+            -1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0,
+            1.0, 1.0, -1.0,
+            -1.0, -1.0, -1.0,
+            1.0, -1.0, -1.0,
+            1.0, -1.0, 1.0,
+            -1.0, -1.0, 1.0,
+            1.0, -1.0, -1.0,
+            1.0, 1.0, -1.0,
+            1.0, 1.0, 1.0,
+            1.0, -1.0, 1.0,
+            -1.0, -1.0, -1.0,
+            -1.0, -1.0, 1.0,
+            -1.0, 1.0, 1.0,
+            -1.0, 1.0, -1.0
+        ];
+        let colors = [
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            1, 0, 0,
+            1, 0, 0,
+            1, 0, 0,
+            1, 0, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            1, 0, 1,
+            1, 0, 1,
+            1, 0, 1,
+            1, 0, 1,
+            1, 1, 1,
+            1, 1, 1,
+            1, 1, 1,
+            1, 1, 1
+        ];
+        let indices = [
+            0, 1, 2, 0, 2, 3,
+            4, 5, 6, 4, 6, 7,
+            8, 9, 10, 8, 10, 11,
+            12, 13, 14, 12, 14, 15,
+            16, 17, 18, 16, 18, 19,
+            20, 21, 22, 20, 22, 23
+        ];
+        const vertexNormals = [];
+        this.vertices = vertices;
+        this.indices = indices;
+        this.Colors = colors;
+        this.mov_matrix[14] = -zoom;
+    }
+    Draw() {
+        let gl = document.getElementById(id).getContext("webgl");
+        this.InitGL(this.vertices, this.Colors, this.indices);
+        gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+    }
+    clearMatrix() {
+        super.clearMatrix();
+    }
+}
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 var c1 = [0, 0, 0];
 var c2 = [1, 0, 0];
 var c3 = [1, 1, 0];
+var shaderProgram = null;
 var currentShape;
+var webGlShaderProgram = null;
 var Shapes = [];
-var zoom = 10;
+const zoom = 1;
 const id = "cnvs";
 var EasingType;
 (function (EasingType) {
@@ -1332,12 +1426,13 @@ function EasingFunction(t, type, concomitantParam) {
     return 0;
 }
 function DrawScene() {
-    let gl = document.getElementById("cnvs").getContext("webgl");
+    let gl = document.getElementById(id).getContext("webgl");
     gl.clearColor(0.5, 0.5, 0.5, 1);
     gl.clearDepth(1.0);
     gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     Rotate();
+    Translate();
     for (let index = 0; index < Shapes.length; index++) {
         Shapes[index].Draw();
     }
@@ -1366,6 +1461,9 @@ var scaled = false;
 var mouseDown = new DOMPoint();
 var points = [];
 var accuracy = 6;
+var translateZ = 0;
+var translateZDelta = 0;
+const zWidth = 30;
 function Rotate() {
     let param = [];
     let easing = EasingType.arc;
@@ -1391,18 +1489,37 @@ function Rotate() {
         rotateT = 0;
     }
 }
+function Translate() {
+    if (translateZDelta != 0) {
+        if (Math.abs(translateZ) < zWidth) {
+            for (let index = 0; index < Shapes.length; index++) {
+                Shapes[index].translateZ(-translateZ / zWidth * 3);
+            }
+            translateZ += translateZDelta;
+            for (let index = 0; index < Shapes.length; index++) {
+                Shapes[index].translateZ(translateZ / zWidth * 3);
+            }
+        }
+        else {
+            translateZDelta = 0;
+            translateZ = 0;
+        }
+    }
+}
 window.onload = () => {
     document.getElementById("approve").onclick = () => {
         accuracy = parseInt(document.getElementById("anglesCount").value) / 2;
     };
     window.onresize(new UIEvent("resize"));
-    currentShape = new Sphere();
-    let generator = new ParticlesGenerator();
-    generator.Type = ParticleType.Cube;
-    generator.Start();
-    Shapes.push(currentShape);
-    Shapes.push(generator);
-    Shapes.push(new Svg(content));
+    let cube1 = new Cube();
+    let cube2 = new Cube();
+    let text = new Svg(content);
+    currentShape = cube1;
+    cube1.translateZ(-4);
+    cube2.translateZ(-7);
+    Shapes.push(cube1);
+    Shapes.push(cube2);
+    Shapes.push(text);
     DrawScene();
 };
 document.onmousedown = (ev) => {
@@ -1413,14 +1530,10 @@ document.onmousedown = (ev) => {
     mouseDown.y = ev.pageY;
 };
 document.onwheel = (ev) => {
-    //Math.abs(ev.deltaY) * 0.1 + 1
-    let value = ev.deltaY / 1200;
-    for (let index = 0; index < Shapes.length; index++) {
-        Shapes[index].translateZ(value);
-    }
+    translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 3;
 };
 window.onresize = (ev) => {
-    let cnvs = document.getElementById("cnvs");
+    let cnvs = document.getElementById(id);
     cnvs.setAttribute("width", (innerWidth).toString());
     cnvs.setAttribute("height", (innerHeight).toString());
 };

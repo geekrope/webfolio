@@ -6,10 +6,6 @@ interface Drawable {
 	Draw(): void;
 }
 
-function InitBuffers() {
-
-}
-
 class Shape implements Drawable {
 	protected mov_matrix: number[];
 	protected vertices: number[];
@@ -21,7 +17,7 @@ class Shape implements Drawable {
 	public Opacity: number;
 	public Colors: number[];
 	public InitGL(vertices: number[], colors: number[], indices: number[]) {
-		let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
+		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
 
 		let vertex_buffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
@@ -103,6 +99,8 @@ class Shape implements Drawable {
 
 		gl.enable(gl.DEPTH_TEST);
 		gl.depthFunc(gl.LEQUAL);
+
+		webGlShaderProgram = shaderProgram;
 	}
 	public CalculateEdges(): void {
 
@@ -989,8 +987,8 @@ class Svg extends Shape {
 
 		for (let index = 0; index < this.Points.length; index++) {
 			for (let index2 = 0; index2 < this.Points[index].length; index2++) {
-				vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, -(this.Points[index][index2].y - 1080 / 2) / 500, 2);
-				colors.push(0, 0, 0);
+				vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, -(this.Points[index][index2].y - 1080 / 2) / 500, 0);
+				colors.push(1, 1, 1);
 				if (index2 + 1 < this.Points[index].length) {
 					indices.push(index2 + polygonIndex);
 					indices.push(index2 + polygonIndex + 1);
@@ -998,28 +996,6 @@ class Svg extends Shape {
 			}
 			polygonIndex += this.Points[index].length;
 		}
-
-		//totalLength = polygonIndex;
-
-		//polygonIndex = 0;
-
-		//for (let index = 0; index < this.Points.length; index++) {
-		//	for (let index2 = 0; index2 < this.Points[index].length; index2++) {
-		//		vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, (this.Points[index][index2].y - 1080 / 2) / 500, -1);
-		//		if (index2 + 1 < this.Points[index].length) {
-		//			indices.push(index2 + polygonIndex + totalLength);
-		//			indices.push(index2 + polygonIndex + 1 + totalLength);
-		//		}
-		//	}
-		//	polygonIndex += this.Points[index].length;
-		//}
-
-		//for (let index = 0; index < this.Points.length; index++) {
-		//	for (let index2 = 0; index2 < this.Points[index].length; index2++) {
-		//		indices.push(index2);
-		//		indices.push(index2 + totalLength);
-		//	}			
-		//}
 
 		const vertexNormals = [
 
@@ -1047,17 +1023,155 @@ class Svg extends Shape {
 	}
 }
 
+class Cube extends Shape {
+	protected mov_matrix: number[];
+	protected vertices: number[];
+	protected indices: number[];
+	protected Points: DOMPoint[][];
+	public Opacity: number;
+	public Colors: number[];
+	public InitGL(vertices: number[], colors: number[], indices: number[]) {
+		super.InitGL(vertices, colors, indices);
+	}
+	public rotateZ(angle: number): void {
+		super.rotateZ(angle);
+	}
+	public rotateX(angle: number): void {
+		super.rotateX(angle);
+	}
+	public rotateY(angle: number): void {
+		super.rotateY(angle);
+	}
+	public translateX(offset: number): void {
+		super.translateX(offset);
+	}
+	public translateY(offset: number): void {
+		super.translateY(offset);
+	}
+	public translateZ(offset: number): void {
+		super.translateZ(offset);
+	}
+	public scaleX(value: number): void {
+		super.scaleX(value);
+	}
+	public scaleY(value: number): void {
+		super.scaleY(value);
+	}
+	public scaleZ(value: number): void {
+		super.scaleZ(value);
+	}
+	public CalculateEdges(): void {
+		let vertices = [
+			-1.0, -1.0, 1.0,
+			1.0, -1.0, 1.0,
+			1.0, 1.0, 1.0,
+			-1.0, 1.0, 1.0,
+
+			-1.0, -1.0, -1.0,
+			-1.0, 1.0, -1.0,
+			1.0, 1.0, -1.0,
+			1.0, -1.0, -1.0,
+
+			-1.0, 1.0, -1.0,
+			-1.0, 1.0, 1.0,
+			1.0, 1.0, 1.0,
+			1.0, 1.0, -1.0,
+
+			-1.0, -1.0, -1.0,
+			1.0, -1.0, -1.0,
+			1.0, -1.0, 1.0,
+			-1.0, -1.0, 1.0,
+
+			1.0, -1.0, -1.0,
+			1.0, 1.0, -1.0,
+			1.0, 1.0, 1.0,
+			1.0, -1.0, 1.0,
+
+			-1.0, -1.0, -1.0,
+			-1.0, -1.0, 1.0,
+			-1.0, 1.0, 1.0,
+			-1.0, 1.0, -1.0
+		];
+		let colors = [
+			0, 0, 0,
+			0, 0, 0,
+			0, 0, 0,
+			0, 0, 0,
+
+			1, 0, 0,
+			1, 0, 0,
+			1, 0, 0,
+			1, 0, 0,
+
+			0, 1, 0,
+			0, 1, 0,
+			0, 1, 0,
+			0, 1, 0,
+
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+			0, 0, 1,
+
+			1, 0, 1,
+			1, 0, 1,
+			1, 0, 1,
+			1, 0, 1,
+
+			1, 1, 1,
+			1, 1, 1,
+			1, 1, 1,
+			1, 1, 1
+		];
+		let indices = [
+			0, 1, 2, 0, 2, 3,
+			4, 5, 6, 4, 6, 7,
+			8, 9, 10, 8, 10, 11,
+			12, 13, 14, 12, 14, 15,
+			16, 17, 18, 16, 18, 19,
+			20, 21, 22, 20, 22, 23
+		];
+
+		const vertexNormals = [
+
+		];
+
+		this.vertices = vertices;
+		this.indices = indices;
+		this.Colors = colors;
+
+		this.mov_matrix[14] = -zoom;
+	}
+	public constructor() {
+		super();
+		this.CalculateEdges();
+	}
+	public Draw(): void {
+		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
+		this.InitGL(this.vertices, this.Colors, this.indices);
+
+		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+	}
+	public clearMatrix() {
+		super.clearMatrix();
+	}
+}
+
 var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
 var c1 = [0, 0, 0];
 var c2 = [1, 0, 0];
 var c3 = [1, 1, 0];
 
+var shaderProgram = null;
+
 var currentShape: Shape;
+
+var webGlShaderProgram = null;
 
 var Shapes: Shape[] = [];
 
-var zoom = 10;
+const zoom = 1;
 
 const id = "cnvs";
 
@@ -1081,7 +1195,7 @@ function EasingFunction(t: number, type: EasingType, concomitantParam: number[])
 }
 
 function DrawScene() {
-	let gl = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("webgl");
+	let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
 
 	gl.clearColor(0.5, 0.5, 0.5, 1);
 	gl.clearDepth(1.0);
@@ -1090,6 +1204,7 @@ function DrawScene() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	Rotate();
+	Translate();
 	for (let index = 0; index < Shapes.length; index++) {
 		Shapes[index].Draw();
 	}
@@ -1123,6 +1238,10 @@ var mouseDown = new DOMPoint();
 var points: DOMPoint[][] = [];
 var accuracy = 6;
 
+var translateZ = 0;
+var translateZDelta = 0;
+const zWidth = 30;
+
 function Rotate() {
 	let param = [];
 	let easing = EasingType.arc;
@@ -1149,18 +1268,38 @@ function Rotate() {
 	}
 }
 
+function Translate() {
+	if (translateZDelta != 0) {
+		if (Math.abs(translateZ) < zWidth) {
+			for (let index = 0; index < Shapes.length; index++) {
+				Shapes[index].translateZ(-translateZ / zWidth * 3);
+			}
+			translateZ += translateZDelta;
+			for (let index = 0; index < Shapes.length; index++) {
+				Shapes[index].translateZ(translateZ / zWidth * 3);
+			}
+		}
+		else {
+			translateZDelta = 0;
+			translateZ = 0;
+		}
+	}
+}
+
 window.onload = () => {
 	document.getElementById("approve").onclick = () => {
 		accuracy = parseInt((<HTMLInputElement>document.getElementById("anglesCount")).value) / 2;
 	}
 	window.onresize(new UIEvent("resize"));
-	currentShape = new Sphere();
-	let generator = new ParticlesGenerator();
-	generator.Type = ParticleType.Cube;
-	generator.Start();
-	Shapes.push(currentShape);
-	Shapes.push(generator);
-	Shapes.push(new Svg(content));
+	let cube1 = new Cube();
+	let cube2 = new Cube();
+	let text = new Svg(content);
+	currentShape = cube1;
+	cube1.translateZ(-4);
+	cube2.translateZ(-7);
+	Shapes.push(cube1);
+	Shapes.push(cube2);
+	Shapes.push(text);
 	DrawScene();
 }
 
@@ -1173,15 +1312,11 @@ document.onmousedown = (ev) => {
 }
 
 document.onwheel = (ev) => {
-	//Math.abs(ev.deltaY) * 0.1 + 1
-	let value = ev.deltaY / 1200;
-	for (let index = 0; index < Shapes.length; index++) {
-		Shapes[index].translateZ(value);
-	}
+	translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 3;
 }
 
 window.onresize = (ev) => {
-	let cnvs = document.getElementById("cnvs");
+	let cnvs = document.getElementById(id);
 	cnvs.setAttribute("width", (innerWidth).toString());
 	cnvs.setAttribute("height", (innerHeight).toString());
 }
