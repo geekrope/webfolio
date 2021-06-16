@@ -1171,7 +1171,9 @@ var webGlShaderProgram = null;
 
 var Shapes: Shape[] = [];
 
-const zoom = 1;
+const zoom = 3;
+
+const distBetweenCubes = 6;
 
 const id = "cnvs";
 
@@ -1240,6 +1242,7 @@ var accuracy = 6;
 
 var translateZ = 0;
 var translateZDelta = 0;
+var translateT = 0;
 const zWidth = 30;
 
 function Rotate() {
@@ -1269,19 +1272,22 @@ function Rotate() {
 }
 
 function Translate() {
+	let type = EasingType.arc;
 	if (translateZDelta != 0) {
 		if (Math.abs(translateZ) < zWidth) {
 			for (let index = 0; index < Shapes.length; index++) {
-				Shapes[index].translateZ(-translateZ / zWidth * 3);
+				Shapes[index].translateZ(-translateZ / zWidth * distBetweenCubes * EasingFunction(translateT, type, []));
 			}
 			translateZ += translateZDelta;
+			translateT = translateZ / zWidth;
 			for (let index = 0; index < Shapes.length; index++) {
-				Shapes[index].translateZ(translateZ / zWidth * 3);
+				Shapes[index].translateZ(translateZ / zWidth * distBetweenCubes * EasingFunction(translateT, type, []));
 			}
 		}
 		else {
 			translateZDelta = 0;
 			translateZ = 0;
+			translateT = 0;
 		}
 	}
 }
@@ -1295,8 +1301,8 @@ window.onload = () => {
 	let cube2 = new Cube();
 	let text = new Svg(content);
 	currentShape = cube1;
-	cube1.translateZ(-4);
-	cube2.translateZ(-7);
+	cube1.translateZ(-distBetweenCubes - 1);
+	cube2.translateZ(-2 * distBetweenCubes - 1);
 	Shapes.push(cube1);
 	Shapes.push(cube2);
 	Shapes.push(text);
@@ -1312,7 +1318,7 @@ document.onmousedown = (ev) => {
 }
 
 document.onwheel = (ev) => {
-	translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 3;
+	translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 0.5;
 }
 
 window.onresize = (ev) => {
