@@ -1588,7 +1588,7 @@ function Rotate() {
     }
 }
 function Translate() {
-    let type = EasingType.arc;
+    let type = EasingType.quad;
     if (translateZDelta != 0) {
         if (Math.abs(translateZ) < zWidth) {
             for (let index = 0; index < Shapes.length; index++) {
@@ -1626,36 +1626,36 @@ window.onload = () => {
     img.src = "cubetexture.png";
     img.onload = function () {
         cube1.SetTextureStyle(img, [
-            // Front
-            0.0, 0.0,
-            1.0, 0.0,
-            1.0, 1.0,
-            0.0, 1.0,
+            // Front			
+            1 / 4, 1 / 4,
+            2 / 4, 1 / 4,
+            2 / 4, 2 / 4,
+            1 / 4, 2 / 4,
             // Back
-            0.0, 0.0,
-            1.0, 0.0,
-            1.0, 1.0,
-            0.0, 1.0,
+            1 / 4, 3 / 4,
+            2 / 4, 3 / 4,
+            2 / 4, 4 / 4,
+            1 / 4, 4 / 4,
             // Top
-            0.0, 0.0,
-            1.0, 0.0,
-            1.0, 1.0,
-            0.0, 1.0,
+            1 / 4, 2 / 4,
+            2 / 4, 2 / 4,
+            2 / 4, 3 / 4,
+            1 / 4, 3 / 4,
             // Bottom
-            0.0, 0.0,
-            1.0, 0.0,
-            1.0, 1.0,
-            0.0, 1.0,
-            // Right
-            0.0, 0.0,
-            1.0, 0.0,
-            1.0, 1.0,
-            0.0, 1.0,
+            1 / 4, 0 / 4,
+            2 / 4, 0 / 4,
+            2 / 4, 1 / 4,
+            1 / 4, 1 / 4,
+            // Right			
+            2 / 4, 1 / 4,
+            3 / 4, 1 / 4,
+            3 / 4, 2 / 4,
+            2 / 4, 2 / 4,
             // Left
-            0.0, 0.0,
-            1.0, 0.0,
-            1.0, 1.0,
-            0.0, 1.0
+            0 / 4, 1 / 4,
+            1 / 4, 1 / 4,
+            1 / 4, 2 / 4,
+            0 / 4, 2 / 4,
         ]);
     };
 };
@@ -1667,7 +1667,7 @@ document.onmousedown = (ev) => {
     mouseDown.y = ev.pageY;
 };
 document.onwheel = (ev) => {
-    if (currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) >= 0 && currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) < Shapes.length && translateZDelta == 0) {
+    if (currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) >= 0 && currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) < Shapes.length && translateZDelta == 0 && !(rotateT < 90 && (deltaY != 0 || deltaX != 0))) {
         translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 1;
         if (translateZDelta < 0) {
             currentShapeIndex--;
