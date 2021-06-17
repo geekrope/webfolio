@@ -468,79 +468,177 @@ class Shape {
         this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
         this.Opacity = 1;
     }
-    InitGL(vertices, colors, indices) {
-        let gl = document.getElementById(id).getContext("webgl");
-        let vertex_buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        let color_buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-        let index_buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-        let vertCode = `attribute vec3 position;
-		uniform mat4 Pmatrix;
-		uniform mat4 Vmatrix;
-		uniform mat4 Mmatrix;
-		attribute vec3 color;
-		varying vec3 vColor;
+    SetTextureStyle(textureImage, textureCoords) {
+        this.TextureImage = textureImage;
+        this.TextureCoords = textureCoords;
+        this.FillType = "texture";
+    }
+    SetColorsStyle(colors, opacity) {
+        this.Colors = colors;
+        this.Opacity = opacity;
+        this.FillType = "colors";
+    }
+    InitGL() {
+        if (this.FillType == "colors") {
+            let gl = document.getElementById(id).getContext("webgl");
+            let vertex_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+            let color_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.Colors), gl.STATIC_DRAW);
+            let index_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+            let vertCode = `attribute vec3 position;
+				uniform mat4 Pmatrix;
+				uniform mat4 Vmatrix;
+				uniform mat4 Mmatrix;
+				attribute vec3 color;
+				varying vec3 vColor;
 
-		void main(void) {
-		gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);
-		vColor = color;
-		}`;
-        let fragCode = `precision mediump float;
-		varying vec3 vColor;
-		void main(void) {
-		gl_FragColor = vec4(vColor, ${this.Opacity});
-		}`;
-        let vertShader = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vertShader, vertCode);
-        gl.compileShader(vertShader);
-        let fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fragShader, fragCode);
-        gl.compileShader(fragShader);
-        let shaderProgram = gl.createProgram();
-        gl.attachShader(shaderProgram, vertShader);
-        gl.attachShader(shaderProgram, fragShader);
-        gl.linkProgram(shaderProgram);
-        let Pmatrix = gl.getUniformLocation(shaderProgram, "Pmatrix");
-        let Vmatrix = gl.getUniformLocation(shaderProgram, "Vmatrix");
-        let Mmatrix = gl.getUniformLocation(shaderProgram, "Mmatrix");
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-        let position = gl.getAttribLocation(shaderProgram, "position");
-        gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(position);
-        gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
-        let color = gl.getAttribLocation(shaderProgram, "color");
-        gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(color);
-        gl.useProgram(shaderProgram);
-        function get_projection(angle, a, zMin, zMax) {
-            let ang = Math.tan((angle * .5) * Math.PI / 180);
-            return [
-                0.5 / ang, 0, 0, 0,
-                0, 0.5 * a / ang, 0, 0,
-                0, 0, -(zMax + zMin) / (zMax - zMin), -1,
-                0, 0, (-2 * zMax * zMin) / (zMax - zMin), 0
-            ];
+				void main(void) {
+				gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);
+				vColor = color;
+				}`;
+            let fragCode = `precision mediump float;
+				varying vec3 vColor;
+				void main(void) {
+				gl_FragColor = vec4(vColor, ${this.Opacity});
+				}`;
+            let vertShader = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vertShader, vertCode);
+            gl.compileShader(vertShader);
+            let fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fragShader, fragCode);
+            gl.compileShader(fragShader);
+            let shaderProgram = gl.createProgram();
+            gl.attachShader(shaderProgram, vertShader);
+            gl.attachShader(shaderProgram, fragShader);
+            gl.linkProgram(shaderProgram);
+            let Pmatrix = gl.getUniformLocation(shaderProgram, "Pmatrix");
+            let Vmatrix = gl.getUniformLocation(shaderProgram, "Vmatrix");
+            let Mmatrix = gl.getUniformLocation(shaderProgram, "Mmatrix");
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+            let position = gl.getAttribLocation(shaderProgram, "position");
+            gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(position);
+            gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
+            let color = gl.getAttribLocation(shaderProgram, "color");
+            gl.vertexAttribPointer(color, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(color);
+            gl.useProgram(shaderProgram);
+            function get_projection(angle, a, zMin, zMax) {
+                let ang = Math.tan((angle * .5) * Math.PI / 180);
+                return [
+                    0.5 / ang, 0, 0, 0,
+                    0, 0.5 * a / ang, 0, 0,
+                    0, 0, -(zMax + zMin) / (zMax - zMin), -1,
+                    0, 0, (-2 * zMax * zMin) / (zMax - zMin), 0
+                ];
+            }
+            let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, 100);
+            let view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+            gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
+            gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
+            gl.uniformMatrix4fv(Mmatrix, false, this.mov_matrix);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+            webGlShaderProgram = shaderProgram;
         }
-        let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, 100);
-        let view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-        gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
-        gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
-        gl.uniformMatrix4fv(Mmatrix, false, this.mov_matrix);
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-        gl.enable(gl.DEPTH_TEST);
-        gl.depthFunc(gl.LEQUAL);
-        webGlShaderProgram = shaderProgram;
+        else if (this.FillType == "texture") {
+            let gl = document.getElementById(id).getContext("webgl");
+            let vertex_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+            let index_buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+            let vertCode = `attribute vec3 position;
+				uniform mat4 Pmatrix;
+				uniform mat4 Vmatrix;
+				uniform mat4 Mmatrix;		
+				attribute vec2 texcoord;
+				varying vec2 v_texcoord;
+
+				void main(void) {
+				gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);
+				v_texcoord = texcoord;
+				}`;
+            let fragCode = `precision mediump float;
+				varying vec2 v_texcoord;
+				uniform sampler2D u_texture;
+				void main(void) {
+				gl_FragColor = texture2D(u_texture, v_texcoord);
+				}`;
+            let vertShader = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vertShader, vertCode);
+            gl.compileShader(vertShader);
+            let fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fragShader, fragCode);
+            gl.compileShader(fragShader);
+            let shaderProgram = gl.createProgram();
+            gl.attachShader(shaderProgram, vertShader);
+            gl.attachShader(shaderProgram, fragShader);
+            gl.linkProgram(shaderProgram);
+            var texcoordLocation = gl.getAttribLocation(shaderProgram, "texcoord");
+            var buffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+            gl.enableVertexAttribArray(texcoordLocation);
+            gl.vertexAttribPointer(texcoordLocation, 2, gl.FLOAT, false, 0, 0);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.TextureCoords), gl.STATIC_DRAW);
+            var texture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+            if (!this.TextureImage.complete) {
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([
+                    0, 255, 0, 255
+                ]));
+            }
+            else {
+                configureTexture(this.TextureImage);
+            }
+            function configureTexture(image) {
+                gl.bindTexture(gl.TEXTURE_2D, texture);
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+                gl.generateMipmap(gl.TEXTURE_2D);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            }
+            let Pmatrix = gl.getUniformLocation(shaderProgram, "Pmatrix");
+            let Vmatrix = gl.getUniformLocation(shaderProgram, "Vmatrix");
+            let Mmatrix = gl.getUniformLocation(shaderProgram, "Mmatrix");
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+            let position = gl.getAttribLocation(shaderProgram, "position");
+            gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(position);
+            gl.useProgram(shaderProgram);
+            function get_projection(angle, a, zMin, zMax) {
+                let ang = Math.tan((angle * .5) * Math.PI / 180);
+                return [
+                    0.5 / ang, 0, 0, 0,
+                    0, 0.5 * a / ang, 0, 0,
+                    0, 0, -(zMax + zMin) / (zMax - zMin), -1,
+                    0, 0, (-2 * zMax * zMin) / (zMax - zMin), 0
+                ];
+            }
+            let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, 100);
+            let view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+            gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
+            gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
+            gl.uniformMatrix4fv(Mmatrix, false, this.mov_matrix);
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthFunc(gl.LEQUAL);
+            webGlShaderProgram = shaderProgram;
+        }
     }
     CalculateEdges() {
     }
     Draw() {
         let gl = document.getElementById(id).getContext("webgl");
-        this.InitGL(this.vertices, this.Colors, this.indices);
+        this.InitGL();
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     }
     rotateZ(angle) {
@@ -618,6 +716,40 @@ class Sphere extends Shape {
         super();
         this.Quality = 50;
         this.CalculateEdges();
+        let orange = [
+            1, 0.5, 0,
+        ];
+        let black = [
+            0, 0, 0,
+        ];
+        let colors = [];
+        let addColor = (buffer) => {
+            let index = 0;
+            for (; index < buffer.length; index++) {
+                colors.push(buffer[index]);
+            }
+        };
+        for (let i = 0; i < this.Quality; i++) {
+            for (let i2 = 0; i2 < this.Quality; i2++) {
+                if (i % 2 == 0) {
+                    addColor(orange);
+                }
+                else {
+                    addColor(black);
+                }
+            }
+        }
+        for (let i = 0; i < this.Quality; i++) {
+            for (let i2 = 0; i2 < this.Quality; i2++) {
+                if (i % 2 == 0) {
+                    addColor(orange);
+                }
+                else {
+                    addColor(black);
+                }
+            }
+        }
+        this.SetColorsStyle(colors, 1);
     }
     get Quality() {
         return this.quality;
@@ -626,8 +758,14 @@ class Sphere extends Shape {
         this.quality = value;
         this.CalculateEdges();
     }
-    InitGL(vertices, colors, indices) {
-        super.InitGL(vertices, colors, indices);
+    InitGL() {
+        super.InitGL();
+    }
+    SetTextureStyle(textureImage, textureCoords) {
+        super.SetTextureStyle(textureImage, textureCoords);
+    }
+    SetColorsStyle(colors, opacity) {
+        super.SetColorsStyle(colors, opacity);
     }
     rotateZ(angle) {
         super.rotateZ(angle);
@@ -658,35 +796,14 @@ class Sphere extends Shape {
     }
     CalculateEdges() {
         let vertices = [];
-        let colors = [];
         let indices = [];
-        const parallelsCount = this.Quality;
-        let count = this.Quality;
-        let orange = [
-            1, 0.5, 0,
-        ];
-        let black = [
-            0, 0, 0,
-        ];
-        let red = [
-            1, 0, 0,
-        ];
-        let pink = [
-            1, 0, 1,
-        ];
-        let addColor = (buffer) => {
-            let index = 0;
-            for (; index < buffer.length; index++) {
-                colors.push(buffer[index]);
-            }
-        };
         let calcHalf = (zSign) => {
-            for (let angleRelativeY = 0; angleRelativeY < parallelsCount; angleRelativeY += 1) {
-                let absoluteY = Math.sin((angleRelativeY / (parallelsCount - 1) * Math.PI) + Math.PI / 2);
+            for (let angleRelativeY = 0; angleRelativeY < this.Quality; angleRelativeY += 1) {
+                let absoluteY = Math.sin((angleRelativeY / (this.Quality - 1) * Math.PI) + Math.PI / 2);
                 let xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
                 let radius = -xStart;
-                for (let angleRelativeX = 0; angleRelativeX < count; angleRelativeX += 1) {
-                    let absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
+                for (let angleRelativeX = 0; angleRelativeX < this.Quality; angleRelativeX += 1) {
+                    let absoluteX = Math.cos((angleRelativeX) / (this.Quality - 1) * Math.PI) * radius;
                     let z = Math.sin(Math.acos(absoluteX / radius)) * radius;
                     if (isNaN(z)) {
                         z = 0;
@@ -695,34 +812,14 @@ class Sphere extends Shape {
                 }
             }
         };
-        for (let i = 0; i < parallelsCount; i++) {
-            for (let i2 = 0; i2 < count; i2++) {
-                if (i % 2 == 0) {
-                    addColor(orange);
-                }
-                else {
-                    addColor(black);
-                }
-            }
-        }
-        for (let i = 0; i < parallelsCount; i++) {
-            for (let i2 = 0; i2 < count; i2++) {
-                if (i % 2 == 0) {
-                    addColor(orange);
-                }
-                else {
-                    addColor(black);
-                }
-            }
-        }
         calcHalf(1);
         calcHalf(-1);
         let index1 = 0;
-        let index2 = count;
+        let index2 = this.Quality;
         let bounds = 0;
-        for (let y = 0; y <= parallelsCount; y += 1) {
+        for (let y = 0; y <= this.Quality; y += 1) {
             index1 = bounds;
-            bounds += count;
+            bounds += this.Quality;
             index2 = bounds;
             for (; index1 < bounds - 1;) {
                 indices.push(index1);
@@ -735,9 +832,9 @@ class Sphere extends Shape {
                 index2++;
             }
         }
-        for (let y = 0; y <= parallelsCount; y += 1) {
+        for (let y = 0; y <= this.Quality; y += 1) {
             index1 = bounds;
-            bounds += count;
+            bounds += this.Quality;
             index2 = bounds;
             for (; index1 < bounds - 1;) {
                 indices.push(index1);
@@ -753,7 +850,6 @@ class Sphere extends Shape {
         const vertexNormals = [];
         this.vertices = vertices;
         this.indices = indices;
-        this.Colors = colors;
         this.mov_matrix[14] = -zoom;
     }
     Draw() {
@@ -779,8 +875,14 @@ class RegularPolygon extends Shape {
         this.n = value;
         this.CalculateEdges();
     }
-    InitGL(vertices, colors, indices) {
-        super.InitGL(vertices, colors, indices);
+    SetTextureStyle(textureImage, textureCoords) {
+        super.SetTextureStyle(textureImage, textureCoords);
+    }
+    SetColorsStyle(colors, opacity) {
+        super.SetColorsStyle(colors, opacity);
+    }
+    InitGL() {
+        super.InitGL();
     }
     rotateZ(angle) {
         super.rotateZ(angle);
@@ -812,7 +914,6 @@ class RegularPolygon extends Shape {
     CalculateEdges() {
         let accuracy = this.N / 2;
         let vertices = [];
-        let colors = [];
         let r = 1;
         const vertexNormals = [];
         for (let angle = 0; angle < accuracy * 2; angle += 1) {
@@ -823,9 +924,6 @@ class RegularPolygon extends Shape {
             let y = p1.y;
             let x2 = p2.x;
             let y2 = p2.y;
-            for (let i = 0; i < c1.length * 4; i++) {
-                colors.push(c1[i % 3]);
-            }
             let nP = this.Circle((radians + radians + Math.PI / accuracy) / 2, r);
             vertexNormals.push(nP.x, nP.y, 0);
             vertexNormals.push(nP.x, nP.y, 0);
@@ -837,9 +935,6 @@ class RegularPolygon extends Shape {
             vertices.push(x, y, 1);
         }
         vertices.push(0, 0, 1);
-        for (let i = 0; i < c2.length; i++) {
-            colors.push(c2[i % 3]);
-        }
         for (let angle = 0; angle < accuracy * 2; angle += 1) {
             let radians = (angle / accuracy) * Math.PI;
             let p1 = this.Circle(radians, r);
@@ -848,16 +943,10 @@ class RegularPolygon extends Shape {
             let y = p1.y;
             let x2 = p2.x;
             let y2 = p2.y;
-            for (let i = 0; i < c2.length * 2; i++) {
-                colors.push(c2[i % 3]);
-            }
             vertices.push(x2, y2, 1);
             vertices.push(x, y, 1);
         }
         vertices.push(0, 0, -1);
-        for (let i = 0; i < c3.length; i++) {
-            colors.push(c3[i % 3]);
-        }
         for (let angle = 0; angle < accuracy * 2; angle += 1) {
             let radians = (angle / accuracy) * Math.PI;
             let p1 = this.Circle(radians, r);
@@ -866,9 +955,6 @@ class RegularPolygon extends Shape {
             let y = p1.y;
             let x2 = p2.x;
             let y2 = p2.y;
-            for (let i = 0; i < c3.length * 2; i++) {
-                colors.push(c3[i % 3]);
-            }
             vertices.push(x2, y2, -1);
             vertices.push(x, y, -1);
         }
@@ -893,7 +979,6 @@ class RegularPolygon extends Shape {
         }
         this.vertices = vertices;
         this.indices = indices;
-        this.Colors = colors;
         this.mov_matrix[14] = -zoom;
     }
     Draw() {
@@ -926,6 +1011,8 @@ class ParticlesGeneratorProperties {
 class ParticlesGenerator extends Shape {
     constructor() {
         super();
+        this.parallelsCount = 15;
+        this.count = 15;
         this.particles = [];
         this.Type = ParticleType.Sphere;
         this.Properties = {
@@ -939,6 +1026,76 @@ class ParticlesGenerator extends Shape {
         };
         this.finished = 0;
         this.generated = 0;
+        let colors = [];
+        if (this.Type == ParticleType.Sphere) {
+            let addColor = (buffer) => {
+                let index = 0;
+                for (; index < buffer.length; index++) {
+                    colors.push(buffer[index]);
+                }
+            };
+            let yellow = [
+                1, 1, 0,
+            ];
+            let green = [
+                0, 1, 0,
+            ];
+            let red = [
+                1, 0, 0,
+            ];
+            let pink = [
+                1, 0, 1,
+            ];
+            for (let i = 0; i < this.parallelsCount; i++) {
+                for (let i2 = 0; i2 < this.count; i2++) {
+                    if (i < (this.parallelsCount - 1) / 2) {
+                        addColor(yellow);
+                    }
+                    else {
+                        addColor(green);
+                    }
+                }
+            }
+            for (let i = 0; i < this.parallelsCount; i++) {
+                for (let i2 = 0; i2 < this.count; i2++) {
+                    if (i < (this.parallelsCount - 1) / 2) {
+                        addColor(red);
+                    }
+                    else {
+                        addColor(pink);
+                    }
+                }
+            }
+        }
+        else if (this.Type == ParticleType.Cube) {
+            colors = [
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                1, 0, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 1, 0,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                0, 0, 1,
+                1, 0, 1,
+                1, 0, 1,
+                1, 0, 1,
+                1, 0, 1,
+                1, 1, 1,
+                1, 1, 1,
+                1, 1, 1,
+                1, 1, 1,
+                1, 1, 0,
+                1, 1, 0,
+                1, 1, 0,
+                1, 1, 0,
+            ];
+        }
+        this.SetColorsStyle(colors, 1);
     }
     GenerateParticle() {
         let angleX = Math.random() * Math.PI;
@@ -950,6 +1107,12 @@ class ParticlesGenerator extends Shape {
         let scale = Math.random() * (this.Properties.maxSize - this.Properties.minSize) + this.Properties.minSize;
         //180deg
         return new Particle(angleX, angleY, angleZ, 0, scale, rotationX, rotationY, rotationZ, Math.random() * (this.Properties.maxDistance - this.Properties.minDistance) + this.Properties.minDistance);
+    }
+    SetTextureStyle(textureImage, textureCoords) {
+        super.SetTextureStyle(textureImage, textureCoords);
+    }
+    SetColorsStyle(colors, opacity) {
+        super.SetColorsStyle(colors, opacity);
     }
     get Type() {
         return this._type;
@@ -964,8 +1127,8 @@ class ParticlesGenerator extends Shape {
     set Properties(value) {
         this.properties = value;
     }
-    InitGL(vertices, colors, indices) {
-        super.InitGL(vertices, colors, indices);
+    InitGL() {
+        super.InitGL();
     }
     rotateZ(angle) {
         super.rotateZ(angle);
@@ -996,7 +1159,6 @@ class ParticlesGenerator extends Shape {
     }
     CalculateEdges() {
         let vertices = [];
-        let colors = [];
         let indices = [];
         if (this._type == ParticleType.Cube) {
             vertices = [
@@ -1025,32 +1187,6 @@ class ParticlesGenerator extends Shape {
                 -1.0, 1.0, 1.0,
                 -1.0, 1.0, -1.0
             ];
-            colors = [
-                1, 0, 0,
-                1, 0, 0,
-                1, 0, 0,
-                1, 0, 0,
-                0, 1, 0,
-                0, 1, 0,
-                0, 1, 0,
-                0, 1, 0,
-                0, 0, 1,
-                0, 0, 1,
-                0, 0, 1,
-                0, 0, 1,
-                1, 0, 1,
-                1, 0, 1,
-                1, 0, 1,
-                1, 0, 1,
-                1, 1, 1,
-                1, 1, 1,
-                1, 1, 1,
-                1, 1, 1,
-                1, 1, 0,
-                1, 1, 0,
-                1, 1, 0,
-                1, 1, 0,
-            ];
             indices = [
                 0, 1, 2, 0, 2, 3,
                 4, 5, 6, 4, 6, 7,
@@ -1061,36 +1197,15 @@ class ParticlesGenerator extends Shape {
             ];
             this.vertices = vertices;
             this.indices = indices;
-            this.Colors = colors;
         }
         else if (this._type == ParticleType.Sphere) {
-            const parallelsCount = 15;
-            let count = 15;
-            let yellow = [
-                1, 1, 0,
-            ];
-            let green = [
-                0, 1, 0,
-            ];
-            let red = [
-                1, 0, 0,
-            ];
-            let pink = [
-                1, 0, 1,
-            ];
-            let addColor = (buffer) => {
-                let index = 0;
-                for (; index < buffer.length; index++) {
-                    colors.push(buffer[index]);
-                }
-            };
             let calcHalf = (zSign) => {
-                for (let angleRelativeY = 0; angleRelativeY < parallelsCount; angleRelativeY += 1) {
-                    let absoluteY = Math.sin((angleRelativeY / (parallelsCount - 1) * Math.PI) + Math.PI / 2);
+                for (let angleRelativeY = 0; angleRelativeY < this.parallelsCount; angleRelativeY += 1) {
+                    let absoluteY = Math.sin((angleRelativeY / (this.parallelsCount - 1) * Math.PI) + Math.PI / 2);
                     let xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
                     let radius = -xStart;
-                    for (let angleRelativeX = 0; angleRelativeX < count; angleRelativeX += 1) {
-                        let absoluteX = Math.cos((angleRelativeX) / (count - 1) * Math.PI) * radius;
+                    for (let angleRelativeX = 0; angleRelativeX < this.count; angleRelativeX += 1) {
+                        let absoluteX = Math.cos((angleRelativeX) / (this.count - 1) * Math.PI) * radius;
                         let z = Math.sin(Math.acos(absoluteX / radius)) * radius;
                         if (isNaN(z)) {
                             z = 0;
@@ -1099,34 +1214,14 @@ class ParticlesGenerator extends Shape {
                     }
                 }
             };
-            for (let i = 0; i < parallelsCount; i++) {
-                for (let i2 = 0; i2 < count; i2++) {
-                    if (i < (parallelsCount - 1) / 2) {
-                        addColor(yellow);
-                    }
-                    else {
-                        addColor(green);
-                    }
-                }
-            }
-            for (let i = 0; i < parallelsCount; i++) {
-                for (let i2 = 0; i2 < count; i2++) {
-                    if (i < (parallelsCount - 1) / 2) {
-                        addColor(red);
-                    }
-                    else {
-                        addColor(pink);
-                    }
-                }
-            }
             calcHalf(1);
             calcHalf(-1);
             let index1 = 0;
-            let index2 = count;
+            let index2 = this.count;
             let bounds = 0;
-            for (let y = 0; y <= parallelsCount; y += 1) {
+            for (let y = 0; y <= this.parallelsCount; y += 1) {
                 index1 = bounds;
-                bounds += count;
+                bounds += this.count;
                 index2 = bounds;
                 for (; index1 < bounds - 1;) {
                     indices.push(index1);
@@ -1139,9 +1234,9 @@ class ParticlesGenerator extends Shape {
                     index2++;
                 }
             }
-            for (let y = 0; y <= parallelsCount; y += 1) {
+            for (let y = 0; y <= this.parallelsCount; y += 1) {
                 index1 = bounds;
-                bounds += count;
+                bounds += this.count;
                 index2 = bounds;
                 for (; index1 < bounds - 1;) {
                     indices.push(index1);
@@ -1157,7 +1252,6 @@ class ParticlesGenerator extends Shape {
             const vertexNormals = [];
             this.vertices = vertices;
             this.indices = indices;
-            this.Colors = colors;
         }
         this.mov_matrix[14] = -zoom;
     }
@@ -1188,7 +1282,7 @@ class ParticlesGenerator extends Shape {
                 this.scaleX(this.particles[index].scale * scaleValue);
                 this.scaleY(this.particles[index].scale * scaleValue);
                 this.scaleZ(this.particles[index].scale * scaleValue);
-                this.InitGL(this.vertices, this.Colors, this.indices);
+                this.InitGL();
                 gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
                 this.mov_matrix = movMatrix;
                 if (this.particles[index].distance >= this.particles[index].distanceMax && (this.generated < this.Properties.count || this.Properties.count == -1)) {
@@ -1219,9 +1313,22 @@ class Svg extends Shape {
         super();
         this.Code = svgcode;
         this.CalculateEdges();
+        let colors = [];
+        for (let index = 0; index < this.Points.length; index++) {
+            for (let index2 = 0; index2 < this.Points[index].length; index2++) {
+                colors.push(1, 1, 1);
+            }
+        }
+        this.SetColorsStyle(colors, 1);
     }
-    InitGL(vertices, colors, indices) {
-        super.InitGL(vertices, colors, indices);
+    InitGL() {
+        super.InitGL();
+    }
+    SetTextureStyle(textureImage, textureCoords) {
+        super.SetTextureStyle(textureImage, textureCoords);
+    }
+    SetColorsStyle(colors, opacity) {
+        super.SetColorsStyle(colors, opacity);
     }
     rotateZ(angle) {
         super.rotateZ(angle);
@@ -1252,7 +1359,6 @@ class Svg extends Shape {
     }
     CalculateEdges() {
         let vertices = [];
-        let colors = [];
         let indices = [];
         let parse = ParseSvg(this.Code);
         this.Points = CalculatePolygons(parse);
@@ -1261,7 +1367,6 @@ class Svg extends Shape {
         for (let index = 0; index < this.Points.length; index++) {
             for (let index2 = 0; index2 < this.Points[index].length; index2++) {
                 vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, -(this.Points[index][index2].y - 1080 / 2) / 500, 0);
-                colors.push(1, 1, 1);
                 if (index2 + 1 < this.Points[index].length) {
                     indices.push(index2 + polygonIndex);
                     indices.push(index2 + polygonIndex + 1);
@@ -1272,12 +1377,11 @@ class Svg extends Shape {
         const vertexNormals = [];
         this.vertices = vertices;
         this.indices = indices;
-        this.Colors = colors;
         this.mov_matrix[14] = -zoom;
     }
     Draw() {
         let gl = document.getElementById(id).getContext("webgl");
-        this.InitGL(this.vertices, this.Colors, this.indices);
+        this.InitGL();
         gl.drawElements(gl.LINES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     }
     clearMatrix() {
@@ -1288,9 +1392,42 @@ class Cube extends Shape {
     constructor() {
         super();
         this.CalculateEdges();
+        let colors = [
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            1, 0, 0,
+            1, 0, 0,
+            1, 0, 0,
+            1, 0, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 1, 0,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
+            1, 0, 1,
+            1, 0, 1,
+            1, 0, 1,
+            1, 0, 1,
+            1, 1, 1,
+            1, 1, 1,
+            1, 1, 1,
+            1, 1, 1
+        ];
+        this.SetColorsStyle(colors, 1);
     }
-    InitGL(vertices, colors, indices) {
-        super.InitGL(vertices, colors, indices);
+    InitGL() {
+        super.InitGL();
+    }
+    SetTextureStyle(textureImage, textureCoords) {
+        super.SetTextureStyle(textureImage, textureCoords);
+    }
+    SetColorsStyle(colors, opacity) {
+        super.SetColorsStyle(colors, opacity);
     }
     rotateZ(angle) {
         super.rotateZ(angle);
@@ -1346,32 +1483,6 @@ class Cube extends Shape {
             -1.0, 1.0, 1.0,
             -1.0, 1.0, -1.0
         ];
-        let colors = [
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            0, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            1, 0, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 1, 0,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
-            1, 0, 1,
-            1, 0, 1,
-            1, 0, 1,
-            1, 0, 1,
-            1, 1, 1,
-            1, 1, 1,
-            1, 1, 1,
-            1, 1, 1
-        ];
         let indices = [
             0, 1, 2, 0, 2, 3,
             4, 5, 6, 4, 6, 7,
@@ -1383,13 +1494,11 @@ class Cube extends Shape {
         const vertexNormals = [];
         this.vertices = vertices;
         this.indices = indices;
-        this.Colors = colors;
+        this.InitGL();
         this.mov_matrix[14] = -zoom;
     }
     Draw() {
-        let gl = document.getElementById(id).getContext("webgl");
-        this.InitGL(this.vertices, this.Colors, this.indices);
-        gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+        super.Draw();
     }
     clearMatrix() {
         super.clearMatrix();
@@ -1438,20 +1547,6 @@ function DrawScene() {
         Shapes[index].Draw();
     }
     requestAnimationFrame(DrawScene);
-    //let _2d = (<HTMLCanvasElement>document.getElementById("cnvs")).getContext("2d");
-    //_2d.strokeStyle = "black";
-    //_2d.lineCap = "round";
-    //_2d.lineJoin = "round";
-    //_2d.lineWidth = 1;
-    //_2d.clearRect(0, 0, _2d.canvas.width, _2d.canvas.height);
-    //for (let polygon = 0; polygon < points.length; polygon++) {
-    //	_2d.beginPath();
-    //	for (let point = 0; point < points[polygon].length; point++) {
-    //		_2d.lineTo(points[polygon][point].x + 100, points[polygon][point].y + 100);
-    //	}
-    //	_2d.closePath();
-    //	_2d.stroke();
-    //}
 }
 const defaultDelta = 3;
 var deltaX = 0;
@@ -1499,7 +1594,7 @@ function Translate() {
                 Shapes[index].translateZ(-translateZ / zWidth * distBetweenCubes * EasingFunction(translateT, type, []));
             }
             translateZ += translateZDelta;
-            translateT = translateZ / zWidth;
+            translateT = Math.abs(translateZ) / zWidth;
             for (let index = 0; index < Shapes.length; index++) {
                 Shapes[index].translateZ(translateZ / zWidth * distBetweenCubes * EasingFunction(translateT, type, []));
             }
@@ -1526,6 +1621,42 @@ window.onload = () => {
     Shapes.push(cube2);
     Shapes.push(text);
     DrawScene();
+    var img = new Image();
+    img.src = "cubetexture.png";
+    img.onload = function () {
+        cube1.SetTextureStyle(img, [
+            // Front
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+            // Back
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+            // Top
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+            // Bottom
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+            // Right
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0,
+            // Left
+            0.0, 0.0,
+            1.0, 0.0,
+            1.0, 1.0,
+            0.0, 1.0
+        ]);
+    };
 };
 document.onmousedown = (ev) => {
     if (!rotationEnded) {
