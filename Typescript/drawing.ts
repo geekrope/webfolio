@@ -1360,6 +1360,7 @@ var accuracy = 6;
 var translateZ = 0;
 var translateZDelta = 0;
 var translateT = 0;
+var currentShapeIndex = 0;
 const zWidth = 30;
 
 function Rotate() {
@@ -1417,12 +1418,13 @@ window.onload = () => {
 	let cube1 = new Cube();
 	let cube2 = new Cube();
 	let text = new Svg(content);
-	currentShape = cube1;
+	currentShape = text;
 	cube1.translateZ(-distBetweenCubes - 1);
 	cube2.translateZ(-2 * distBetweenCubes - 1);
+	
+	Shapes.push(text);
 	Shapes.push(cube1);
 	Shapes.push(cube2);
-	Shapes.push(text);
 	DrawScene();
 
 	var img = new Image();
@@ -1472,7 +1474,17 @@ document.onmousedown = (ev) => {
 }
 
 document.onwheel = (ev) => {
-	translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 0.5;
+	if (currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) >= 0 && currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) < Shapes.length && translateZDelta == 0) {
+		translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 1;
+		if (translateZDelta < 0) {
+			currentShapeIndex--;
+		}
+		else if (translateZDelta > 0) {
+			currentShapeIndex++;
+		}
+		currentShape = Shapes[currentShapeIndex];
+		console.log(currentShapeIndex);
+	}
 }
 
 window.onresize = (ev) => {
