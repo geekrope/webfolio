@@ -70,6 +70,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="caviar.ttf" />
+    <Content Include="nknwn_ndfnd.png" />
     <Content Include="tsconfig.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -79,7 +80,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="cubetexture.png" />
     <Content Include="index.css" />
     <Content Include="index.html" />
     <Content Include="Web.config" />

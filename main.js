@@ -469,8 +469,11 @@ class Shape {
         this.Opacity = 1;
     }
     SetTextureStyle(textureImage, textureCoords) {
+        let gl = document.getElementById(id).getContext("webgl");
         this.TextureImage = textureImage;
         this.TextureCoords = textureCoords;
+        this.LoadedTexture = gl.createTexture();
+        this.LoadedTexture;
         this.FillType = "texture";
     }
     SetColorsStyle(colors, opacity) {
@@ -588,17 +591,11 @@ class Shape {
             gl.enableVertexAttribArray(texcoordLocation);
             gl.vertexAttribPointer(texcoordLocation, 2, gl.FLOAT, false, 0, 0);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.TextureCoords), gl.STATIC_DRAW);
-            var texture = gl.createTexture();
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            if (!this.TextureImage.complete) {
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([
-                    0, 255, 0, 255
-                ]));
+            if (!this.LoadedTexture) {
+                this.LoadedTexture = gl.createTexture();
             }
-            else {
-                configureTexture(this.TextureImage);
-            }
-            function configureTexture(image) {
+            configureTexture(this.TextureImage, this.LoadedTexture);
+            function configureTexture(image, texture) {
                 gl.bindTexture(gl.TEXTURE_2D, texture);
                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
@@ -1466,6 +1463,14 @@ class Cube extends Shape {
             -1.0, 1.0, -1.0,
             1.0, 1.0, -1.0,
             1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0,
+            -1.0, -1.0, 1.0,
+            -1.0, 1.0, 1.0,
+            -1.0, 1.0, -1.0,
+            1.0, -1.0, -1.0,
+            1.0, 1.0, -1.0,
+            1.0, 1.0, 1.0,
+            1.0, -1.0, 1.0,
             -1.0, 1.0, -1.0,
             -1.0, 1.0, 1.0,
             1.0, 1.0, 1.0,
@@ -1473,15 +1478,7 @@ class Cube extends Shape {
             -1.0, -1.0, -1.0,
             1.0, -1.0, -1.0,
             1.0, -1.0, 1.0,
-            -1.0, -1.0, 1.0,
-            1.0, -1.0, -1.0,
-            1.0, 1.0, -1.0,
-            1.0, 1.0, 1.0,
-            1.0, -1.0, 1.0,
-            -1.0, -1.0, -1.0,
-            -1.0, -1.0, 1.0,
-            -1.0, 1.0, 1.0,
-            -1.0, 1.0, -1.0
+            -1.0, -1.0, 1.0
         ];
         let indices = [
             0, 1, 2, 0, 2, 3,
@@ -1627,35 +1624,47 @@ window.onload = () => {
     img.onload = function () {
         cube1.SetTextureStyle(img, [
             // Front			
-            1 / 4, 1 / 4,
-            2 / 4, 1 / 4,
-            2 / 4, 2 / 4,
-            1 / 4, 2 / 4,
-            // Back
-            1 / 4, 3 / 4,
-            2 / 4, 3 / 4,
-            2 / 4, 4 / 4,
-            1 / 4, 4 / 4,
-            // Top
-            1 / 4, 2 / 4,
-            2 / 4, 2 / 4,
-            2 / 4, 3 / 4,
-            1 / 4, 3 / 4,
-            // Bottom
-            1 / 4, 0 / 4,
-            2 / 4, 0 / 4,
-            2 / 4, 1 / 4,
-            1 / 4, 1 / 4,
-            // Right			
-            2 / 4, 1 / 4,
-            3 / 4, 1 / 4,
-            3 / 4, 2 / 4,
-            2 / 4, 2 / 4,
-            // Left
-            0 / 4, 1 / 4,
-            1 / 4, 1 / 4,
-            1 / 4, 2 / 4,
-            0 / 4, 2 / 4,
+            1 / 2, 0,
+            1, 0,
+            1, 1 / 2,
+            1 / 2, 1 / 2,
+            // Back	
+            1 / 2, 1 / 2,
+            1, 1 / 2,
+            1, 1,
+            1 / 2, 1,
+            // Right	
+            0, 1 / 2,
+            1 / 2, 1 / 2,
+            1 / 2, 1,
+            0, 1,
+            // Left		
+            0, 0,
+            1 / 2, 0,
+            1 / 2, 1 / 2,
+            0, 1 / 2,
+        ]);
+        cube2.SetTextureStyle(img, [
+            // Front			
+            1 / 2, 0,
+            1, 0,
+            1, 1 / 2,
+            1 / 2, 1 / 2,
+            // Back	
+            1 / 2, 1 / 2,
+            1, 1 / 2,
+            1, 1,
+            1 / 2, 1,
+            // Right	
+            0, 1 / 2,
+            1 / 2, 1 / 2,
+            1 / 2, 1,
+            0, 1,
+            // Left		
+            0, 0,
+            1 / 2, 0,
+            1 / 2, 1 / 2,
+            0, 1 / 2,
         ]);
     };
 };
