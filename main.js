@@ -1544,6 +1544,12 @@ function DrawScene() {
         Shapes[index].Draw();
     }
     requestAnimationFrame(DrawScene);
+    fps++;
+    if (Date.now() - startTick > 1000) {
+        document.getElementById("approve").innerHTML = fps.toString();
+        fps = 0;
+        startTick = Date.now();
+    }
 }
 const defaultDelta = 3;
 var deltaX = 0;
@@ -1559,6 +1565,8 @@ var translateZDelta = 0;
 var translateT = 0;
 var currentShapeIndex = 0;
 const zWidth = 30;
+var startTick = Date.now();
+var fps = 0;
 function Rotate() {
     let param = [];
     let easing = EasingType.arc;
@@ -1605,9 +1613,6 @@ function Translate() {
     }
 }
 window.onload = () => {
-    document.getElementById("approve").onclick = () => {
-        accuracy = parseInt(document.getElementById("anglesCount").value) / 2;
-    };
     window.onresize(new UIEvent("resize"));
     let cube1 = new Cube();
     let cube2 = new Cube();
@@ -1711,14 +1716,14 @@ document.onmouseup = (ev) => {
         }
     }
     else {
-        //if (ev.pageY - mouseDown.y < 0) {
-        //	deltaY = -defaultDelta;
-        //	rotationEnded = false;
-        //}
-        //else {
-        //	deltaY = defaultDelta;
-        //	rotationEnded = false;
-        //}
+        if (ev.pageY - mouseDown.y < 0) {
+            deltaY = -defaultDelta;
+            rotationEnded = false;
+        }
+        else {
+            deltaY = defaultDelta;
+            rotationEnded = false;
+        }
     }
 };
 function transposeMat4(matrix) {
