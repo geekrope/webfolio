@@ -69,8 +69,9 @@
     <TypeScriptSourceRoot />
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="caviar.ttf" />
-    <Content Include="nknwn_ndfnd.png" />
+    <Content Include="Resources\caviar.ttf" />
+    <Content Include="Resources\nknwn_ndfnd.png" />
+    <Content Include="Resources\nknwn_ndfnd_min.png" />
     <Content Include="tsconfig.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
