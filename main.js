@@ -547,7 +547,7 @@ class Shape {
             gl.uniformMatrix4fv(Mmatrix, false, this.mov_matrix);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
             gl.enable(gl.DEPTH_TEST);
-            gl.depthFunc(gl.LEQUAL);
+            gl.depthFunc(gl.LESS);
             webGlShaderProgram = shaderProgram;
         }
         else if (this.FillType == "texture") {
@@ -600,8 +600,8 @@ class Shape {
                 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
                 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
                 gl.generateMipmap(gl.TEXTURE_2D);
-                //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST);
-                //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
             }
             let Pmatrix = gl.getUniformLocation(shaderProgram, "Pmatrix");
             let Vmatrix = gl.getUniformLocation(shaderProgram, "Vmatrix");
@@ -627,7 +627,7 @@ class Shape {
             gl.uniformMatrix4fv(Mmatrix, false, this.mov_matrix);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
             gl.enable(gl.DEPTH_TEST);
-            gl.depthFunc(gl.LEQUAL);
+            gl.depthFunc(gl.LESS);
             webGlShaderProgram = shaderProgram;
         }
     }
