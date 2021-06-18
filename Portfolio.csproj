@@ -73,6 +73,7 @@
     <Content Include="Resources\nknwn_ndfnd.png" />
     <Content Include="Resources\nknwn_ndfnd_min.png" />
     <Content Include="tsconfig.json" />
+    <Content Include="package.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
