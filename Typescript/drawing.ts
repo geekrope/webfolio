@@ -1502,7 +1502,7 @@ window.onresize = (ev) => {
 }
 
 document.onmouseup = (ev) => {
-	if (!rotationEnded) {
+	if (!rotationEnded) { 
 		return;
 	}
 	if (mouseDown.x == ev.pageX && mouseDown.y == ev.pageY) {
