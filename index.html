@@ -4,8 +4,66 @@
     <meta charset='utf-8' />
     <title></title>
     <script src="main.js">
-    </script>    
-    <link rel="stylesheet" href="index.css">
+    </script>
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+            overflow: hidden;
+        }
+
+        .nInput {
+            width: 250px;
+            font-family: Caviar;
+            height: 60%;
+            font-size: 30px;
+            border-radius: 0.5em;
+            background: white;
+            filter: drop-shadow(5px 5px 0px #aaaaaa);
+            margin: auto;
+            vertical-align: middle;
+            border: none;
+            outline: none;
+            text-align: center;
+            transition: 0.1s;
+        }
+
+            .nInput:hover {
+                filter: drop-shadow(0px 0px 0px #aaaaaa);
+            }
+
+        .button {
+            width: 200px;
+            border: none;
+            font-family: Caviar;
+            height: 60%;
+            font-size: 30px;
+            border-radius: 0.5em;
+            background: white;
+            filter: drop-shadow(5px 5px 0px #aaaaaa);
+            margin: auto;
+            vertical-align: middle;
+            margin-left: 10px;
+            outline: none;
+            text-align: center;
+            transition: 0.1s;
+        }
+
+            .button:hover {
+                filter: drop-shadow(0px 0px 0px #aaaaaa);
+            }
+
+        .grid {
+            display: grid;
+            grid-template-rows: 70px auto;
+            grid-template-columns: 300px auto;
+        }
+
+        @font-face {
+            src: url(Resources/caviar.ttf);
+            font-family: Caviar;
+        }
+    </style>
 </head>
 <body>
     <canvas width="1600" height="900" id="cnvs" style="grid-row-start:2;grid-column-start:1;grid-column-end:3;margin:auto;vertical-align:middle;position:absolute">
