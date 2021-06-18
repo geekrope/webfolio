@@ -1425,7 +1425,7 @@ window.onload = () => {
 	DrawScene();
 
 	var img = new Image();
-	img.src = "cubetexture.png";
+	img.src = "nknwn_ndfnd_min.png";
 	img.onload = function () {
 		cube1.SetTextureStyle(img, [
 			// Front			

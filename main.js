@@ -1620,7 +1620,7 @@ window.onload = () => {
     Shapes.push(cube2);
     DrawScene();
     var img = new Image();
-    img.src = "cubetexture.png";
+    img.src = "nknwn_ndfnd_min.png";
     img.onload = function () {
         cube1.SetTextureStyle(img, [
             // Front			
@@ -1711,14 +1711,14 @@ document.onmouseup = (ev) => {
         }
     }
     else {
-        if (ev.pageY - mouseDown.y < 0) {
-            deltaY = -defaultDelta;
-            rotationEnded = false;
-        }
-        else {
-            deltaY = defaultDelta;
-            rotationEnded = false;
-        }
+        //if (ev.pageY - mouseDown.y < 0) {
+        //	deltaY = -defaultDelta;
+        //	rotationEnded = false;
+        //}
+        //else {
+        //	deltaY = defaultDelta;
+        //	rotationEnded = false;
+        //}
     }
 };
 function transposeMat4(matrix) {
