@@ -1353,7 +1353,6 @@ function DrawScene() {
 
 const defaultDelta = 3;
 var deltaX = 0;
-var deltaY = 0;
 var rotateT = 0;
 var rotationEnded = true;
 var scaled = false;
@@ -1373,25 +1372,18 @@ var fps = 0;
 function Rotate() {
 	let param = [];
 	let easing = EasingType.arc;
-	if (rotateT < 90 && (deltaY != 0 || deltaX != 0)) {
-		if (deltaY != 0) {
-			currentShape.rotateX(-deltaY / Math.abs(deltaY) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
-		}
+	if (rotateT < 90 && deltaX != 0) {		
 		if (deltaX != 0) {
 			currentShape.rotateY(-deltaX / Math.abs(deltaX) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
 		}
-		rotateT += defaultDelta;
-		if (deltaY != 0) {
-			currentShape.rotateX(deltaY / Math.abs(deltaY) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
-		}
+		rotateT += defaultDelta;		
 		if (deltaX != 0) {
 			currentShape.rotateY(deltaX / Math.abs(deltaX) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
 		}
 	}
 	else {
 		rotationEnded = true;
-		deltaX = 0;
-		deltaY = 0;
+		deltaX = 0;		
 		rotateT = 0;
 	}
 }
@@ -1432,7 +1424,7 @@ window.onload = () => {
 	DrawScene();
 
 	var img = new Image();
-	img.src = "nknwn_ndfnd_min.png";
+	img.src = "Resources/nknwn_ndfnd_min.png";
 	img.onload = function () {
 		cube1.SetTextureStyle(img, [
 			// Front			
@@ -1490,7 +1482,7 @@ document.onmousedown = (ev) => {
 }
 
 document.onwheel = (ev) => {
-	if (currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) >= 0 && currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) < Shapes.length && translateZDelta == 0 && !(rotateT < 90 && (deltaY != 0 || deltaX != 0))) {
+	if (currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) >= 0 && currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) < Shapes.length && translateZDelta == 0 && !(rotateT < 90 && deltaX != 0)) {
 		translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 1;
 		if (translateZDelta < 0) {
 			currentShapeIndex--;
@@ -1525,17 +1517,7 @@ document.onmouseup = (ev) => {
 			deltaX = defaultDelta;
 			rotationEnded = false;
 		}
-	}
-	else {
-		if (ev.pageY - mouseDown.y < 0) {
-			deltaY = -defaultDelta;
-			rotationEnded = false;
-		}
-		else {
-			deltaY = defaultDelta;
-			rotationEnded = false;
-		}
-	}
+	}	
 }
 
 function transposeMat4(matrix: number[]): number[] {
