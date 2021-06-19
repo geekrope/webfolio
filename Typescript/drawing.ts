@@ -329,6 +329,23 @@ class Sphere extends Shape {
 		this.quality = value;
 		this.CalculateEdges();
 	}
+	public static CalculateHalfOfSphere(zSign: number, quality: number): number[] {
+		let vertices = [];
+		for (let angleRelativeY: number = 0; angleRelativeY < quality; angleRelativeY += 1) {
+			let absoluteY = Math.sin((angleRelativeY / (quality - 1) * Math.PI) + Math.PI / 2);
+			let xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
+			let radius = -xStart;
+			for (let angleRelativeX: number = 0; angleRelativeX < quality; angleRelativeX += 1) {
+				let absoluteX = Math.cos((angleRelativeX) / (quality - 1) * Math.PI) * radius;
+				let z = Math.sin(Math.acos(absoluteX / radius)) * radius;
+				if (isNaN(z)) {
+					z = 0;
+				}
+				vertices.push(absoluteX, absoluteY, z * zSign);
+			}
+		}
+		return vertices;
+	}
 	public InitGL() {
 		super.InitGL();
 	}
@@ -374,24 +391,8 @@ class Sphere extends Shape {
 		];
 
 
-		let calcHalf = (zSign: number) => {
-			for (let angleRelativeY: number = 0; angleRelativeY < this.Quality; angleRelativeY += 1) {
-				let absoluteY = Math.sin((angleRelativeY / (this.Quality - 1) * Math.PI) + Math.PI / 2);
-				let xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
-				let radius = -xStart;
-				for (let angleRelativeX: number = 0; angleRelativeX < this.Quality; angleRelativeX += 1) {
-					let absoluteX = Math.cos((angleRelativeX) / (this.Quality - 1) * Math.PI) * radius;
-					let z = Math.sin(Math.acos(absoluteX / radius)) * radius;
-					if (isNaN(z)) {
-						z = 0;
-					}
-					vertices.push(absoluteX, absoluteY, z * zSign);
-				}
-			}
-		}
-
-		calcHalf(1);
-		calcHalf(-1);
+		var vert1 = Sphere.CalculateHalfOfSphere(1, this.Quality);
+		vertices = Sphere.CalculateHalfOfSphere(-1, this.Quality).concat(vert1);
 
 		let index1 = 0;
 		let index2 = this.Quality;
@@ -655,24 +656,8 @@ class ParticlesGenerator extends Shape {
 			this.indices = indices;
 		}
 		else if (this._type == ParticleType.Sphere) {
-			let calcHalf = (zSign: number) => {
-				for (let angleRelativeY: number = 0; angleRelativeY < this.parallelsCount; angleRelativeY += 1) {
-					let absoluteY = Math.sin((angleRelativeY / (this.parallelsCount - 1) * Math.PI) + Math.PI / 2);
-					let xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
-					let radius = -xStart;
-					for (let angleRelativeX: number = 0; angleRelativeX < this.count; angleRelativeX += 1) {
-						let absoluteX = Math.cos((angleRelativeX) / (this.count - 1) * Math.PI) * radius;
-						let z = Math.sin(Math.acos(absoluteX / radius)) * radius;
-						if (isNaN(z)) {
-							z = 0;
-						}
-						vertices.push(absoluteX, absoluteY, z * zSign);
-					}
-				}
-			}
-
-			calcHalf(1);
-			calcHalf(-1);
+			var vert1 = Sphere.CalculateHalfOfSphere(1, 15);
+			vertices = Sphere.CalculateHalfOfSphere(-1, 15).concat(vert1);
 
 			let index1 = 0;
 			let index2 = this.count;
@@ -1246,21 +1231,24 @@ function Translate() {
 function InitShapes() {
 	let cube1 = new Cube();
 	let cube2 = new Cube();
+	let sphere = new Sphere();
 	let text = new Svg(content);
 	currentShape = text;
 	cube1.translateZ(-distBetweenCubes - 1);
 	cube2.translateZ(-2 * distBetweenCubes - 1);
+	sphere.translateZ(-3 * distBetweenCubes - 1);
 
 	Shapes.push(text);
 	Shapes.push(cube1);
 	Shapes.push(cube2);
+	Shapes.push(sphere);
 }
 
 function InitTextures() {
-	var img = new Image();
-	img.src = "Resources/nknwn_ndfnd_min.png";
-	img.onload = function () {
-		Shapes[1].SetTextureStyle(img, [
+	let nknwnStand = new Image();
+	nknwnStand.src = "Resources/nknwn_ndfnd_min.png";
+	nknwnStand.onload = function () {
+		Shapes[1].SetTextureStyle(nknwnStand, [
 			// Front			
 			1 / 2, 0,
 			1, 0,
@@ -1282,7 +1270,18 @@ function InitTextures() {
 			1 / 2, 1 / 2,
 			0, 1 / 2,
 		]);
+	};
+	let returnImg = new Image();
+	returnImg.src = "Resources/return.png";
+	let returnPositions: number[] = [];
+	var quality = (<Sphere>Shapes[3]).Quality;
+	for (let x = quality; x >= 0; x--) {
+		for (let y = quality; y >= 0; y--) {
+			returnPositions.push(x / quality);
+			returnPositions.push(y / quality);
+		}
 	}
+	Shapes[3].SetTextureStyle(returnImg, returnPositions);
 }
 
 function StartApp() {
