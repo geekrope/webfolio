@@ -483,7 +483,7 @@ class Shape {
     }
     InitGL() {
         if (this.FillType == "colors") {
-            let gl = document.getElementById(id).getContext("webgl");
+            let gl = document.getElementById(id).getContext(glVersion);
             let vertex_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
@@ -551,7 +551,7 @@ class Shape {
             webGlShaderProgram = shaderProgram;
         }
         else if (this.FillType == "texture") {
-            let gl = document.getElementById(id).getContext("webgl");
+            let gl = document.getElementById(id).getContext(glVersion);
             let vertex_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
@@ -634,7 +634,7 @@ class Shape {
     CalculateEdges() {
     }
     Draw() {
-        let gl = document.getElementById(id).getContext("webgl");
+        let gl = document.getElementById(id).getContext(glVersion);
         this.InitGL();
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     }
@@ -845,135 +845,6 @@ class Sphere extends Shape {
             }
         }
         const vertexNormals = [];
-        this.vertices = vertices;
-        this.indices = indices;
-        this.mov_matrix[14] = -zoom;
-    }
-    Draw() {
-        super.Draw();
-    }
-    clearMatrix() {
-        super.clearMatrix();
-    }
-}
-class RegularPolygon extends Shape {
-    constructor() {
-        super();
-        this.N = 4;
-        this.CalculateEdges();
-    }
-    Circle(angle, r) {
-        return new DOMPoint(Math.cos(angle) * r, Math.sin(angle) * r);
-    }
-    get N() {
-        return this.n;
-    }
-    set N(value) {
-        this.n = value;
-        this.CalculateEdges();
-    }
-    SetTextureStyle(textureImage, textureCoords) {
-        super.SetTextureStyle(textureImage, textureCoords);
-    }
-    SetColorsStyle(colors, opacity) {
-        super.SetColorsStyle(colors, opacity);
-    }
-    InitGL() {
-        super.InitGL();
-    }
-    rotateZ(angle) {
-        super.rotateZ(angle);
-    }
-    rotateX(angle) {
-        super.rotateX(angle);
-    }
-    rotateY(angle) {
-        super.rotateY(angle);
-    }
-    translateX(offset) {
-        super.translateX(offset);
-    }
-    translateY(offset) {
-        super.translateY(offset);
-    }
-    translateZ(offset) {
-        super.translateZ(offset);
-    }
-    scaleX(value) {
-        super.scaleX(value);
-    }
-    scaleY(value) {
-        super.scaleY(value);
-    }
-    scaleZ(value) {
-        super.scaleZ(value);
-    }
-    CalculateEdges() {
-        let accuracy = this.N / 2;
-        let vertices = [];
-        let r = 1;
-        const vertexNormals = [];
-        for (let angle = 0; angle < accuracy * 2; angle += 1) {
-            let radians = (angle / accuracy) * Math.PI;
-            let p1 = this.Circle(radians, r);
-            let p2 = this.Circle(radians + Math.PI / accuracy, r);
-            let x = p1.x;
-            let y = p1.y;
-            let x2 = p2.x;
-            let y2 = p2.y;
-            let nP = this.Circle((radians + radians + Math.PI / accuracy) / 2, r);
-            vertexNormals.push(nP.x, nP.y, 0);
-            vertexNormals.push(nP.x, nP.y, 0);
-            vertexNormals.push(nP.x, nP.y, 0);
-            vertexNormals.push(nP.x, nP.y, 0);
-            vertices.push(x, y, -1);
-            vertices.push(x2, y2, -1);
-            vertices.push(x2, y2, 1);
-            vertices.push(x, y, 1);
-        }
-        vertices.push(0, 0, 1);
-        for (let angle = 0; angle < accuracy * 2; angle += 1) {
-            let radians = (angle / accuracy) * Math.PI;
-            let p1 = this.Circle(radians, r);
-            let p2 = this.Circle(radians + Math.PI / accuracy, r);
-            let x = p1.x;
-            let y = p1.y;
-            let x2 = p2.x;
-            let y2 = p2.y;
-            vertices.push(x2, y2, 1);
-            vertices.push(x, y, 1);
-        }
-        vertices.push(0, 0, -1);
-        for (let angle = 0; angle < accuracy * 2; angle += 1) {
-            let radians = (angle / accuracy) * Math.PI;
-            let p1 = this.Circle(radians, r);
-            let p2 = this.Circle(radians + Math.PI / accuracy, r);
-            let x = p1.x;
-            let y = p1.y;
-            let x2 = p2.x;
-            let y2 = p2.y;
-            vertices.push(x2, y2, -1);
-            vertices.push(x, y, -1);
-        }
-        let indices = [];
-        for (let index = 0; index < accuracy * 2 * 4; index += 4) {
-            indices.push(index);
-            indices.push(index + 1);
-            indices.push(index + 2);
-            indices.push(index + 0);
-            indices.push(index + 2);
-            indices.push(index + 3);
-        }
-        for (let index = accuracy * 2 * 4; index < accuracy * 2 * 4 + accuracy * 2 * 2; index += 2) {
-            indices.push(accuracy * 2 * 4);
-            indices.push(index + 1);
-            indices.push(index + 2);
-        }
-        for (let index = accuracy * 2 * 4 + accuracy * 2 * 2 + 1; index < accuracy * 2 * 4 + accuracy * 2 * 2 + accuracy * 2 * 2; index += 2) {
-            indices.push(accuracy * 2 * 4 + accuracy * 2 * 2 + 1);
-            indices.push(index + 1);
-            indices.push(index + 2);
-        }
         this.vertices = vertices;
         this.indices = indices;
         this.mov_matrix[14] = -zoom;
@@ -1259,7 +1130,7 @@ class ParticlesGenerator extends Shape {
         this.started = true;
     }
     Draw() {
-        let gl = document.getElementById(id).getContext("webgl");
+        let gl = document.getElementById(id).getContext(glVersion);
         if (this.started) {
             for (let index = 0; index < this.particles.length; index++) {
                 let x = Math.cos(this.particles[index].angleX) * this.particles[index].distance;
@@ -1377,7 +1248,7 @@ class Svg extends Shape {
         this.mov_matrix[14] = -zoom;
     }
     Draw() {
-        let gl = document.getElementById(id).getContext("webgl");
+        let gl = document.getElementById(id).getContext(glVersion);
         this.InitGL();
         gl.drawElements(gl.LINES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     }
@@ -1501,23 +1372,38 @@ class Cube extends Shape {
         super.clearMatrix();
     }
 }
-var mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-var c1 = [0, 0, 0];
-var c2 = [1, 0, 0];
-var c3 = [1, 1, 0];
-var shaderProgram = null;
 var currentShape;
+var currentShapeIndex = 0;
 var webGlShaderProgram = null;
 var Shapes = [];
 const zoom = 3;
 const distBetweenCubes = 6;
 const id = "cnvs";
+const glVersion = "webgl";
+const defaultDelta = 3;
+var rotation = {
+    deltaX: 0,
+    rotateT: 0,
+    rotationEnded: true,
+    scaled: false,
+    mouseDown: new DOMPoint()
+};
+var points = [];
+const zWidth = 30;
+var translation = {
+    translateZ: 0,
+    translateZDelta: 0,
+    translateT: 0,
+};
+var startTick = Date.now();
+var fps = 0;
 var EasingType;
 (function (EasingType) {
     EasingType[EasingType["arc"] = 0] = "arc";
     EasingType[EasingType["linear"] = 1] = "linear";
     EasingType[EasingType["quad"] = 2] = "quad";
 })(EasingType || (EasingType = {}));
+window.onload = StartApp;
 function EasingFunction(t, type, concomitantParam) {
     if (type == EasingType.arc) {
         let x = -(1 - t);
@@ -1551,61 +1437,45 @@ function DrawScene() {
         startTick = Date.now();
     }
 }
-const defaultDelta = 3;
-var deltaX = 0;
-var rotateT = 0;
-var rotationEnded = true;
-var scaled = false;
-var mouseDown = new DOMPoint();
-var points = [];
-var accuracy = 6;
-var translateZ = 0;
-var translateZDelta = 0;
-var translateT = 0;
-var currentShapeIndex = 0;
-const zWidth = 30;
-var startTick = Date.now();
-var fps = 0;
 function Rotate() {
     let param = [];
     let easing = EasingType.arc;
-    if (rotateT < 90 && deltaX != 0) {
-        if (deltaX != 0) {
-            currentShape.rotateY(-deltaX / Math.abs(deltaX) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
+    if (rotation.rotateT < 90 && rotation.deltaX != 0) {
+        if (rotation.deltaX != 0) {
+            currentShape.rotateY(-rotation.deltaX / Math.abs(rotation.deltaX) / 2 * Math.PI * EasingFunction(rotation.rotateT / 90, easing, param));
         }
-        rotateT += defaultDelta;
-        if (deltaX != 0) {
-            currentShape.rotateY(deltaX / Math.abs(deltaX) / 2 * Math.PI * EasingFunction(rotateT / 90, easing, param));
+        rotation.rotateT += defaultDelta;
+        if (rotation.deltaX != 0) {
+            currentShape.rotateY(rotation.deltaX / Math.abs(rotation.deltaX) / 2 * Math.PI * EasingFunction(rotation.rotateT / 90, easing, param));
         }
     }
     else {
-        rotationEnded = true;
-        deltaX = 0;
-        rotateT = 0;
+        rotation.rotationEnded = true;
+        rotation.deltaX = 0;
+        rotation.rotateT = 0;
     }
 }
 function Translate() {
     let type = EasingType.quad;
-    if (translateZDelta != 0) {
-        if (Math.abs(translateZ) < zWidth) {
+    if (translation.translateZDelta != 0) {
+        if (Math.abs(translation.translateZ) < zWidth) {
             for (let index = 0; index < Shapes.length; index++) {
-                Shapes[index].translateZ(-translateZ / zWidth * distBetweenCubes * EasingFunction(translateT, type, []));
+                Shapes[index].translateZ(-translation.translateZ / zWidth * distBetweenCubes * EasingFunction(translation.translateT, type, []));
             }
-            translateZ += translateZDelta;
-            translateT = Math.abs(translateZ) / zWidth;
+            translation.translateZ += translation.translateZDelta;
+            translation.translateT = Math.abs(translation.translateZ) / zWidth;
             for (let index = 0; index < Shapes.length; index++) {
-                Shapes[index].translateZ(translateZ / zWidth * distBetweenCubes * EasingFunction(translateT, type, []));
+                Shapes[index].translateZ(translation.translateZ / zWidth * distBetweenCubes * EasingFunction(translation.translateT, type, []));
             }
         }
         else {
-            translateZDelta = 0;
-            translateZ = 0;
-            translateT = 0;
+            translation.translateZDelta = 0;
+            translation.translateZ = 0;
+            translation.translateT = 0;
         }
     }
 }
-window.onload = () => {
-    window.onresize(new UIEvent("resize"));
+function InitShapes() {
     let cube1 = new Cube();
     let cube2 = new Cube();
     let text = new Svg(content);
@@ -1615,33 +1485,12 @@ window.onload = () => {
     Shapes.push(text);
     Shapes.push(cube1);
     Shapes.push(cube2);
-    DrawScene();
+}
+function InitTextures() {
     var img = new Image();
     img.src = "Resources/nknwn_ndfnd_min.png";
     img.onload = function () {
-        cube1.SetTextureStyle(img, [
-            // Front			
-            1 / 2, 0,
-            1, 0,
-            1, 1 / 2,
-            1 / 2, 1 / 2,
-            // Back	
-            1 / 2, 1 / 2,
-            1, 1 / 2,
-            1, 1,
-            1 / 2, 1,
-            // Right	
-            0, 1 / 2,
-            1 / 2, 1 / 2,
-            1 / 2, 1,
-            0, 1,
-            // Left		
-            0, 0,
-            1 / 2, 0,
-            1 / 2, 1 / 2,
-            0, 1 / 2,
-        ]);
-        cube2.SetTextureStyle(img, [
+        Shapes[1].SetTextureStyle(img, [
             // Front			
             1 / 2, 0,
             1, 0,
@@ -1664,50 +1513,68 @@ window.onload = () => {
             0, 1 / 2,
         ]);
     };
-};
-document.onmousedown = (ev) => {
-    if (!rotationEnded) {
+}
+function StartApp() {
+    Resize();
+    InitShapes();
+    InitTextures();
+    DrawScene();
+    BindEvents();
+}
+function BindEvents() {
+    var cnvs = document.getElementById(id);
+    cnvs.onmousedown = MouseDown;
+    cnvs.onmouseup = MouseUp;
+    cnvs.onwheel = MouseWheel;
+    window.onresize = () => {
+        Resize();
+    };
+}
+function MouseDown(ev) {
+    if (!rotation.rotationEnded) {
         return;
     }
-    mouseDown.x = ev.pageX;
-    mouseDown.y = ev.pageY;
-};
-document.onwheel = (ev) => {
-    if (currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) >= 0 && currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) < Shapes.length && translateZDelta == 0 && !(rotateT < 90 && deltaX != 0)) {
-        translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 1;
-        if (translateZDelta < 0) {
+    rotation.mouseDown.x = ev.pageX;
+    rotation.mouseDown.y = ev.pageY;
+}
+function MouseUp(ev) {
+    if (!rotation.rotationEnded) {
+        return;
+    }
+    if (rotation.mouseDown.x == ev.pageX && rotation.mouseDown.y == ev.pageY) {
+        return;
+    }
+    if (Math.abs(ev.pageX - rotation.mouseDown.x) > Math.abs(ev.pageY - rotation.mouseDown.y)) {
+        if (ev.pageX - rotation.mouseDown.x < 0) {
+            rotation.deltaX = -defaultDelta;
+            rotation.rotationEnded = false;
+        }
+        else {
+            rotation.deltaX = defaultDelta;
+            rotation.rotationEnded = false;
+        }
+    }
+}
+function MouseWheel(ev) {
+    let rotationEnded = !(rotation.rotateT < 90 && rotation.deltaX != 0);
+    let translationStarted = currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) >= 0 && currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) < Shapes.length && translation.translateZDelta == 0;
+    if (translationStarted && rotationEnded) {
+        translation.translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 1;
+        if (translation.translateZDelta < 0) {
             currentShapeIndex--;
         }
-        else if (translateZDelta > 0) {
+        else if (translation.translateZDelta > 0) {
             currentShapeIndex++;
         }
         currentShape = Shapes[currentShapeIndex];
         console.log(currentShapeIndex);
     }
-};
-window.onresize = (ev) => {
+}
+function Resize() {
     let cnvs = document.getElementById(id);
     cnvs.setAttribute("width", (innerWidth).toString());
     cnvs.setAttribute("height", (innerHeight).toString());
-};
-document.onmouseup = (ev) => {
-    if (!rotationEnded) {
-        return;
-    }
-    if (mouseDown.x == ev.pageX && mouseDown.y == ev.pageY) {
-        return;
-    }
-    if (Math.abs(ev.pageX - mouseDown.x) > Math.abs(ev.pageY - mouseDown.y)) {
-        if (ev.pageX - mouseDown.x < 0) {
-            deltaX = -defaultDelta;
-            rotationEnded = false;
-        }
-        else {
-            deltaX = defaultDelta;
-            rotationEnded = false;
-        }
-    }
-};
+}
 function transposeMat4(matrix) {
     let newMatrix = [
         0, 0, 0, 0,
