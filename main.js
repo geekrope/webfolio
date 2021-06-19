@@ -469,7 +469,6 @@ class Shape {
         this.Opacity = 1;
     }
     SetTextureStyle(textureImage, textureCoords) {
-        let gl = document.getElementById(id).getContext("webgl");
         this.TextureImage = textureImage;
         this.TextureCoords = textureCoords;
         this.LoadedTexture = gl.createTexture();
@@ -483,7 +482,6 @@ class Shape {
     }
     InitGL() {
         if (this.FillType == "colors") {
-            let gl = document.getElementById(id).getContext(glVersion);
             let vertex_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
@@ -551,7 +549,6 @@ class Shape {
             webGlShaderProgram = shaderProgram;
         }
         else if (this.FillType == "texture") {
-            let gl = document.getElementById(id).getContext(glVersion);
             let vertex_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
@@ -634,7 +631,6 @@ class Shape {
     CalculateEdges() {
     }
     Draw() {
-        let gl = document.getElementById(id).getContext(glVersion);
         this.InitGL();
         gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     }
@@ -811,8 +807,8 @@ class Sphere extends Shape {
     CalculateEdges() {
         let vertices = [];
         let indices = [];
-        var vert1 = Sphere.CalculateHalfOfSphere(1, this.Quality);
-        vertices = Sphere.CalculateHalfOfSphere(-1, this.Quality).concat(vert1);
+        var vert1 = Sphere.CalculateHalfOfSphere(-1, this.Quality);
+        vertices = Sphere.CalculateHalfOfSphere(1, this.Quality).concat(vert1);
         let index1 = 0;
         let index2 = this.Quality;
         let bounds = 0;
@@ -1069,8 +1065,8 @@ class ParticlesGenerator extends Shape {
             this.indices = indices;
         }
         else if (this._type == ParticleType.Sphere) {
-            var vert1 = Sphere.CalculateHalfOfSphere(1, 15);
-            vertices = Sphere.CalculateHalfOfSphere(-1, 15).concat(vert1);
+            var vert1 = Sphere.CalculateHalfOfSphere(-1, 15);
+            vertices = Sphere.CalculateHalfOfSphere(1, 15).concat(vert1);
             let index1 = 0;
             let index2 = this.count;
             let bounds = 0;
@@ -1117,7 +1113,6 @@ class ParticlesGenerator extends Shape {
         this.started = true;
     }
     Draw() {
-        let gl = document.getElementById(id).getContext(glVersion);
         if (this.started) {
             for (let index = 0; index < this.particles.length; index++) {
                 let x = Math.cos(this.particles[index].angleX) * this.particles[index].distance;
@@ -1235,7 +1230,6 @@ class Svg extends Shape {
         this.mov_matrix[14] = -zoom;
     }
     Draw() {
-        let gl = document.getElementById(id).getContext(glVersion);
         this.InitGL();
         gl.drawElements(gl.LINES, this.indices.length, gl.UNSIGNED_SHORT, 0);
     }
@@ -1367,6 +1361,7 @@ const zoom = 3;
 const distBetweenCubes = 6;
 const id = "cnvs";
 const glVersion = "webgl";
+var gl = null;
 const defaultDelta = 3;
 var rotation = {
     deltaX: 0,
@@ -1406,7 +1401,6 @@ function EasingFunction(t, type, concomitantParam) {
     return 0;
 }
 function DrawScene() {
-    let gl = document.getElementById(id).getContext("webgl");
     gl.clearColor(0.5, 0.5, 0.5, 1);
     gl.clearDepth(1.0);
     gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
@@ -1479,6 +1473,7 @@ function InitShapes() {
 function InitTextures() {
     let nknwnStand = new Image();
     nknwnStand.src = "Resources/nknwn_ndfnd_min.png";
+    nknwnStand.decode();
     nknwnStand.onload = function () {
         Shapes[1].SetTextureStyle(nknwnStand, [
             // Front			
@@ -1500,22 +1495,52 @@ function InitTextures() {
             0, 0,
             1 / 2, 0,
             1 / 2, 1 / 2,
+            0, 1 / 2
+        ]);
+        Shapes[2].SetTextureStyle(nknwnStand, [
+            // Front			
+            1 / 2, 0,
+            1, 0,
+            1, 1 / 2,
+            1 / 2, 1 / 2,
+            // Back	
+            1 / 2, 1 / 2,
+            1, 1 / 2,
+            1, 1,
+            1 / 2, 1,
+            // Right	
             0, 1 / 2,
+            1 / 2, 1 / 2,
+            1 / 2, 1,
+            0, 1,
+            // Left		
+            0, 0,
+            1 / 2, 0,
+            1 / 2, 1 / 2,
+            0, 1 / 2
         ]);
     };
     let returnImg = new Image();
     returnImg.src = "Resources/return.png";
+    returnImg.decode();
     let returnPositions = [];
     var quality = Shapes[3].Quality;
-    for (let x = quality; x >= 0; x--) {
-        for (let y = quality; y >= 0; y--) {
-            returnPositions.push(x / quality);
-            returnPositions.push(y / quality);
+    for (let angleRelativeY = 0; angleRelativeY < quality; angleRelativeY += 1) {
+        let absoluteY = Math.sin((angleRelativeY / (quality - 1) * Math.PI) + Math.PI / 2);
+        let xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
+        let radius = -xStart;
+        for (let angleRelativeX = 0; angleRelativeX < quality; angleRelativeX += 1) {
+            let absoluteX = Math.cos((angleRelativeX) / (quality - 1) * Math.PI) * radius;
+            returnPositions.push((absoluteX + 1) / 2);
+            returnPositions.push((absoluteY + 1) / 2);
         }
     }
-    Shapes[3].SetTextureStyle(returnImg, returnPositions);
+    returnImg.onload = () => {
+        Shapes[3].SetTextureStyle(returnImg, returnPositions);
+    };
 }
 function StartApp() {
+    gl = document.getElementById(id).getContext(glVersion);
     Resize();
     InitShapes();
     InitTextures();

@@ -18,8 +18,7 @@ class Shape implements Drawable {
 	protected TextureImage: HTMLImageElement;
 	protected TextureCoords: number[];
 	protected LoadedTexture: WebGLTexture;
-	public SetTextureStyle(textureImage: HTMLImageElement, textureCoords: number[]) {
-		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
+	public SetTextureStyle(textureImage: HTMLImageElement, textureCoords: number[]) {	
 		this.TextureImage = textureImage;
 		this.TextureCoords = textureCoords;
 		this.LoadedTexture = gl.createTexture();
@@ -36,9 +35,7 @@ class Shape implements Drawable {
 		this.Opacity = 1;
 	}
 	public InitGL() {
-		if (this.FillType == "colors") {
-			let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext(glVersion);
-
+		if (this.FillType == "colors") {			
 			let vertex_buffer = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
@@ -122,9 +119,7 @@ class Shape implements Drawable {
 
 			webGlShaderProgram = shaderProgram;
 		}
-		else if (this.FillType == "texture") {
-			let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext(glVersion);
-
+		else if (this.FillType == "texture") {		
 			let vertex_buffer = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
@@ -232,8 +227,7 @@ class Shape implements Drawable {
 	public CalculateEdges(): void {
 
 	}
-	public Draw(): void {
-		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext(glVersion);
+	public Draw(): void {		
 		this.InitGL();
 
 		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
@@ -391,8 +385,8 @@ class Sphere extends Shape {
 		];
 
 
-		var vert1 = Sphere.CalculateHalfOfSphere(1, this.Quality);
-		vertices = Sphere.CalculateHalfOfSphere(-1, this.Quality).concat(vert1);
+		var vert1 = Sphere.CalculateHalfOfSphere(-1, this.Quality);
+		vertices = Sphere.CalculateHalfOfSphere(1, this.Quality).concat(vert1);
 
 		let index1 = 0;
 		let index2 = this.Quality;
@@ -656,8 +650,8 @@ class ParticlesGenerator extends Shape {
 			this.indices = indices;
 		}
 		else if (this._type == ParticleType.Sphere) {
-			var vert1 = Sphere.CalculateHalfOfSphere(1, 15);
-			vertices = Sphere.CalculateHalfOfSphere(-1, 15).concat(vert1);
+			var vert1 = Sphere.CalculateHalfOfSphere(-1, 15);
+			vertices = Sphere.CalculateHalfOfSphere(1, 15).concat(vert1);
 
 			let index1 = 0;
 			let index2 = this.count;
@@ -808,8 +802,7 @@ class ParticlesGenerator extends Shape {
 		}
 		this.SetColorsStyle(colors, 1);
 	}
-	public Draw(): void {
-		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext(glVersion);
+	public Draw(): void {		
 		if (this.started) {
 			for (let index = 0; index < this.particles.length; index++) {
 				let x = Math.cos(this.particles[index].angleX) * this.particles[index].distance;
@@ -953,8 +946,7 @@ class Svg extends Shape {
 		}
 		this.SetColorsStyle(colors, 1);
 	}
-	public Draw(): void {
-		let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext(glVersion);
+	public Draw(): void {		
 		this.InitGL();
 
 		gl.drawElements(gl.LINES, this.indices.length, gl.UNSIGNED_SHORT, 0);
@@ -1118,6 +1110,8 @@ const id = "cnvs";
 
 const glVersion = "webgl";
 
+var gl: WebGLRenderingContext = null;
+
 const defaultDelta = 3;
 
 var rotation = {
@@ -1164,8 +1158,6 @@ function EasingFunction(t: number, type: EasingType, concomitantParam: number[])
 }
 
 function DrawScene() {
-	let gl = (<HTMLCanvasElement>document.getElementById(id)).getContext("webgl");
-
 	gl.clearColor(0.5, 0.5, 0.5, 1);
 	gl.clearDepth(1.0);
 
@@ -1247,6 +1239,7 @@ function InitShapes() {
 function InitTextures() {
 	let nknwnStand = new Image();
 	nknwnStand.src = "Resources/nknwn_ndfnd_min.png";
+	nknwnStand.decode();
 	nknwnStand.onload = function () {
 		Shapes[1].SetTextureStyle(nknwnStand, [
 			// Front			
@@ -1268,23 +1261,53 @@ function InitTextures() {
 			0, 0,
 			1 / 2, 0,
 			1 / 2, 1 / 2,
+			0, 1 / 2
+		]);
+		Shapes[2].SetTextureStyle(nknwnStand, [
+			// Front			
+			1 / 2, 0,
+			1, 0,
+			1, 1 / 2,
+			1 / 2, 1 / 2,
+			// Back	
+			1 / 2, 1 / 2,
+			1, 1 / 2,
+			1, 1,
+			1 / 2, 1,
+			// Right	
 			0, 1 / 2,
+			1 / 2, 1 / 2,
+			1 / 2, 1,
+			0, 1,
+			// Left		
+			0, 0,
+			1 / 2, 0,
+			1 / 2, 1 / 2,
+			0, 1 / 2
 		]);
 	};
 	let returnImg = new Image();
 	returnImg.src = "Resources/return.png";
+	returnImg.decode();
 	let returnPositions: number[] = [];
 	var quality = (<Sphere>Shapes[3]).Quality;
-	for (let x = quality; x >= 0; x--) {
-		for (let y = quality; y >= 0; y--) {
-			returnPositions.push(x / quality);
-			returnPositions.push(y / quality);
+	for (let angleRelativeY: number = 0; angleRelativeY < quality; angleRelativeY += 1) {
+		let absoluteY = Math.sin((angleRelativeY / (quality - 1) * Math.PI) + Math.PI / 2);
+		let xStart = -Math.sqrt(1 - Math.pow(absoluteY, 2));
+		let radius = -xStart;
+		for (let angleRelativeX: number = 0; angleRelativeX < quality; angleRelativeX += 1) {
+			let absoluteX = Math.cos((angleRelativeX) / (quality - 1) * Math.PI) * radius;
+			returnPositions.push((absoluteX + 1) / 2);
+			returnPositions.push((absoluteY + 1) / 2);
 		}
 	}
-	Shapes[3].SetTextureStyle(returnImg, returnPositions);
+	returnImg.onload = () => {
+		Shapes[3].SetTextureStyle(returnImg, returnPositions);
+	}
 }
 
 function StartApp() {
+	gl = (<HTMLCanvasElement>document.getElementById(id)).getContext(glVersion);
 	Resize();
 	InitShapes();
 	InitTextures();
