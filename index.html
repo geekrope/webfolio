@@ -63,10 +63,21 @@
             src: url(Resources/caviar.ttf);
             font-family: Caviar;
         }
+
+        .canvas3d {
+            grid-row-start: 2;
+            grid-column-start: 1;
+            grid-column-end: 3;
+            margin: auto;
+            vertical-align: middle;
+            position: absolute;
+            background: url(Resources/mKphY1sfLXs.jpg);
+            background-size: cover;          
+        }
     </style>
 </head>
 <body>
-    <canvas width="1600" height="900" id="cnvs" style="grid-row-start:2;grid-column-start:1;grid-column-end:3;margin:auto;vertical-align:middle;position:absolute">
+    <canvas id="cnvs" class="canvas3d">
     </canvas>
     <div class="grid" style="position:relative">
         <input class="nInput" id="anglesCount" type="number" style="grid-row-start:1;grid-column-start:1" value="6" />

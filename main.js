@@ -465,7 +465,7 @@ function CalculatePolygons(paths) {
 /// <reference path="description.ts" />
 class Shape {
     constructor() {
-        this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+        this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -zoom, 1];
         this.Opacity = 1;
     }
     SetTextureStyle(textureImage, textureCoords) {
@@ -538,7 +538,7 @@ class Shape {
                     0, 0, (-2 * zMax * zMin) / (zMax - zMin), 0
                 ];
             }
-            let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, 100);
+            let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, zDepth);
             let view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
             gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
             gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
@@ -617,7 +617,7 @@ class Shape {
                     0, 0, (-2 * zMax * zMin) / (zMax - zMin), 0
                 ];
             }
-            let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, 100);
+            let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, zDepth);
             let view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
             gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
             gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
@@ -845,7 +845,6 @@ class Sphere extends Shape {
         const vertexNormals = [];
         this.vertices = vertices;
         this.indices = indices;
-        this.mov_matrix[14] = -zoom;
     }
     Draw() {
         super.Draw();
@@ -1104,7 +1103,6 @@ class ParticlesGenerator extends Shape {
             this.vertices = vertices;
             this.indices = indices;
         }
-        this.mov_matrix[14] = -zoom;
     }
     Start() {
         if (this.Properties.count != 0) {
@@ -1166,7 +1164,7 @@ class Svg extends Shape {
         let colors = [];
         for (let index = 0; index < this.Points.length; index++) {
             for (let index2 = 0; index2 < this.Points[index].length; index2++) {
-                colors.push(1, 1, 1);
+                colors.push(0, 0, 0);
             }
         }
         this.SetColorsStyle(colors, 1);
@@ -1227,7 +1225,6 @@ class Svg extends Shape {
         const vertexNormals = [];
         this.vertices = vertices;
         this.indices = indices;
-        this.mov_matrix[14] = -zoom;
     }
     Draw() {
         this.InitGL();
@@ -1344,7 +1341,77 @@ class Cube extends Shape {
         this.vertices = vertices;
         this.indices = indices;
         this.InitGL();
-        this.mov_matrix[14] = -zoom;
+    }
+    Draw() {
+        super.Draw();
+    }
+    clearMatrix() {
+        super.clearMatrix();
+    }
+}
+class InfinitePlane extends Shape {
+    constructor() {
+        super();
+        this.CalculateEdges();
+        let colors = [
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+            0, 0, 0,
+        ];
+        this.SetColorsStyle(colors, 1);
+    }
+    InitGL() {
+        super.InitGL();
+    }
+    SetTextureStyle(textureImage, textureCoords) {
+        super.SetTextureStyle(textureImage, textureCoords);
+    }
+    SetColorsStyle(colors, opacity) {
+        super.SetColorsStyle(colors, opacity);
+    }
+    rotateZ(angle) {
+        super.rotateZ(angle);
+    }
+    rotateX(angle) {
+        super.rotateX(angle);
+    }
+    rotateY(angle) {
+        super.rotateY(angle);
+    }
+    translateX(offset) {
+        super.translateX(offset);
+    }
+    translateY(offset) {
+        super.translateY(offset);
+    }
+    translateZ(offset) {
+        super.translateZ(offset);
+    }
+    scaleX(value) {
+        super.scaleX(value);
+    }
+    scaleY(value) {
+        super.scaleY(value);
+    }
+    scaleZ(value) {
+        super.scaleZ(value);
+    }
+    CalculateEdges() {
+        let width = 3;
+        let vertices = [
+            -width, -1, zoom,
+            width, -1, zoom,
+            -width, -1, -zDepth,
+            width, -1, -zDepth
+        ];
+        let indices = [
+            0, 1, 2, 1, 2, 3
+        ];
+        const vertexNormals = [];
+        this.vertices = vertices;
+        this.indices = indices;
+        this.InitGL();
     }
     Draw() {
         super.Draw();
@@ -1362,6 +1429,7 @@ const distBetweenCubes = 6;
 const id = "cnvs";
 const glVersion = "webgl";
 var gl = null;
+var zDepth = 50;
 const defaultDelta = 3;
 var rotation = {
     deltaX: 0,
@@ -1370,7 +1438,6 @@ var rotation = {
     scaled: false,
     mouseDown: new DOMPoint()
 };
-var points = [];
 const zWidth = 30;
 var translation = {
     translateZ: 0,
@@ -1401,7 +1468,7 @@ function EasingFunction(t, type, concomitantParam) {
     return 0;
 }
 function DrawScene() {
-    gl.clearColor(0.5, 0.5, 0.5, 1);
+    gl.clearColor(0, 0, 0, 0);
     gl.clearDepth(1.0);
     gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -1461,6 +1528,7 @@ function InitShapes() {
     let cube2 = new Cube();
     let sphere = new Sphere();
     let text = new Svg(content);
+    let plane = new InfinitePlane();
     currentShape = text;
     cube1.translateZ(-distBetweenCubes - 1);
     cube2.translateZ(-2 * distBetweenCubes - 1);
@@ -1469,6 +1537,7 @@ function InitShapes() {
     Shapes.push(cube1);
     Shapes.push(cube2);
     Shapes.push(sphere);
+    Shapes.push(plane);
 }
 function InitTextures() {
     let nknwnStand = new Image();

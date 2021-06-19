@@ -18,7 +18,7 @@ class Shape implements Drawable {
 	protected TextureImage: HTMLImageElement;
 	protected TextureCoords: number[];
 	protected LoadedTexture: WebGLTexture;
-	public SetTextureStyle(textureImage: HTMLImageElement, textureCoords: number[]) {	
+	public SetTextureStyle(textureImage: HTMLImageElement, textureCoords: number[]) {
 		this.TextureImage = textureImage;
 		this.TextureCoords = textureCoords;
 		this.LoadedTexture = gl.createTexture();
@@ -31,11 +31,11 @@ class Shape implements Drawable {
 		this.FillType = "colors";
 	}
 	public constructor() {
-		this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+		this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -zoom, 1];
 		this.Opacity = 1;
 	}
 	public InitGL() {
-		if (this.FillType == "colors") {			
+		if (this.FillType == "colors") {
 			let vertex_buffer = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
@@ -105,7 +105,7 @@ class Shape implements Drawable {
 				];
 			}
 
-			let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, 100);
+			let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, zDepth);
 
 			let view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
@@ -119,7 +119,7 @@ class Shape implements Drawable {
 
 			webGlShaderProgram = shaderProgram;
 		}
-		else if (this.FillType == "texture") {		
+		else if (this.FillType == "texture") {
 			let vertex_buffer = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
 			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
@@ -209,7 +209,7 @@ class Shape implements Drawable {
 				];
 			}
 
-			let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, 100);
+			let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, zDepth);
 
 			let view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
@@ -227,7 +227,7 @@ class Shape implements Drawable {
 	public CalculateEdges(): void {
 
 	}
-	public Draw(): void {		
+	public Draw(): void {
 		this.InitGL();
 
 		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
@@ -431,8 +431,6 @@ class Sphere extends Shape {
 
 		this.vertices = vertices;
 		this.indices = indices;
-
-		this.mov_matrix[14] = -zoom;
 	}
 	public constructor() {
 		super();
@@ -697,7 +695,6 @@ class ParticlesGenerator extends Shape {
 			this.vertices = vertices;
 			this.indices = indices;
 		}
-		this.mov_matrix[14] = -zoom;
 	}
 	public Start(): void {
 		if (this.Properties.count != 0) {
@@ -802,7 +799,7 @@ class ParticlesGenerator extends Shape {
 		}
 		this.SetColorsStyle(colors, 1);
 	}
-	public Draw(): void {		
+	public Draw(): void {
 		if (this.started) {
 			for (let index = 0; index < this.particles.length; index++) {
 				let x = Math.cos(this.particles[index].angleX) * this.particles[index].distance;
@@ -931,8 +928,6 @@ class Svg extends Shape {
 
 		this.vertices = vertices;
 		this.indices = indices;
-
-		this.mov_matrix[14] = -zoom;
 	}
 	public constructor(svgcode: string) {
 		super();
@@ -941,12 +936,12 @@ class Svg extends Shape {
 		let colors = [];
 		for (let index = 0; index < this.Points.length; index++) {
 			for (let index2 = 0; index2 < this.Points[index].length; index2++) {
-				colors.push(1, 1, 1);
+				colors.push(0, 0, 0);
 			}
 		}
 		this.SetColorsStyle(colors, 1);
 	}
-	public Draw(): void {		
+	public Draw(): void {
 		this.InitGL();
 
 		gl.drawElements(gl.LINES, this.indices.length, gl.UNSIGNED_SHORT, 0);
@@ -1048,8 +1043,6 @@ class Cube extends Shape {
 		this.indices = indices;
 
 		this.InitGL();
-
-		this.mov_matrix[14] = -zoom;
 	}
 	public constructor() {
 		super();
@@ -1095,6 +1088,89 @@ class Cube extends Shape {
 	}
 }
 
+class InfinitePlane extends Shape {
+	protected mov_matrix: number[];
+	protected vertices: number[];
+	protected indices: number[];
+	protected Points: DOMPoint[][];
+	protected Opacity: number;
+	protected Colors: number[];
+	public InitGL() {
+		super.InitGL();
+	}
+	public SetTextureStyle(textureImage: HTMLImageElement, textureCoords: number[]) {
+		super.SetTextureStyle(textureImage, textureCoords);
+	}
+	public SetColorsStyle(colors: number[], opacity: number) {
+		super.SetColorsStyle(colors, opacity);
+	}
+	public rotateZ(angle: number): void {
+		super.rotateZ(angle);
+	}
+	public rotateX(angle: number): void {
+		super.rotateX(angle);
+	}
+	public rotateY(angle: number): void {
+		super.rotateY(angle);
+	}
+	public translateX(offset: number): void {
+		super.translateX(offset);
+	}
+	public translateY(offset: number): void {
+		super.translateY(offset);
+	}
+	public translateZ(offset: number): void {
+		super.translateZ(offset);
+	}
+	public scaleX(value: number): void {
+		super.scaleX(value);
+	}
+	public scaleY(value: number): void {
+		super.scaleY(value);
+	}
+	public scaleZ(value: number): void {
+		super.scaleZ(value);
+	}
+	public CalculateEdges(): void {
+		let width = 3;
+		let vertices = [
+			-width, -1, zoom,
+			width, -1, zoom,
+			-width, -1, -zDepth,
+			width, -1, -zDepth
+		];
+		let indices = [
+			0, 1, 2, 1, 2, 3
+		];
+
+		const vertexNormals = [
+
+		];
+
+		this.vertices = vertices;
+		this.indices = indices;
+
+		this.InitGL();
+	}
+	public constructor() {
+		super();
+		this.CalculateEdges();
+		let colors = [
+			0, 0, 0,
+			0, 0, 0,
+			0, 0, 0,
+			0, 0, 0,
+		];
+		this.SetColorsStyle(colors, 1);
+	}
+	public Draw(): void {
+		super.Draw();
+	}
+	public clearMatrix() {
+		super.clearMatrix();
+	}
+}
+
 var currentShape: Shape;
 var currentShapeIndex = 0;
 
@@ -1112,6 +1188,8 @@ const glVersion = "webgl";
 
 var gl: WebGLRenderingContext = null;
 
+var zDepth = 50;
+
 const defaultDelta = 3;
 
 var rotation = {
@@ -1121,8 +1199,6 @@ var rotation = {
 	scaled: false,
 	mouseDown: new DOMPoint()
 };
-
-var points: DOMPoint[][] = [];
 
 const zWidth = 30;
 
@@ -1158,7 +1234,7 @@ function EasingFunction(t: number, type: EasingType, concomitantParam: number[])
 }
 
 function DrawScene() {
-	gl.clearColor(0.5, 0.5, 0.5, 1);
+	gl.clearColor(0, 0, 0, 0);
 	gl.clearDepth(1.0);
 
 	gl.viewport(0.0, 0.0, gl.canvas.width, gl.canvas.height);
@@ -1225,6 +1301,7 @@ function InitShapes() {
 	let cube2 = new Cube();
 	let sphere = new Sphere();
 	let text = new Svg(content);
+	let plane = new InfinitePlane();
 	currentShape = text;
 	cube1.translateZ(-distBetweenCubes - 1);
 	cube2.translateZ(-2 * distBetweenCubes - 1);
@@ -1234,6 +1311,7 @@ function InitShapes() {
 	Shapes.push(cube1);
 	Shapes.push(cube2);
 	Shapes.push(sphere);
+	Shapes.push(plane);
 }
 
 function InitTextures() {
