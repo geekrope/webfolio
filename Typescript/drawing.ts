@@ -1089,12 +1089,19 @@ class Cube extends Shape {
 }
 
 class InfinitePlane extends Shape {
+	protected width: number = 3;
 	protected mov_matrix: number[];
 	protected vertices: number[];
 	protected indices: number[];
 	protected Points: DOMPoint[][];
 	protected Opacity: number;
 	protected Colors: number[];
+	protected cellsVertices: number[];
+	protected cellsIndices: number[];
+	protected cellsColors: number[];
+	protected planeVertices: number[];
+	protected planeIndices: number[];
+	protected planeColors: number[];
 	public InitGL() {
 		super.InitGL();
 	}
@@ -1132,39 +1139,142 @@ class InfinitePlane extends Shape {
 		super.scaleZ(value);
 	}
 	public CalculateEdges(): void {
-		let width = 3;
-		let vertices = [
-			-width, -1, zoom,
-			width, -1, zoom,
-			-width, -1, -zDepth,
-			width, -1, -zDepth
+		let lineWidth = 0.004;
+		this.planeVertices = [
+			-this.width, -1, zoom,
+			this.width, -1, zoom,
+			-this.width, -1, -zDepth,
+			this.width, -1, -zDepth
 		];
-		let indices = [
+
+		this.planeIndices = [
 			0, 1, 2, 1, 2, 3
 		];
 
-		const vertexNormals = [
+		this.cellsVertices = [];
+		this.cellsIndices = [];
+		this.cellsColors = [];
 
-		];
+		for (let x = 0; x <= this.width * 2; x++) {
+			let rX = x - this.width;
+			let index = x * 24;
+			this.cellsVertices = this.cellsVertices.concat([
+				rX - lineWidth, -1.0 - lineWidth, zoom,
+				rX + lineWidth, -1.0 - lineWidth, zoom,
+				rX + lineWidth, -1.0 + lineWidth, zoom,
+				rX - lineWidth, -1.0 + lineWidth, zoom,
 
-		this.vertices = vertices;
-		this.indices = indices;
+				rX - lineWidth, -1.0 - lineWidth, -zDepth,
+				rX - lineWidth, -1.0 + lineWidth, -zDepth,
+				rX + lineWidth, -1.0 + lineWidth, -zDepth,
+				rX + lineWidth, -1.0 - lineWidth, -zDepth,
 
-		this.InitGL();
+				rX - lineWidth, -1.0 - lineWidth, -zDepth,
+				rX - lineWidth, -1.0 - lineWidth, zoom,
+				rX - lineWidth, -1.0 + lineWidth, zoom,
+				rX - lineWidth, -1.0 + lineWidth, -zDepth,
+
+				rX + lineWidth, -1.0 - lineWidth, -zDepth,
+				rX + lineWidth, -1.0 + lineWidth, -zDepth,
+				rX + lineWidth, -1.0 + lineWidth, zoom,
+				rX + lineWidth, -1.0 - lineWidth, zoom,
+
+				rX - lineWidth, -1.0 + lineWidth, -zDepth,
+				rX - lineWidth, -1.0 + lineWidth, zoom,
+				rX + lineWidth, -1.0 + lineWidth, zoom,
+				rX + lineWidth, -1.0 + lineWidth, -zDepth,
+
+				rX - lineWidth, -1.0 - lineWidth, -zDepth,
+				rX + lineWidth, -1.0 - lineWidth, -zDepth,
+				rX + lineWidth, -1.0 - lineWidth, zoom,
+				rX - lineWidth, -1.0 - lineWidth, zoom
+			]);
+
+			this.cellsIndices = this.cellsIndices.concat([
+				0 + index, 1 + index, 2 + index, 0 + index, 2 + index, 3 + index,
+				4 + index, 5 + index, 6 + index, 4 + index, 6 + index, 7 + index,
+				8 + index, 9 + index, 10 + index, 8 + index, 10 + index, 11 + index,
+				12 + index, 13 + index, 14 + index, 12 + index, 14 + index, 15 + index,
+				16 + index, 17 + index, 18 + index, 16 + index, 18 + index, 19 + index,
+				20 + index, 21 + index, 22 + index, 20 + index, 22 + index, 23 + index
+			]);
+		}
+
+		for (let z = zoom; z >= zDepth; z--) {
+			let index = (-z + zoom) * 24 + (this.width * 2 + 1) * 24;
+			this.cellsVertices = this.cellsVertices.concat([
+				-this.width, -1.0 - lineWidth, z + lineWidth,
+				this.width, -1.0 - lineWidth, z + lineWidth,
+				this.width, -1.0 + lineWidth, z + lineWidth,
+				-this.width, -1.0 + lineWidth, z + lineWidth,
+
+				-this.width, -1.0 - lineWidth, z - lineWidth,
+				-this.width, -1.0 + lineWidth, z - lineWidth,
+				this.width, -1.0 + lineWidth, z - lineWidth,
+				this.width, -1.0 - lineWidth, z - lineWidth,
+
+				-this.width, -1.0 - lineWidth, z - lineWidth,
+				-this.width, -1.0 - lineWidth, z + lineWidth,
+				-this.width, -1.0 + lineWidth, z + lineWidth,
+				-this.width, -1.0 + lineWidth, z - lineWidth,
+
+				this.width, -1.0 - lineWidth, -zDepth,
+				this.width, -1.0 + lineWidth, -zDepth,
+				this.width, -1.0 + lineWidth, z - lineWidth,
+				this.width, -1.0 - lineWidth, z - lineWidth,
+
+				-this.width, -1.0 + lineWidth, -zDepth,
+				-this.width, -1.0 + lineWidth, z - lineWidth,
+				this.width, -1.0 + lineWidth, z - lineWidth,
+				this.width, -1.0 + lineWidth, -zDepth,
+
+				-this.width, -1.0 - lineWidth, -zDepth,
+				this.width, -1.0 - lineWidth, -zDepth,
+				this.width, -1.0 - lineWidth, z - lineWidth,
+				-this.width, -1.0 - lineWidth, z - lineWidth
+			]);
+
+			this.cellsIndices = this.cellsIndices.concat([
+				0 + index, 1 + index, 2 + index, 0 + index, 2 + index, 3 + index,
+				4 + index, 5 + index, 6 + index, 4 + index, 6 + index, 7 + index,
+				8 + index, 9 + index, 10 + index, 8 + index, 10 + index, 11 + index,
+				12 + index, 13 + index, 14 + index, 12 + index, 14 + index, 15 + index,
+				16 + index, 17 + index, 18 + index, 16 + index, 18 + index, 19 + index,
+				20 + index, 21 + index, 22 + index, 20 + index, 22 + index, 23 + index
+			]);
+		}
 	}
 	public constructor() {
 		super();
 		this.CalculateEdges();
-		let colors = [
+		this.planeColors = [
 			0, 0, 0,
 			0, 0, 0,
 			0, 0, 0,
 			0, 0, 0,
 		];
-		this.SetColorsStyle(colors, 1);
+		for (let x = -this.width; x <= this.width; x++) {
+			for (let z = 0; z <= zDepth; z++) {
+				this.cellsColors.push(0.5, 0.5, 0.5);
+			}
+		}
 	}
 	public Draw(): void {
-		super.Draw();
+		this.vertices = this.planeVertices;
+		this.indices = this.planeIndices;
+		this.SetColorsStyle(this.planeColors, 1);
+
+		this.InitGL();
+
+		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
+
+		this.vertices = this.cellsVertices;
+		this.indices = this.cellsIndices;
+		this.SetColorsStyle(this.cellsColors, 1);
+
+		this.InitGL();
+
+		gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
 	}
 	public clearMatrix() {
 		super.clearMatrix();
