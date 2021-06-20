@@ -481,6 +481,7 @@ class Shape {
         this.FillType = "colors";
     }
     InitGL() {
+        let angle = 70;
         if (this.FillType == "colors") {
             let vertex_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
@@ -538,7 +539,7 @@ class Shape {
                     0, 0, (-2 * zMax * zMin) / (zMax - zMin), 0
                 ];
             }
-            let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, zDepth);
+            let proj_matrix = get_projection(angle, gl.canvas.width / gl.canvas.height, 1, zDepth);
             let view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
             gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
             gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
@@ -617,7 +618,7 @@ class Shape {
                     0, 0, (-2 * zMax * zMin) / (zMax - zMin), 0
                 ];
             }
-            let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, zDepth);
+            let proj_matrix = get_projection(angle, gl.canvas.width / gl.canvas.height, 1, zDepth);
             let view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
             gl.uniformMatrix4fv(Pmatrix, false, proj_matrix);
             gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
@@ -1432,7 +1433,7 @@ const id = "cnvs";
 const glVersion = "webgl";
 const standsCount = 4;
 var gl = null;
-var zDepth = 30;
+var zDepth = 23;
 const defaultDelta = 3;
 var rotation = {
     deltaX: 0,

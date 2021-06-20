@@ -35,6 +35,7 @@ class Shape implements Drawable {
 		this.Opacity = 1;
 	}
 	public InitGL() {
+		let angle = 70;
 		if (this.FillType == "colors") {
 			let vertex_buffer = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
@@ -105,7 +106,7 @@ class Shape implements Drawable {
 				];
 			}
 
-			let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, zDepth);
+			let proj_matrix = get_projection(angle, gl.canvas.width / gl.canvas.height, 1, zDepth);
 
 			let view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
@@ -209,7 +210,7 @@ class Shape implements Drawable {
 				];
 			}
 
-			let proj_matrix = get_projection(60, gl.canvas.width / gl.canvas.height, 1, zDepth);
+			let proj_matrix = get_projection(angle, gl.canvas.width / gl.canvas.height, 1, zDepth);
 
 			let view_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 
