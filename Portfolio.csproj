@@ -70,9 +70,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Resources\caviar.ttf" />
+    <Content Include="Resources\FVE-image.png" />
     <Content Include="Resources\mKphY1sfLXs.jpg" />
     <Content Include="Resources\nknwn_ndfnd.png" />
     <Content Include="Resources\nknwn_ndfnd_min.png" />
+    <Content Include="Resources\return.png" />
     <Content Include="tsconfig.json" />
     <Content Include="package.json" />
     <None Include="Web.Debug.config">

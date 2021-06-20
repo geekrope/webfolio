@@ -1430,6 +1430,7 @@ const zoom = 3;
 const distBetweenCubes = 6;
 const id = "cnvs";
 const glVersion = "webgl";
+const standsCount = 4;
 var gl = null;
 var zDepth = 30;
 const defaultDelta = 3;
@@ -1592,7 +1593,7 @@ function InitTextures() {
         ]);
     };
     let returnImg = new Image();
-    returnImg.src = "Resources/return.png";
+    returnImg.src = "Resources/FVE-image.png";
     returnImg.decode();
     let returnPositions = [];
     var quality = Shapes[3].Quality;
@@ -1654,7 +1655,7 @@ function MouseUp(ev) {
 }
 function MouseWheel(ev) {
     let rotationEnded = !(rotation.rotateT < 90 && rotation.deltaX != 0);
-    let translationEnded = currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) >= 0 && currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) < Shapes.length - 1 && translation.translateZDelta == 0;
+    let translationEnded = currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) >= 0 && currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) < standsCount && translation.translateZDelta == 0;
     if (translationEnded && rotationEnded) {
         translation.translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 1;
         if (translation.translateZDelta < 0) {
