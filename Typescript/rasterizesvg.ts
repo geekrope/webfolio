@@ -74,7 +74,7 @@ function splitMulti(str: string, ...tokens: string[]) {
 function CalculatePolygons(paths: Attribute[][]): DOMPoint[][] {
 	let shapes = ["m", "h", "v", "l", "q", "c", "z"];
 	let polygons: DOMPoint[][] = [];
-	let steps = 4;
+	let steps = 5;
 	let movePoint = new DOMPoint();
 	let mPoint = new DOMPoint();
 	let polygonIndex = 0;
