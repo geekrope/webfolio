@@ -98,7 +98,6 @@
     <TypeScriptCompile Include="Typescript\description.ts" />
     <TypeScriptCompile Include="Typescript\drawing.ts" />
     <TypeScriptCompile Include="Typescript\rasterizesvg.ts" />
-    <TypeScriptCompile Include="Typescript\triangulate.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
