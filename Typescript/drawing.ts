@@ -1331,55 +1331,43 @@ function InitShapes() {
 }
 
 function InitTextures() {
+	let coords = [
+		// Front			
+		1 / 2, 0,
+		1, 0,
+		1, 1 / 2,
+		1 / 2, 1 / 2,
+		// Back	
+		1 / 2, 1 / 2,
+		1, 1 / 2,
+		1, 1,
+		1 / 2, 1,
+		// Right	
+		0, 1 / 2,
+		1 / 2, 1 / 2,
+		1 / 2, 1,
+		0, 1,
+		// Left		
+		0, 0,
+		1 / 2, 0,
+		1 / 2, 1 / 2,
+		0, 1 / 2
+	];
+
 	let nknwnStand = new Image();
 	nknwnStand.src = "Resources/nknwn_ndfnd_min.png";
 	nknwnStand.decode();
 	nknwnStand.onload = function () {
-		Shapes[1].SetTextureStyle(nknwnStand, [
-			// Front			
-			1 / 2, 0,
-			1, 0,
-			1, 1 / 2,
-			1 / 2, 1 / 2,
-			// Back	
-			1 / 2, 1 / 2,
-			1, 1 / 2,
-			1, 1,
-			1 / 2, 1,
-			// Right	
-			0, 1 / 2,
-			1 / 2, 1 / 2,
-			1 / 2, 1,
-			0, 1,
-			// Left		
-			0, 0,
-			1 / 2, 0,
-			1 / 2, 1 / 2,
-			0, 1 / 2
-		]);
-		Shapes[2].SetTextureStyle(nknwnStand, [
-			// Front			
-			1 / 2, 0,
-			1, 0,
-			1, 1 / 2,
-			1 / 2, 1 / 2,
-			// Back	
-			1 / 2, 1 / 2,
-			1, 1 / 2,
-			1, 1,
-			1 / 2, 1,
-			// Right	
-			0, 1 / 2,
-			1 / 2, 1 / 2,
-			1 / 2, 1,
-			0, 1,
-			// Left		
-			0, 0,
-			1 / 2, 0,
-			1 / 2, 1 / 2,
-			0, 1 / 2
-		]);
+		Shapes[1].SetTextureStyle(nknwnStand, coords);		
 	};
+
+	let damirStand = new Image();
+	damirStand.src = "Resources/damir_min.png";
+	damirStand.decode();
+	damirStand.onload = function () {		
+		Shapes[2].SetTextureStyle(damirStand, coords);
+	};
+
 	let returnImg = new Image();
 	returnImg.src = "Resources/FVE-image.png";	
 	returnImg.decode();
