@@ -8,9 +8,6 @@ interface Drawable {
 
 type FillType = "texture" | "colors";
 
-var webGlConfig = {	
-}
-
 class Shape implements Drawable {
 	protected mov_matrix: number[];
 	protected vertices: number[];
@@ -122,14 +119,6 @@ class Shape implements Drawable {
 			gl.depthFunc(gl.LESS);
 
 			webGlShaderProgram = shaderProgram;
-
-			webGlConfig = {
-				Pmatrix: Pmatrix,
-				Vmatrix: Vmatrix,
-				Mmatrix: Mmatrix,
-				fragShader: fragShader,
-				vertShader: vertShader
-			}
 		}
 		else if (this.FillType == "texture") {
 			let vertex_buffer = gl.createBuffer();
@@ -246,14 +235,6 @@ class Shape implements Drawable {
 			gl.depthFunc(gl.LESS);
 
 			webGlShaderProgram = shaderProgram;
-
-			webGlConfig = {
-				Pmatrix: Pmatrix,
-				Vmatrix: Vmatrix,
-				Mmatrix: Mmatrix,
-				fragShader: fragShader,
-				vertShader: vertShader
-			}
 		}
 	}
 	public CalculateEdges(): void {

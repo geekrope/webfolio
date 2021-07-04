@@ -463,11 +463,6 @@ function CalculatePolygons(paths) {
 }
 /// <reference path="rasterizesvg.ts" />
 /// <reference path="description.ts" />
-var webGlConfig = {
-    Pmatrix: WebGLUniformLocation,
-    Vmatrix: WebGLUniformLocation,
-    Mmatrix: WebGLUniformLocation,
-};
 class Shape {
     constructor() {
         this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -zoom, 1];
@@ -558,7 +553,6 @@ class Shape {
             let vertex_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
             let index_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
@@ -615,7 +609,7 @@ class Shape {
             let Pmatrix = gl.getUniformLocation(shaderProgram, "Pmatrix");
             let Vmatrix = gl.getUniformLocation(shaderProgram, "Vmatrix");
             let Mmatrix = gl.getUniformLocation(shaderProgram, "Mmatrix");
-            //gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
             let position = gl.getAttribLocation(shaderProgram, "position");
             gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(position);
