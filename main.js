@@ -463,6 +463,11 @@ function CalculatePolygons(paths) {
 }
 /// <reference path="rasterizesvg.ts" />
 /// <reference path="description.ts" />
+var webGlConfig = {
+    Pmatrix: WebGLUniformLocation,
+    Vmatrix: WebGLUniformLocation,
+    Mmatrix: WebGLUniformLocation,
+};
 class Shape {
     constructor() {
         this.mov_matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -zoom, 1];
@@ -553,9 +558,11 @@ class Shape {
             let vertex_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
             let index_buffer = gl.createBuffer();
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+            //shaders code
             let vertCode = `attribute vec3 position;
 				uniform mat4 Pmatrix;
 				uniform mat4 Vmatrix;
@@ -573,16 +580,19 @@ class Shape {
 				void main(void) {
 				gl_FragColor = texture2D(u_texture, v_texcoord);
 				}`;
+            //create shaders
             let vertShader = gl.createShader(gl.VERTEX_SHADER);
             gl.shaderSource(vertShader, vertCode);
             gl.compileShader(vertShader);
             let fragShader = gl.createShader(gl.FRAGMENT_SHADER);
             gl.shaderSource(fragShader, fragCode);
             gl.compileShader(fragShader);
+            //create shader program
             let shaderProgram = gl.createProgram();
             gl.attachShader(shaderProgram, vertShader);
             gl.attachShader(shaderProgram, fragShader);
             gl.linkProgram(shaderProgram);
+            //create texture
             var texcoordLocation = gl.getAttribLocation(shaderProgram, "texcoord");
             var buffer = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -601,10 +611,11 @@ class Shape {
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
             }
+            //matrixes
             let Pmatrix = gl.getUniformLocation(shaderProgram, "Pmatrix");
             let Vmatrix = gl.getUniformLocation(shaderProgram, "Vmatrix");
             let Mmatrix = gl.getUniformLocation(shaderProgram, "Mmatrix");
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+            //gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
             let position = gl.getAttribLocation(shaderProgram, "position");
             gl.vertexAttribPointer(position, 3, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(position);
@@ -624,6 +635,7 @@ class Shape {
             gl.uniformMatrix4fv(Vmatrix, false, view_matrix);
             gl.uniformMatrix4fv(Mmatrix, false, this.mov_matrix);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
+            //other
             gl.enable(gl.DEPTH_TEST);
             gl.depthFunc(gl.LESS);
             webGlShaderProgram = shaderProgram;
@@ -1579,7 +1591,7 @@ function InitTextures() {
         Shapes[2].SetTextureStyle(damirStand, coords);
     };
     let returnImg = new Image();
-    returnImg.src = "Resources/FVE-image.png";
+    returnImg.src = "Resources/return-button.png";
     returnImg.decode();
     let returnPositions = [];
     var quality = Shapes[3].Quality;

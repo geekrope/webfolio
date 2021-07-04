@@ -8,6 +8,9 @@ interface Drawable {
 
 type FillType = "texture" | "colors";
 
+var webGlConfig = {	
+}
+
 class Shape implements Drawable {
 	protected mov_matrix: number[];
 	protected vertices: number[];
@@ -119,6 +122,14 @@ class Shape implements Drawable {
 			gl.depthFunc(gl.LESS);
 
 			webGlShaderProgram = shaderProgram;
+
+			webGlConfig = {
+				Pmatrix: Pmatrix,
+				Vmatrix: Vmatrix,
+				Mmatrix: Mmatrix,
+				fragShader: fragShader,
+				vertShader: vertShader
+			}
 		}
 		else if (this.FillType == "texture") {
 			let vertex_buffer = gl.createBuffer();
@@ -128,6 +139,8 @@ class Shape implements Drawable {
 			let index_buffer = gl.createBuffer();
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
 			gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(this.indices), gl.STATIC_DRAW);
+
+			//shaders code
 
 			let vertCode = `attribute vec3 position;
 				uniform mat4 Pmatrix;
@@ -148,6 +161,8 @@ class Shape implements Drawable {
 				gl_FragColor = texture2D(u_texture, v_texcoord);
 				}`;
 
+			//create shaders
+
 			let vertShader = gl.createShader(gl.VERTEX_SHADER);
 			gl.shaderSource(vertShader, vertCode);
 			gl.compileShader(vertShader);
@@ -156,10 +171,14 @@ class Shape implements Drawable {
 			gl.shaderSource(fragShader, fragCode);
 			gl.compileShader(fragShader);
 
+			//create shader program
+
 			let shaderProgram = gl.createProgram();
 			gl.attachShader(shaderProgram, vertShader);
 			gl.attachShader(shaderProgram, fragShader);
 			gl.linkProgram(shaderProgram);
+
+			//create texture
 
 			var texcoordLocation = gl.getAttribLocation(shaderProgram, "texcoord");
 
@@ -188,6 +207,8 @@ class Shape implements Drawable {
 				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST);
 				gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 			}
+
+			//matrixes
 
 			let Pmatrix = gl.getUniformLocation(shaderProgram, "Pmatrix");
 			let Vmatrix = gl.getUniformLocation(shaderProgram, "Vmatrix");
@@ -219,10 +240,20 @@ class Shape implements Drawable {
 			gl.uniformMatrix4fv(Mmatrix, false, this.mov_matrix);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
 
+			//other
+
 			gl.enable(gl.DEPTH_TEST);
 			gl.depthFunc(gl.LESS);
 
 			webGlShaderProgram = shaderProgram;
+
+			webGlConfig = {
+				Pmatrix: Pmatrix,
+				Vmatrix: Vmatrix,
+				Mmatrix: Mmatrix,
+				fragShader: fragShader,
+				vertShader: vertShader
+			}
 		}
 	}
 	public CalculateEdges(): void {
@@ -1133,7 +1164,7 @@ class InfinitePlane extends Shape {
 	public scaleZ(value: number): void {
 		super.scaleZ(value);
 	}
-	public CalculateEdges(): void {		
+	public CalculateEdges(): void {
 		let y = -1.1;
 
 		this.vertices = [];
@@ -1358,18 +1389,18 @@ function InitTextures() {
 	nknwnStand.src = "Resources/nknwn_ndfnd_min.png";
 	nknwnStand.decode();
 	nknwnStand.onload = function () {
-		Shapes[1].SetTextureStyle(nknwnStand, coords);		
+		Shapes[1].SetTextureStyle(nknwnStand, coords);
 	};
 
 	let damirStand = new Image();
 	damirStand.src = "Resources/damir_min.png";
 	damirStand.decode();
-	damirStand.onload = function () {		
+	damirStand.onload = function () {
 		Shapes[2].SetTextureStyle(damirStand, coords);
 	};
 
 	let returnImg = new Image();
-	returnImg.src = "Resources/FVE-image.png";	
+	returnImg.src = "Resources/return-button.png";
 	returnImg.decode();
 	let returnPositions: number[] = [];
 	var quality = (<Sphere>Shapes[3]).Quality;
