@@ -1503,7 +1503,7 @@ function MouseWheel(ev: WheelEvent) {
 			ClearLink();
 		}
 		console.log(currentShapeIndex);
-	}
+	}	
 }
 
 function Resize() {
