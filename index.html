@@ -12,26 +12,6 @@
             overflow: hidden;
         }
 
-        .nInput {
-            width: 250px;
-            font-family: Caviar;
-            height: 60%;
-            font-size: 30px;
-            border-radius: 0.5em;
-            background: white;
-            filter: drop-shadow(5px 5px 0px #aaaaaa);
-            margin: auto;
-            vertical-align: middle;
-            border: none;
-            outline: none;
-            text-align: center;
-            transition: 0.1s;
-        }
-
-            .nInput:hover {
-                filter: drop-shadow(0px 0px 0px #aaaaaa);
-            }
-
         .button {
             width: 200px;
             border: none;
@@ -43,10 +23,10 @@
             filter: drop-shadow(5px 5px 0px #aaaaaa);
             margin: auto;
             vertical-align: middle;
-            margin-left: 10px;
             outline: none;
             text-align: center;
             transition: 0.1s;
+            padding: 2px;
         }
 
             .button:hover {
@@ -57,6 +37,15 @@
             display: grid;
             grid-template-rows: 70px auto;
             grid-template-columns: 300px auto;
+        }
+
+        .unselectable {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
 
         @font-face {
@@ -70,7 +59,7 @@
             grid-column-end: 3;
             margin: auto;
             vertical-align: middle;
-            position: absolute;                              
+            position: absolute;
         }
     </style>
 </head>
@@ -78,8 +67,10 @@
     <canvas id="cnvs" class="canvas3d">
     </canvas>
     <div class="grid" style="position:relative">
-        <input class="nInput" id="anglesCount" type="number" style="grid-row-start:1;grid-column-start:1" value="6" />
-        <span class="button" id="approve" style="grid-row-start:1;grid-column-start:2">Обновить</span>
+        <span id="fps"></span>
+        <a class="button unselectable" id="reference" style="grid-row-start: 1; grid-column-start: 1; text-decoration: none; color: black">
+            follow the link
+        </a>        
     </div>
 </body>
 </html>

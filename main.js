@@ -1272,6 +1272,7 @@ class Cube extends Shape {
             1, 1, 1
         ];
         this.SetColorsStyle(colors, 1);
+        this.SideIndex = 0;
     }
     InitGL() {
         super.InitGL();
@@ -1490,7 +1491,7 @@ function DrawScene() {
     requestAnimationFrame(DrawScene);
     fps++;
     if (Date.now() - startTick > 1000) {
-        document.getElementById("approve").innerHTML = fps.toString();
+        document.getElementById("fps").innerHTML = fps.toString();
         fps = 0;
         startTick = Date.now();
     }
@@ -1543,6 +1544,18 @@ function InitShapes() {
     cube1.translateZ(-distBetweenCubes - 1);
     cube2.translateZ(-2 * distBetweenCubes - 1);
     sphere.translateZ(-3 * distBetweenCubes - 1);
+    cube1.References = [
+        "https://github.com/geekrope",
+        "https://github.com/geekrope/SvgEdtitor",
+        "https://github.com/geekrope/TetrisRemake",
+        "https://github.com/geekrope/2048"
+    ];
+    cube2.References = [
+        "https://www.behance.net/damirr765dcd7",
+        "https://www.behance.net/gallery/122634587/GUCCI-%282021%29-website-redesign",
+        "https://www.behance.net/gallery/119202149/BMX-haro",
+        "https://www.behance.net/gallery/119305933/Alfa-Bank"
+    ];
     Shapes.push(text);
     Shapes.push(cube1);
     Shapes.push(cube2);
@@ -1585,7 +1598,7 @@ function InitTextures() {
         Shapes[2].SetTextureStyle(damirStand, coords);
     };
     let returnImg = new Image();
-    returnImg.src = "Resources/return-button.png";
+    returnImg.src = "Resources/emoji.png";
     returnImg.decode();
     let returnPositions = [];
     var quality = Shapes[3].Quality;
@@ -1600,7 +1613,7 @@ function InitTextures() {
         }
     }
     returnImg.onload = () => {
-        Shapes[3].SetTextureStyle(returnImg, returnPositions);
+        Shapes[3].SetTextureStyle(returnImg, returnPositions.concat(returnPositions));
     };
 }
 function StartApp() {
@@ -1638,12 +1651,33 @@ function MouseUp(ev) {
         if (ev.pageX - rotation.mouseDown.x < 0) {
             rotation.deltaX = -defaultDelta;
             rotation.rotationEnded = false;
+            if (currentShape instanceof Cube) {
+                currentShape.SideIndex++;
+                GetCurrentReference(currentShape);
+            }
         }
         else {
             rotation.deltaX = defaultDelta;
+            if (currentShape instanceof Cube) {
+                currentShape.SideIndex--;
+                GetCurrentReference(currentShape);
+            }
             rotation.rotationEnded = false;
         }
     }
+}
+function GetCurrentReference(cube) {
+    var index = 0;
+    if (cube.SideIndex < 0) {
+        index = cube.References.length - Math.abs(cube.SideIndex % cube.References.length);
+    }
+    else {
+        index = Math.abs(cube.SideIndex % cube.References.length);
+    }
+    document.getElementById("reference").href = cube.References[index];
+}
+function ClearLink() {
+    document.getElementById("reference").href = "javascript:void(0);";
 }
 function MouseWheel(ev) {
     let rotationEnded = !(rotation.rotateT < 90 && rotation.deltaX != 0);
@@ -1657,6 +1691,12 @@ function MouseWheel(ev) {
             currentShapeIndex++;
         }
         currentShape = Shapes[currentShapeIndex];
+        if (currentShape instanceof Cube) {
+            GetCurrentReference(currentShape);
+        }
+        else {
+            ClearLink();
+        }
         console.log(currentShapeIndex);
     }
 }
