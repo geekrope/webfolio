@@ -1529,29 +1529,3 @@ function Resize() {
 	cnvs.setAttribute("width", (innerWidth).toString());
 	cnvs.setAttribute("height", (innerHeight).toString());
 }
-
-function transposeMat4(matrix: number[]): number[] {
-	let newMatrix = [
-		0, 0, 0, 0,
-		0, 0, 0, 0,
-		0, 0, 0, 0,
-		0, 0, 0, 0
-	];
-	for (let index = 0; index < matrix.length; index++) {
-		let col = index % 4;
-		let row = Math.floor(index / 4);
-		let newIndex = col * 4 + row;
-		newMatrix[newIndex] = matrix[index];
-	}
-	return newMatrix;
-}
-
-function inverseMat4(matrix: number[]): number[] {
-	let newMatrix = [
-		0, 0, 0, 0,
-		0, 0, 0, 0,
-		0, 0, 0, 0,
-		0, 0, 0, 0
-	];
-	return newMatrix;
-}
