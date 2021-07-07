@@ -860,309 +860,6 @@ class Sphere extends Shape {
         super.clearMatrix();
     }
 }
-var ParticleType;
-(function (ParticleType) {
-    ParticleType[ParticleType["Cube"] = 0] = "Cube";
-    ParticleType[ParticleType["Sphere"] = 1] = "Sphere";
-})(ParticleType || (ParticleType = {}));
-class Particle {
-    constructor(angleX, angleY, angleZ, distance, scale, rotationX, rotationY, rotationZ, distanceMax) {
-        this.angleX = angleX;
-        this.angleY = angleY;
-        this.angleZ = angleZ;
-        this.distance = distance;
-        this.scale = scale;
-        this.rotationX = rotationX;
-        this.rotationY = rotationY;
-        this.rotationZ = rotationZ;
-        this.distanceMax = distanceMax;
-    }
-}
-class ParticlesGeneratorProperties {
-}
-class ParticlesGenerator extends Shape {
-    constructor() {
-        super();
-        this.parallelsCount = 15;
-        this.count = 15;
-        this.particles = [];
-        this.Type = ParticleType.Sphere;
-        this.Properties = {
-            count: -1,
-            maxDistance: 5,
-            minDistance: 1,
-            speed: 0.1,
-            minSize: 0.01,
-            maxSize: 0.1,
-            countOnFrame: 20
-        };
-        this.finished = 0;
-        this.generated = 0;
-        let colors = [];
-        if (this.Type == ParticleType.Sphere) {
-            let addColor = (buffer) => {
-                let index = 0;
-                for (; index < buffer.length; index++) {
-                    colors.push(buffer[index]);
-                }
-            };
-            let yellow = [
-                1, 1, 0,
-            ];
-            let green = [
-                0, 1, 0,
-            ];
-            let red = [
-                1, 0, 0,
-            ];
-            let pink = [
-                1, 0, 1,
-            ];
-            for (let i = 0; i < this.parallelsCount; i++) {
-                for (let i2 = 0; i2 < this.count; i2++) {
-                    if (i < (this.parallelsCount - 1) / 2) {
-                        addColor(yellow);
-                    }
-                    else {
-                        addColor(green);
-                    }
-                }
-            }
-            for (let i = 0; i < this.parallelsCount; i++) {
-                for (let i2 = 0; i2 < this.count; i2++) {
-                    if (i < (this.parallelsCount - 1) / 2) {
-                        addColor(red);
-                    }
-                    else {
-                        addColor(pink);
-                    }
-                }
-            }
-        }
-        else if (this.Type == ParticleType.Cube) {
-            colors = [
-                1, 0, 0,
-                1, 0, 0,
-                1, 0, 0,
-                1, 0, 0,
-                0, 1, 0,
-                0, 1, 0,
-                0, 1, 0,
-                0, 1, 0,
-                0, 0, 1,
-                0, 0, 1,
-                0, 0, 1,
-                0, 0, 1,
-                1, 0, 1,
-                1, 0, 1,
-                1, 0, 1,
-                1, 0, 1,
-                1, 1, 1,
-                1, 1, 1,
-                1, 1, 1,
-                1, 1, 1,
-                1, 1, 0,
-                1, 1, 0,
-                1, 1, 0,
-                1, 1, 0,
-            ];
-        }
-        this.SetColorsStyle(colors, 1);
-    }
-    GenerateParticle() {
-        let angleX = Math.random() * Math.PI;
-        let angleY = Math.random() * Math.PI;
-        let angleZ = Math.random() * Math.PI;
-        let rotationX = Math.random() * Math.PI;
-        let rotationY = Math.random() * Math.PI;
-        let rotationZ = Math.random() * Math.PI;
-        let scale = Math.random() * (this.Properties.maxSize - this.Properties.minSize) + this.Properties.minSize;
-        //180deg
-        return new Particle(angleX, angleY, angleZ, 0, scale, rotationX, rotationY, rotationZ, Math.random() * (this.Properties.maxDistance - this.Properties.minDistance) + this.Properties.minDistance);
-    }
-    SetTextureStyle(textureImage, textureCoords) {
-        super.SetTextureStyle(textureImage, textureCoords);
-    }
-    SetColorsStyle(colors, opacity) {
-        super.SetColorsStyle(colors, opacity);
-    }
-    get Type() {
-        return this._type;
-    }
-    set Type(value) {
-        this._type = value;
-        this.CalculateEdges();
-    }
-    get Properties() {
-        return this.properties;
-    }
-    set Properties(value) {
-        this.properties = value;
-    }
-    InitGL() {
-        super.InitGL();
-    }
-    rotateZ(angle) {
-        super.rotateZ(angle);
-    }
-    rotateX(angle) {
-        super.rotateX(angle);
-    }
-    rotateY(angle) {
-        super.rotateY(angle);
-    }
-    translateX(offset) {
-        super.translateX(offset);
-    }
-    translateY(offset) {
-        super.translateY(offset);
-    }
-    translateZ(offset) {
-        super.translateZ(offset);
-    }
-    scaleX(value) {
-        super.scaleX(value);
-    }
-    scaleY(value) {
-        super.scaleY(value);
-    }
-    scaleZ(value) {
-        super.scaleZ(value);
-    }
-    CalculateEdges() {
-        let vertices = [];
-        let indices = [];
-        if (this._type == ParticleType.Cube) {
-            vertices = [
-                -1.0, -1.0, 1.0,
-                1.0, -1.0, 1.0,
-                1.0, 1.0, 1.0,
-                -1.0, 1.0, 1.0,
-                -1.0, -1.0, -1.0,
-                -1.0, 1.0, -1.0,
-                1.0, 1.0, -1.0,
-                1.0, -1.0, -1.0,
-                -1.0, 1.0, -1.0,
-                -1.0, 1.0, 1.0,
-                1.0, 1.0, 1.0,
-                1.0, 1.0, -1.0,
-                -1.0, -1.0, -1.0,
-                1.0, -1.0, -1.0,
-                1.0, -1.0, 1.0,
-                -1.0, -1.0, 1.0,
-                1.0, -1.0, -1.0,
-                1.0, 1.0, -1.0,
-                1.0, 1.0, 1.0,
-                1.0, -1.0, 1.0,
-                -1.0, -1.0, -1.0,
-                -1.0, -1.0, 1.0,
-                -1.0, 1.0, 1.0,
-                -1.0, 1.0, -1.0
-            ];
-            indices = [
-                0, 1, 2, 0, 2, 3,
-                4, 5, 6, 4, 6, 7,
-                8, 9, 10, 8, 10, 11,
-                12, 13, 14, 12, 14, 15,
-                16, 17, 18, 16, 18, 19,
-                20, 21, 22, 20, 22, 23
-            ];
-            this.vertices = vertices;
-            this.indices = indices;
-        }
-        else if (this._type == ParticleType.Sphere) {
-            var vert1 = Sphere.CalculateHalfOfSphere(-1, 15);
-            vertices = Sphere.CalculateHalfOfSphere(1, 15).concat(vert1);
-            let index1 = 0;
-            let index2 = this.count;
-            let bounds = 0;
-            for (let y = 0; y <= this.parallelsCount; y += 1) {
-                index1 = bounds;
-                bounds += this.count;
-                index2 = bounds;
-                for (; index1 < bounds - 1;) {
-                    indices.push(index1);
-                    indices.push(index2);
-                    indices.push(index2 + 1);
-                    indices.push(index1);
-                    indices.push(index1 + 1);
-                    indices.push(index2 + 1);
-                    index1++;
-                    index2++;
-                }
-            }
-            for (let y = 0; y <= this.parallelsCount; y += 1) {
-                index1 = bounds;
-                bounds += this.count;
-                index2 = bounds;
-                for (; index1 < bounds - 1;) {
-                    indices.push(index1);
-                    indices.push(index2);
-                    indices.push(index2 + 1);
-                    indices.push(index1);
-                    indices.push(index1 + 1);
-                    indices.push(index2 + 1);
-                    index1++;
-                    index2++;
-                }
-            }
-            const vertexNormals = [];
-            this.vertices = vertices;
-            this.indices = indices;
-        }
-    }
-    Start() {
-        if (this.Properties.count != 0) {
-            this.particles.push(this.GenerateParticle());
-        }
-        this.started = true;
-    }
-    Draw() {
-        if (this.started) {
-            for (let index = 0; index < this.particles.length; index++) {
-                let x = Math.cos(this.particles[index].angleX) * this.particles[index].distance;
-                let y = Math.sin(this.particles[index].angleY) * this.particles[index].distance;
-                let z = Math.sin(this.particles[index].angleZ) * this.particles[index].distance;
-                if (isNaN(z)) {
-                    z = 0;
-                }
-                let movMatrix = Array.from(this.mov_matrix);
-                this.translateX(x);
-                this.translateY(y);
-                this.translateZ(z);
-                this.rotateX(this.particles[index].rotationX);
-                this.rotateY(this.particles[index].rotationY);
-                this.rotateZ(this.particles[index].rotationZ);
-                let scaleValue = 1 - this.particles[index].distance / this.particles[index].distanceMax;
-                this.scaleX(this.particles[index].scale * scaleValue);
-                this.scaleY(this.particles[index].scale * scaleValue);
-                this.scaleZ(this.particles[index].scale * scaleValue);
-                this.InitGL();
-                gl.drawElements(gl.TRIANGLES, this.indices.length, gl.UNSIGNED_SHORT, 0);
-                this.mov_matrix = movMatrix;
-                if (this.particles[index].distance >= this.particles[index].distanceMax && (this.generated < this.Properties.count || this.Properties.count == -1)) {
-                    this.finished++;
-                    this.generated++;
-                    this.particles[index] = this.GenerateParticle();
-                    continue;
-                }
-                this.particles[index].distance += this.Properties.speed;
-            }
-            if (this.particles.length < this.Properties.countOnFrame) {
-                this.particles.push(this.GenerateParticle());
-            }
-            if (this.finished >= this.Properties.count && this.Properties.count != -1) {
-                this.particles = [];
-                this.finished = 0;
-                this.generated = 0;
-                this.started = false;
-            }
-        }
-    }
-    clearMatrix() {
-        super.clearMatrix();
-    }
-}
 class Svg extends Shape {
     constructor(svgcode) {
         super();
@@ -1434,6 +1131,7 @@ var currentShape;
 var currentShapeIndex = 0;
 var webGlShaderProgram = null;
 var Shapes = [];
+var showFps = false;
 const zoom = 3;
 const distBetweenCubes = 6;
 const id = "cnvs";
@@ -1492,7 +1190,9 @@ function DrawScene() {
     requestAnimationFrame(DrawScene);
     fps++;
     if (Date.now() - startTick > 1000) {
-        document.getElementById("fps").innerHTML = fps.toString();
+        if (showFps) {
+            console.log(fps);
+        }
         fps = 0;
         startTick = Date.now();
     }
@@ -1707,36 +1407,11 @@ function MouseWheel(ev) {
         else {
             ClearLink();
         }
-        console.log(currentShapeIndex);
     }
 }
 function Resize() {
     let cnvs = document.getElementById(id);
     cnvs.setAttribute("width", (innerWidth).toString());
     cnvs.setAttribute("height", (innerHeight).toString());
-}
-function transposeMat4(matrix) {
-    let newMatrix = [
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0
-    ];
-    for (let index = 0; index < matrix.length; index++) {
-        let col = index % 4;
-        let row = Math.floor(index / 4);
-        let newIndex = col * 4 + row;
-        newMatrix[newIndex] = matrix[index];
-    }
-    return newMatrix;
-}
-function inverseMat4(matrix) {
-    let newMatrix = [
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0
-    ];
-    return newMatrix;
 }
 //# sourceMappingURL=main.js.map

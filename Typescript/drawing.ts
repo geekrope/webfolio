@@ -837,6 +837,8 @@ var webGlShaderProgram = null;
 
 var Shapes: Shape[] = [];
 
+var showFps: boolean = false;
+
 const zoom = 3;
 
 const distBetweenCubes = 6;
@@ -910,7 +912,9 @@ function DrawScene() {
 	fps++;
 
 	if (Date.now() - startTick > 1000) {
-		document.getElementById("fps").innerHTML = fps.toString();
+		if (showFps) {
+			console.log(fps);
+		}
 		fps = 0;
 		startTick = Date.now();
 	}
@@ -961,7 +965,7 @@ function Translate() {
 			translation.translateFrame = 0;
 			translation.translateT = 0;
 		}
-	}	
+	}
 }
 
 function InitShapes() {
@@ -1149,8 +1153,7 @@ function MouseWheel(ev: WheelEvent) {
 		}
 		else {
 			ClearLink();
-		}
-		console.log(currentShapeIndex);
+		}		
 	}
 }
 
