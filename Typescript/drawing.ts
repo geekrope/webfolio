@@ -1231,11 +1231,11 @@ var rotation = {
 	mouseDown: new DOMPoint()
 };
 
-const zWidth = 30;
-
 var translation = {
-	translateZ: 0,
-	translateZDelta: 0,
+	translateTarget: 0,
+	translateStart: 0,
+	translateFrame: 0,
+	translateFrames: 30,
 	translateT: 0,
 }
 
@@ -1307,23 +1307,31 @@ function Rotate() {
 
 function Translate() {
 	let type = EasingType.quad;
-	if (translation.translateZDelta != 0) {
-		if (Math.abs(translation.translateZ) < zWidth) {
-			for (let index = 0; index < Shapes.length; index++) {
-				Shapes[index].translateZ(-translation.translateZ / zWidth * distBetweenCubes * EasingFunction(translation.translateT, type, []));
-			}
-			translation.translateZ += translation.translateZDelta;
-			translation.translateT = Math.abs(translation.translateZ) / zWidth;
-			for (let index = 0; index < Shapes.length; index++) {
-				Shapes[index].translateZ(translation.translateZ / zWidth * distBetweenCubes * EasingFunction(translation.translateT, type, []));
-			}
+	if (translation.translateStart != translation.translateTarget) {
+		var zTransltaionLast = translation.translateStart + (translation.translateTarget - translation.translateStart) *
+			EasingFunction(translation.translateFrame / translation.translateFrames, type, []);
+
+		if (isNaN(zTransltaionLast)) {
+			zTransltaionLast = 0;
 		}
-		else {
-			translation.translateZDelta = 0;
-			translation.translateZ = 0;
+
+		translation.translateFrame++;
+
+		var zTransltaionCurrent = translation.translateStart + (translation.translateTarget - translation.translateStart) *
+			EasingFunction(translation.translateFrame / translation.translateFrames, type, []);
+
+		if (isNaN(zTransltaionCurrent)) {
+			zTransltaionCurrent = 0;
+		}
+
+		Shapes.forEach((value: Shape, index: number, array: Shape[]) => { value.translateZ(zTransltaionCurrent - zTransltaionLast); });
+
+		if (translation.translateFrame == translation.translateFrames) {
+			translation.translateStart = translation.translateTarget;
+			translation.translateFrame = 0;
 			translation.translateT = 0;
 		}
-	}
+	}	
 }
 
 function InitShapes() {
@@ -1486,16 +1494,26 @@ function ClearLink() {
 
 function MouseWheel(ev: WheelEvent) {
 	let rotationEnded = !(rotation.rotateT < 90 && rotation.deltaX != 0);
-	let translationEnded = currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) >= 0 && currentShapeIndex + Math.floor(ev.deltaY / Math.abs(ev.deltaY)) < standsCount && translation.translateZDelta == 0;
-	if (translationEnded && rotationEnded) {
-		translation.translateZDelta = ev.deltaY / Math.abs(ev.deltaY) * 1;
-		if (translation.translateZDelta < 0) {
-			currentShapeIndex--;
+	if (rotationEnded && translation.translateStart == translation.translateTarget) {
+		var direction = Math.round(ev.deltaY / Math.abs(ev.deltaY));
+		var target = translation.translateStart + direction * distBetweenCubes;
+		if (currentShapeIndex + direction >= 0 && currentShapeIndex + direction < standsCount) {
+			currentShapeIndex += direction;
 		}
-		else if (translation.translateZDelta > 0) {
-			currentShapeIndex++;
+		else if (currentShapeIndex + direction < 0) {
+			currentShapeIndex = standsCount - 1;
+			target = currentShapeIndex * distBetweenCubes;
 		}
+		else if (currentShapeIndex + direction >= standsCount) {
+			currentShapeIndex = 0;
+			target = 0;
+		}
+		translation.translateTarget = target;
+
+		translation.translateFrame = 0;
+
 		currentShape = Shapes[currentShapeIndex];
+
 		if (currentShape instanceof Cube) {
 			GetCurrentReference(currentShape);
 		}
@@ -1503,7 +1521,7 @@ function MouseWheel(ev: WheelEvent) {
 			ClearLink();
 		}
 		console.log(currentShapeIndex);
-	}	
+	}
 }
 
 function Resize() {
