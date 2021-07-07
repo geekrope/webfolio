@@ -507,6 +507,8 @@ class Svg extends Shape {
 	protected Points: DOMPoint[][];
 	protected Opacity: number;
 	protected Colors: number[];
+	public svgWidth: number = 0;
+	public svgHeight: number = 0;
 	public InitGL() {
 		super.InitGL();
 	}
@@ -552,11 +554,11 @@ class Svg extends Shape {
 
 		let polygonIndex = 0;
 
-		let totalLength = 0;
+		const scaleDown = 500;
 
 		for (let index = 0; index < this.Points.length; index++) {
 			for (let index2 = 0; index2 < this.Points[index].length; index2++) {
-				vertices.push((this.Points[index][index2].x - 1920 / 2) / 500, -(this.Points[index][index2].y - 1080 / 2) / 500, 0);
+				vertices.push((this.Points[index][index2].x - this.svgWidth / 2) / scaleDown, -(this.Points[index][index2].y - this.svgHeight / 2) / scaleDown, 0);
 				if (index2 + 1 < this.Points[index].length) {
 					indices.push(index2 + polygonIndex);
 					indices.push(index2 + polygonIndex + 1);
@@ -572,8 +574,10 @@ class Svg extends Shape {
 		this.vertices = vertices;
 		this.indices = indices;
 	}
-	public constructor(svgcode: string) {
+	public constructor(svgcode: string, width, height) {
 		super();
+		this.svgWidth = width;
+		this.svgHeight = height;
 		this.Code = svgcode;
 		this.CalculateEdges();
 		let colors = [];
@@ -972,12 +976,15 @@ function InitShapes() {
 	let cube1 = new Cube();
 	let cube2 = new Cube();
 	let sphere = new Sphere();
-	let text = new Svg(content);
+	let text = new Svg(content, 1920, 1080);
 	let plane = new InfinitePlane();
 	currentShape = text;
 	cube1.translateZ(-distBetweenCubes - 1);
 	cube2.translateZ(-2 * distBetweenCubes - 1);
 	sphere.translateZ(-3 * distBetweenCubes - 1);
+
+	text.scaleX(1.5);
+	text.scaleY(1.5);
 
 	cube1.References = [
 		"https://github.com/geekrope",
@@ -1153,7 +1160,7 @@ function MouseWheel(ev: WheelEvent) {
 		}
 		else {
 			ClearLink();
-		}		
+		}
 	}
 }
 
