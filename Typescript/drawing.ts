@@ -1191,10 +1191,10 @@ function TouchEnd(ev: TouchEvent) {
 		}
 		else {
 			if (y - rotation.mouseDown.y > 0) {
-				RotateCurrentShape(-1);
+				TranslateShapes(-1);
 			}
 			else {
-				RotateCurrentShape(1);
+				TranslateShapes(1);
 			}
 		}
 	}
