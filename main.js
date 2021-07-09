@@ -370,7 +370,7 @@ function splitMulti(str, ...tokens) {
 function CalculatePolygons(paths) {
     let shapes = ["m", "h", "v", "l", "q", "c", "z"];
     let polygons = [];
-    let steps = 5;
+    let steps = 4;
     let movePoint = new DOMPoint();
     let mPoint = new DOMPoint();
     let polygonIndex = 0;
@@ -714,7 +714,7 @@ class Shape {
 class Sphere extends Shape {
     constructor() {
         super();
-        this.Quality = 50;
+        this.Quality = 20;
         this.CalculateEdges();
         let orange = [
             1, 0.5, 0,
@@ -1191,7 +1191,9 @@ function DrawScene() {
     for (let index = 0; index < Shapes.length; index++) {
         Shapes[index].Draw();
     }
-    requestAnimationFrame(DrawScene);
+    if (!rotation.rotationEnded || translation.translateStart != translation.translateTarget) {
+        requestAnimationFrame(DrawScene);
+    }
     fps++;
     if (Date.now() - startTick > 1000) {
         if (showFps) {
@@ -1299,12 +1301,14 @@ function InitTextures() {
     nknwnStand.decode();
     nknwnStand.onload = function () {
         Shapes[1].SetTextureStyle(nknwnStand, coords);
+        DrawScene();
     };
     let damirStand = new Image();
     damirStand.src = "Resources/damir_min.png";
     damirStand.decode();
     damirStand.onload = function () {
         Shapes[2].SetTextureStyle(damirStand, coords);
+        DrawScene();
     };
     let returnImg = new Image();
     returnImg.src = "Resources/emoji.png";
@@ -1323,6 +1327,7 @@ function InitTextures() {
     }
     returnImg.onload = () => {
         Shapes[3].SetTextureStyle(returnImg, returnPositions.concat(returnPositions));
+        DrawScene();
     };
 }
 function StartApp() {
@@ -1330,7 +1335,6 @@ function StartApp() {
     Resize();
     InitShapes();
     InitTextures();
-    DrawScene();
     BindEvents();
 }
 function BindEvents() {
@@ -1356,7 +1360,7 @@ function MouseDown(ev) {
     }
 }
 function MouseUp(ev) {
-    if (!(rotation.mouseDown.x == ev.pageX && rotation.mouseDown.y == ev.pageY) && rotation.rotationEnded) {
+    if (!(rotation.mouseDown.x == ev.pageX && rotation.mouseDown.y == ev.pageY)) {
         if (Math.abs(ev.pageX - rotation.mouseDown.x) > Math.abs(ev.pageY - rotation.mouseDown.y)) {
             if (ev.pageX - rotation.mouseDown.x < 0) {
                 RotateCurrentShape(-1);
@@ -1408,14 +1412,18 @@ function TranslateShapes(direction) {
         else {
             ClearLink();
         }
+        DrawScene();
     }
 }
 function RotateCurrentShape(direction) {
-    rotation.deltaX = Math.sign(direction) * defaultDelta;
-    rotation.rotationEnded = false;
-    if (currentShape instanceof Cube) {
-        currentShape.SideIndex++;
-        GetCurrentReference(currentShape);
+    if (rotation.rotationEnded) {
+        rotation.deltaX = Math.sign(direction) * defaultDelta;
+        rotation.rotationEnded = false;
+        if (currentShape instanceof Cube) {
+            currentShape.SideIndex++;
+            GetCurrentReference(currentShape);
+        }
+        DrawScene();
     }
 }
 function TouchStart(ev) {
@@ -1428,7 +1436,7 @@ function TouchStart(ev) {
 function TouchMove(ev) {
     var x = ev.touches[0].clientX;
     var y = ev.touches[0].clientY;
-    if (!(rotation.mouseDown.x == x && rotation.mouseDown.y == y) && rotation.rotationEnded) {
+    if (!(rotation.mouseDown.x == x && rotation.mouseDown.y == y)) {
         if (Math.abs(x - rotation.mouseDown.x) > Math.abs(y - rotation.mouseDown.y)) {
             if (x - rotation.mouseDown.x < 0) {
                 RotateCurrentShape(-1);
@@ -1451,5 +1459,6 @@ function Resize() {
     let cnvs = document.getElementById(id);
     cnvs.setAttribute("width", (innerWidth).toString());
     cnvs.setAttribute("height", (innerHeight).toString());
+    DrawScene();
 }
 //# sourceMappingURL=main.js.map

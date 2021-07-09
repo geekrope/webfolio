@@ -447,7 +447,7 @@ class Sphere extends Shape {
 	}
 	public constructor() {
 		super();
-		this.Quality = 50;
+		this.Quality = 20;
 		this.CalculateEdges();
 		let orange = [
 			1, 0.5, 0,
@@ -912,7 +912,9 @@ function DrawScene() {
 		Shapes[index].Draw();
 	}
 
-	requestAnimationFrame(DrawScene);
+	if (!rotation.rotationEnded || translation.translateStart != translation.translateTarget) {
+		requestAnimationFrame(DrawScene);
+	}	
 	fps++;
 
 	if (Date.now() - startTick > 1000) {
@@ -1035,6 +1037,7 @@ function InitTextures() {
 	nknwnStand.decode();
 	nknwnStand.onload = function () {
 		Shapes[1].SetTextureStyle(nknwnStand, coords);
+		DrawScene();
 	};
 
 	let damirStand = new Image();
@@ -1042,6 +1045,7 @@ function InitTextures() {
 	damirStand.decode();
 	damirStand.onload = function () {
 		Shapes[2].SetTextureStyle(damirStand, coords);
+		DrawScene();
 	};
 
 	let returnImg = new Image();
@@ -1061,6 +1065,7 @@ function InitTextures() {
 	}
 	returnImg.onload = () => {
 		Shapes[3].SetTextureStyle(returnImg, returnPositions.concat(returnPositions));
+		DrawScene();
 	}
 }
 
@@ -1068,9 +1073,8 @@ function StartApp() {
 	gl = (<HTMLCanvasElement>document.getElementById(id)).getContext(glVersion);
 	Resize();
 	InitShapes();
-	InitTextures();
-	DrawScene();
-	BindEvents();
+	InitTextures();	
+	BindEvents();	
 }
 
 function BindEvents() {
@@ -1098,7 +1102,7 @@ function MouseDown(ev: MouseEvent) {
 }
 
 function MouseUp(ev: MouseEvent) {
-	if (!(rotation.mouseDown.x == ev.pageX && rotation.mouseDown.y == ev.pageY) && rotation.rotationEnded) {
+	if (!(rotation.mouseDown.x == ev.pageX && rotation.mouseDown.y == ev.pageY)) {
 		if (Math.abs(ev.pageX - rotation.mouseDown.x) > Math.abs(ev.pageY - rotation.mouseDown.y)) {
 			if (ev.pageX - rotation.mouseDown.x < 0) {
 				RotateCurrentShape(-1);
@@ -1157,16 +1161,20 @@ function TranslateShapes(direction: number) {
 		else {
 			ClearLink();
 		}
+		DrawScene();
 	}
 }
 
 function RotateCurrentShape(direction: number) {
-	rotation.deltaX = Math.sign(direction) * defaultDelta;
-	rotation.rotationEnded = false;
-	if (currentShape instanceof Cube) {
-		currentShape.SideIndex++;
-		GetCurrentReference(currentShape);
-	}
+	if (rotation.rotationEnded) {
+		rotation.deltaX = Math.sign(direction) * defaultDelta;
+		rotation.rotationEnded = false;
+		if (currentShape instanceof Cube) {
+			currentShape.SideIndex++;
+			GetCurrentReference(currentShape);
+		}
+		DrawScene();
+	}	
 }
 
 function TouchStart(ev: TouchEvent) {
@@ -1180,7 +1188,7 @@ function TouchStart(ev: TouchEvent) {
 function TouchMove(ev: TouchEvent) {
 	var x = ev.touches[0].clientX;
 	var y = ev.touches[0].clientY;
-	if (!(rotation.mouseDown.x == x && rotation.mouseDown.y == y) && rotation.rotationEnded) {
+	if (!(rotation.mouseDown.x == x && rotation.mouseDown.y == y)) {
 		if (Math.abs(x - rotation.mouseDown.x) > Math.abs(y - rotation.mouseDown.y)) {
 			if (x - rotation.mouseDown.x < 0) {
 				RotateCurrentShape(-1);
@@ -1204,4 +1212,5 @@ function Resize() {
 	let cnvs = document.getElementById(id);
 	cnvs.setAttribute("width", (innerWidth).toString());
 	cnvs.setAttribute("height", (innerHeight).toString());
+	DrawScene();
 }
